@@ -29,20 +29,22 @@ import './KanbanStyles.css';
 import { ColumnDirective, ColumnsDirective, KanbanComponent } from '@syncfusion/ej2-react-kanban';
 import { DataManager, ODataAdaptor } from '@syncfusion/ej2-data';
 import { format } from 'date-fns';
+import { MyGantt } from "./MyGantt.tsx";
 
 export class MyKanban extends React.Component {
   constructor(props) {
     super(props);
     console.log(`MyKanban Constructor: ${JSON.stringify(props.myState)}`);
     props.myState.KanbanData = "Hello from Kanban";
-
-    props.myState.updateKanban = (data) => {
-        console.log(`Kanban updateKanban: ${JSON.stringify(data)} AppData: ${props.myState.initial}`);
-        // This is where you will update Kanban using Gantt Change Events
-    }
-
     // 1. Create the ref
     this.kanbanInstance = React.createRef();
+
+    props.myState.updateKanban = (data) => {
+      console.log(`Kanban updateKanban: ${JSON.stringify(data)} AppData: ${props.myState.initial}`);
+      this.kanbanInstance.current.refresh();
+      // This is where you will update Kanban using Gantt Change Events
+    }
+
     console.log("MyKanban Constructor: ", this);
   }
   public kanbanRemoteDatasource: DataManager = new DataManager(
@@ -55,7 +57,7 @@ export class MyKanban extends React.Component {
       crossDomain: true
     }
   );
- 
+
   public cardTooltipTemplate(data: any): JSX.Element {
     const redStyle = {
       color: 'red'
@@ -72,6 +74,10 @@ export class MyKanban extends React.Component {
       <div>
         <table>
           <tbody>
+            <tr>
+              <td><b>Title : </b></td>
+              <td>{data.Title}</td>
+            </tr>
             <tr>
               <td><b>Assignee : </b></td>
               <td>{data.Assignee}</td>
@@ -113,6 +119,7 @@ export class MyKanban extends React.Component {
     if (args.requestType === 'save') {
       // Logic to sync changes with a backend API can go here
       console.log('Data saved/updated:', args.data);
+      
     };
   };
   updateTask = (e) => {
@@ -143,6 +150,11 @@ export class MyKanban extends React.Component {
       { text: 'Summary', key: 'Summary', type: 'TextArea', validationRules: { required: true } }
     ]
   };
+
+
+  public onTaskbarEdited = (args) => console.log('taskbarEdited:', args); // after drag/resize/update
+
+  public onCellEdited = (args) => console.log('cellEdited:', args); // after inline cell edit
   render() {
     return (
       <>
@@ -154,11 +166,15 @@ export class MyKanban extends React.Component {
           ref={this.kanbanInstance}
           dataSource={this.kanbanRemoteDatasource} keyField="Status"
           dialogSettings={this.dialogSettings}
-          cardSettings={{ contentField: "Summary", headerField: "Id", selectionType: "Multiple" }}
+          cardSettings={{ contentField: "Title", headerField: "Id", selectionType: "Multiple" }}
           width="100%" height="100%"
           enableTooltip={true} tooltipTemplate={this.cardTooltipTemplate}
           actionBegin={this.actionBegin}
           actionComplete={this.actionComplete}
+
+          taskbarEdited={this.onTaskbarEdited}
+
+          cellEdited={this.onCellEdited}
         >
           <ColumnsDirective>
             <ColumnDirective headerText='To Do' keyField="Open"></ColumnDirective>
@@ -170,6 +186,7 @@ export class MyKanban extends React.Component {
             <ColumnDirective headerText='Close' keyField="Close"></ColumnDirective>
           </ColumnsDirective>
         </KanbanComponent>
+        <MyGantt myState={this.props.myState} />
       </>);
   }
 }

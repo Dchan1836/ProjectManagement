@@ -283,7 +283,8 @@ let allTasks = [
         Priority: "Low",
         Estimate: 3.5,
         Assignee: "Nancy Davloio",
-        Start: "2024-12-11T21:34:00Z"
+        StartDate: new Date('04/02/2025'),
+        EndDate: new Date('04/21/2025'),
     },
     {
         Id: "1000",
@@ -296,7 +297,13 @@ let allTasks = [
         Type: "Story",
         Priority: "Low",
         Estimate: 4.5,
-        Assignee: "test assignee",
+        Assignee: "test assignee", 
+        Duration: 0,
+        Progress: 30,
+        ParentId: null,
+        Predecessor: '1002',
+        info:"test info",
+        resources:[]
     },
     {
         Id: "1002",

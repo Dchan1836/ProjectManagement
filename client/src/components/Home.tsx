@@ -1,4 +1,7 @@
 import React from 'react';
+// import SplitPane from 'react-split-pane';
+import { MyGantt } from "./MyGantt.tsx";
+import { MyKanban } from './MyKanban.tsx';
 
 export const Home: React.FC = () => {
   return (
@@ -8,8 +11,10 @@ export const Home: React.FC = () => {
         <p>
           Organize tasks, plan timelines, and track progress with an integrated Gantt chart.
         </p>
-
+        {/* <MyKanban /> */}
       </section>
+        {/* <MyGantt /> */}
+      {/* <MyKanban /> */}
     </main>
   );
 };

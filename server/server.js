@@ -298,7 +298,7 @@ let allTasks = [
         Priority: "Low",
         Estimate: 4.5,
         Assignee: "test assignee", 
-        Duration: 0,
+        // Duration: 0,
         Progress: 30,
         ParentId: null,
         Predecessor: '1002',
@@ -308,9 +308,9 @@ let allTasks = [
     {
         Id: "1002",
         Title: 'Identify site location',
-        StartDate: new Date('04/02/2025'),
-        EndDate: new Date('04/22/2025'),
-        Duration: 0,
+        StartDate: new Date('04/01/2025'),
+        EndDate: new Date('04/12/2025'),
+        // Duration: 0,
         Progress: 30,
         resources: [1],
         info: 'Measure the total property area alloted for construction',
@@ -325,8 +325,9 @@ let allTasks = [
     {
         Id: "1003",
         Title: 'Perform Soil test',
-        StartDate: new Date('04/02/2025'),
-        Duration: 4,
+        StartDate: new Date('03/22/2025'),
+        EndDate: new Date("03/28/2025"),
+        // Duration: 4,
         Predecessor: '1002',
         Status: "Open",
         Summary: "test summary",
@@ -354,7 +355,7 @@ let allTasks = [
         Title: "Define the product usage",
         StartDate: new Date("04/02/2025"),
         EndDate: new Date("04/08/2025"),
-        Duration: 3,
+        // Duration: 3,
         Progress: 30,
         BaselineStartDate: new Date("04/02/2025"),
         BaselineEndDate: new Date("04/02/2025"),
@@ -375,7 +376,7 @@ let allTasks = [
         Title: "Define the target audience",
         StartDate: new Date("04/02/2025"),
         EndDate: new Date("04/04/2025"),
-        Duration: 2,
+        // Duration: 2,
         Progress: 40,
         Predecessor: 1,
         isExpand: true,
@@ -390,7 +391,8 @@ let allTasks = [
         Id: "4",
         Title: "Prepare product sketch and notes",
         StartDate: new Date("04/05/2025"),
-        Duration: 4,
+        EndDate: new Date("04/08/2025"),
+        // Duration: 4,
         Progress: 30,
         Predecessor: "2FS",
         Status: "Open",
@@ -405,7 +407,7 @@ let allTasks = [
         Title: "Concept approval",
         StartDate: new Date("04/08/2025"),
         EndDate: new Date("04/08/2025"),
-        Duration: 0,
+        // Duration: 0,
         Predecessor: "3FS,4SS",
         Indicators: [
             {
@@ -440,7 +442,7 @@ let allTasks = [
         Title: "Define the product usage",
         StartDate: new Date("04/02/2025"),
         EndDate: new Date("04/08/2025"),
-        Duration: 3,
+        // Duration: 3,
         Progress: 30,
         Status: "In Progress",
         Summary: "test summary",
@@ -454,7 +456,7 @@ let allTasks = [
         Title: "Define the target audience",
         StartDate: new Date("04/02/2025"),
         EndDate: new Date("04/04/2025"),
-        Duration: 2,
+        // Duration: 2,
         Progress: 40,
         Status: "Review",
         Summary: "test summary",
@@ -467,7 +469,8 @@ let allTasks = [
         Id: "9",
         Title: "Prepare product sketch and notes",
         StartDate: new Date("04/05/2025"),
-        Duration: 4,
+        EndDate: new Date("04/10/2025"),
+        // Duration: 4,
         Progress: 30,
         Predecessor: "2",
         Status: "Testing",
@@ -482,7 +485,7 @@ let allTasks = [
         Title: "Concept approval",
         StartDate: new Date("04/08/2025"),
         EndDate: new Date("04/08/2025"),
-        Duration: 0,
+        // Duration: 0,
         Predecessor: "8,9",
         Indicators: [
             {
@@ -502,7 +505,8 @@ let allTasks = [
     {
         Id: "100", Title: "Planning and Permits",
         StartDate: new Date("04/02/2025"), EndDate: new Date("04/10/2025"),
-        Duration: 7, Progress: 100, resources: [
+        // Duration: 7,
+         Progress: 100, resources: [
             {
                 "resourceId": 2,
                 "resourceName": "Rose Fuller",
@@ -523,7 +527,9 @@ let allTasks = [
     },
     {
         Id: "120", Title: "Site Evaluation", StartDate: new Date("04/02/2025"),
-        EndDate: new Date("04/04/2025"), Duration: 2, Progress: 100,
+        EndDate: new Date("04/04/2025"),
+        //  Duration: 2,
+          Progress: 100,
         //  ParentId: 100,
         Predecessor: "4FS,8FS+5 days", resources: [
             {
@@ -547,7 +553,9 @@ let allTasks = [
     },
     {
         Id: "130", Title: "Obtain Permits", StartDate: new Date("04/07/2025"),
-        EndDate: new Date("04/09/2025"), Duration: 3, Progress: 100,
+        EndDate: new Date("04/09/2025"),
+        //  Duration: 3,
+          Progress: 100,
         // ParentId: 100,
         Predecessor: "9FS", resources: [
             {

@@ -8,6 +8,7 @@ import { registerLicense } from '@syncfusion/ej2-base';
 import Dashboard from "@/pages/Dashboard";
 import GanttChart from "@/pages/GanttChart";
 import KanbanBoard from "@/pages/KanbanBoard";
+import SplitView from "@/pages/SplitView";
 import NotFound from "@/pages/not-found";
 
 // Register Syncfusion Community License
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/gantt" component={GanttChart} />
       <Route path="/kanban" component={KanbanBoard} />
+      <Route path="/split-view" component={SplitView} />
       <Route component={NotFound} />
     </Switch>
   );

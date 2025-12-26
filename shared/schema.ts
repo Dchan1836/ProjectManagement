@@ -1,18 +1,30 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
+  taskName: text("task_name").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  duration: integer("duration"),
+  progress: integer("progress").notNull().default(0),
+  status: text("status").notNull(), // Open, In Progress, Testing, Close
+  priority: text("priority").default("Normal"),
+  parentId: integer("parent_id"), // For hierarchical data in Gantt
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true });
+
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+
+// Dashboard Metrics Type
+export const metricsSchema = z.object({
+  totalProjects: z.number(),
+  completedTasks: z.number(),
+  inProgressTasks: z.number(),
+  criticalTasks: z.number(),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type Metrics = z.infer<typeof metricsSchema>;

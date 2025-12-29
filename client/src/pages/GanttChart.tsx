@@ -25,7 +25,50 @@ import {
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, taskFields, editSettings, toolbar, resetFilters, progressTemplate }: any) {
+export const taskFields = {
+  id: 'id',
+  name: 'taskName',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  duration: 'duration',
+  progress: 'progress',
+  parentID: 'parentId',
+  dependency: 'predecessor',
+  status: 'status',
+  wbs: 'wbs',
+  priority: 'priority',
+  resourceInfo: 'assignee',
+  info: 'info'
+};
+
+export const editSettings = {
+  allowAdding: true,
+  allowEditing: true,
+  allowDeleting: true,
+  allowTaskbarEditing: true,
+  showDeleteConfirmDialog: true
+};
+
+export const toolbar = ['Add', 'Edit', 'Update', 'Delete', 'Cancel', 'ExpandAll', 'CollapseAll'];
+
+export const progressTemplate = (props: any) => {
+  return (
+    <div className="w-full flex items-center gap-2">
+      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div 
+          className={`h-full rounded-full ${
+            props.progress === 100 ? 'bg-green-500' : 
+            props.progress > 50 ? 'bg-blue-500' : 'bg-orange-400'
+          }`}
+          style={{ width: `${props.progress}%` }}
+        />
+      </div>
+      <span className="text-xs text-gray-500 w-8">{props.progress}%</span>
+    </div>
+  );
+};
+
+export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters }: any) {
   const ganttInstance = useRef<GanttComponent>(null);
 
   return (
@@ -143,7 +186,6 @@ export default function GanttChart() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
-  const ganttInstance = useRef<GanttComponent>(null);
 
   if (isLoading) {
     return (
@@ -154,32 +196,6 @@ export default function GanttChart() {
       </Layout>
     );
   }
-
-  const taskFields = {
-    id: 'id',
-    name: 'taskName',
-    startDate: 'startDate',
-    endDate: 'endDate',
-    duration: 'duration',
-    progress: 'progress',
-    parentID: 'parentId',
-    dependency: 'predecessor',
-    status: 'status',
-    wbs: 'wbs',
-    priority: 'priority',
-    resourceInfo: 'assignee',
-    info: 'info'
-  };
-
-  const editSettings = {
-    allowAdding: true,
-    allowEditing: true,
-    allowDeleting: true,
-    allowTaskbarEditing: true,
-    showDeleteConfirmDialog: true
-  };
-
-  const toolbar = ['Add', 'Edit', 'Update', 'Delete', 'Cancel', 'ExpandAll', 'CollapseAll'];
 
   const filteredTasks = tasks?.filter((task: any) => {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
@@ -206,24 +222,6 @@ export default function GanttChart() {
     setAssigneeFilter("all");
   };
 
-  // Add custom template for the progress bar
-  const progressTemplate = (props: any) => {
-    return (
-      <div className="w-full flex items-center gap-2">
-        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className={`h-full rounded-full ${
-              props.progress === 100 ? 'bg-green-500' : 
-              props.progress > 50 ? 'bg-blue-500' : 'bg-orange-400'
-            }`}
-            style={{ width: `${props.progress}%` }}
-          />
-        </div>
-        <span className="text-xs text-gray-500 w-8">{props.progress}%</span>
-      </div>
-    );
-  };
-
   return (
     <Layout>
       <div className="h-full flex flex-col space-y-4">
@@ -244,9 +242,6 @@ export default function GanttChart() {
           statusFilter={statusFilter}
           priorityFilter={priorityFilter}
           assigneeFilter={assigneeFilter}
-          taskFields={taskFields}
-          editSettings={editSettings}
-          toolbar={toolbar}
           resetFilters={{
             setSearchTerm,
             setStatusFilter,
@@ -254,7 +249,6 @@ export default function GanttChart() {
             setAssigneeFilter,
             reset: resetFilters
           }}
-          progressTemplate={progressTemplate}
         />
       </div>
     </Layout>

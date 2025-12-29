@@ -18,7 +18,62 @@ import {
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters, cardSettings, cardTemplate }: any) {
+export const cardSettings: CardSettingsModel = {
+  contentField: 'taskName',
+  headerField: 'id',
+  tagsField: 'priority',
+  grabberField: 'color',
+  footerCssField: 'className'
+};
+
+export const cardTemplate = (props: any) => {
+  const priorityColor = 
+    props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
+    props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+    props.priority === 'Normal' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+    'bg-gray-100 text-gray-700 border-gray-200';
+
+  const getInitials = (name: string) => {
+    if (!name) return "??";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  return (
+    <div className="e-card-content p-3">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-mono text-muted-foreground">{props.wbs ? `WBS: ${props.wbs}` : `#${props.id}`}</span>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
+          {props.priority || 'Normal'}
+        </span>
+      </div>
+      <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
+        {props.taskName}
+      </div>
+      {props.info && (
+        <div className="text-[11px] text-muted-foreground italic mb-2 line-clamp-2">
+          {props.info}
+        </div>
+      )}
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+        <div className="flex items-center gap-2">
+          <div className={`w-6 h-6 rounded-full ${props.assignee === 'Jane Doe' ? 'bg-blue-500' : 'bg-purple-500'} border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm`}>
+            {getInitials(props.assignee)}
+          </div>
+          <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[80px]">
+            {props.assignee || 'Unassigned'}
+          </span>
+        </div>
+        <div className={`text-xs font-medium ${
+          props.progress === 100 ? 'text-green-600' : 'text-muted-foreground'
+        }`}>
+          {props.progress}%
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters }: any) {
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
@@ -228,8 +283,6 @@ export default function KanbanBoard() {
             setAssigneeFilter,
             reset: resetFilters
           }}
-          cardSettings={cardSettings}
-          cardTemplate={cardTemplate}
         />
       </div>
     </Layout>

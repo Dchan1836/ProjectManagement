@@ -69,12 +69,19 @@ export default function GanttChart() {
   const toolbar = ['Add', 'Edit', 'Update', 'Delete', 'Cancel', 'ExpandAll', 'CollapseAll'];
 
   const filteredTasks = tasks?.filter((task: any) => {
-    const matchesSearch = task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          (task.wbs && task.wbs.includes(searchTerm)) ||
-                          task.id.toString().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    
+    // For Gantt charts with hierarchy, we often need to show parent tasks if their children match
+    // but in this simple filtering implementation, we'll just check if the task matches.
+    // However, we should ensure taskName check is robust.
+    const matchesSearch = !searchTerm || (
+      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (task.wbs && task.wbs.includes(searchTerm)) ||
+      (task.id && task.id.toString().includes(searchTerm))
+    );
+
     return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
   });
 
@@ -184,6 +191,7 @@ export default function GanttChart() {
           <GanttComponent
             ref={ganttInstance}
             dataSource={filteredTasks}
+            key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
             taskFields={taskFields}
             height="100%"
             treeColumnIndex={2}

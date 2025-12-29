@@ -14,7 +14,7 @@ export const tasks = pgTable("tasks", {
   parentId: integer("parent_id"), // For hierarchical data in Gantt
   wbs: text("wbs"), // Work Breakdown Structure
   assignee: text("assignee"), // Task assignee
-  notes: text("notes"), // Task notes
+  info: text("info"), // Task info
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true });

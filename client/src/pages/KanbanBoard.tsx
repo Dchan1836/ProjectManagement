@@ -83,9 +83,9 @@ export default function KanbanBoard() {
         <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
           {props.taskName}
         </div>
-        {props.notes && (
+        {props.info && (
           <div className="text-[11px] text-muted-foreground italic mb-2 line-clamp-2">
-            {props.notes}
+            {props.info}
           </div>
         )}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">

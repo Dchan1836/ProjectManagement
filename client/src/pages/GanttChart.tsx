@@ -56,7 +56,7 @@ export default function GanttChart() {
     wbs: 'wbs',
     priority: 'priority',
     resourceInfo: 'assignee',
-    notes: 'notes'
+    info: 'info'
   };
 
   const editSettings = {
@@ -217,7 +217,7 @@ export default function GanttChart() {
               <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
               <ColumnDirective field='assignee' headerText='Assignee' width='120'></ColumnDirective>
-              <ColumnDirective field='notes' headerText='Notes' width='200' clipMode='EllipsisWithTooltip'></ColumnDirective>
+              <ColumnDirective field='info' headerText='Info' width='200' clipMode='EllipsisWithTooltip'></ColumnDirective>
               <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
               <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>
               <ColumnDirective field='startDate' headerText='Start Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>

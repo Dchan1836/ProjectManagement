@@ -29,6 +29,7 @@ export default function GanttChart() {
   const { data: tasks, isLoading } = useTasks();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const ganttInstance = useRef<GanttComponent>(null);
 
   if (isLoading) {
@@ -51,7 +52,8 @@ export default function GanttChart() {
     parentID: 'parentId',
     dependency: 'predecessor',
     status: 'status',
-    wbs: 'wbs'
+    wbs: 'wbs',
+    priority: 'priority'
   };
 
   const editSettings = {
@@ -69,12 +71,14 @@ export default function GanttChart() {
                           (task.wbs && task.wbs.includes(searchTerm)) ||
                           task.id.toString().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+    return matchesSearch && matchesStatus && matchesPriority;
   });
 
   const resetFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
+    setPriorityFilter("all");
   };
 
   // Add custom template for the progress bar
@@ -133,6 +137,18 @@ export default function GanttChart() {
               </SelectContent>
             </Select>
 
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                <SelectItem value="Critical">Critical</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+                <SelectItem value="Normal">Normal</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Button 
               variant="ghost" 
               size="sm" 
@@ -175,6 +191,7 @@ export default function GanttChart() {
               <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
+              <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
               <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>
               <ColumnDirective field='startDate' headerText='Start Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>
               <ColumnDirective field='endDate' headerText='End Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>

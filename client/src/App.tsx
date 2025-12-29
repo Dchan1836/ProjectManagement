@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import GanttChart from "@/pages/GanttChart";
 import KanbanBoard from "@/pages/KanbanBoard";
 import SplitView from "@/pages/SplitView";
+import TaskList from "@/pages/TaskList";
 import NotFound from "@/pages/not-found";
 
 // Register Syncfusion Community License
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/gantt" component={GanttChart} />
       <Route path="/kanban" component={KanbanBoard} />
       <Route path="/split-view" component={SplitView} />
+      <Route path="/tasks" component={TaskList} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -5,6 +5,7 @@ import {
   KanbanSquare, 
   BarChart3, 
   Columns,
+  ListTodo,
   Menu, 
   X,
   Bell,
@@ -25,6 +26,7 @@ export function Layout({ children }: LayoutProps) {
     { label: "Gantt Chart", href: "/gantt", icon: BarChart3 },
     { label: "Kanban Board", href: "/kanban", icon: KanbanSquare },
     { label: "Split View", href: "/split-view", icon: Columns },
+    { label: "Task List", href: "/tasks", icon: ListTodo },
   ];
 
   return (

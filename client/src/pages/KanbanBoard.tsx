@@ -29,10 +29,10 @@ export const cardSettings: CardSettingsModel = {
 
 export const cardTemplate = (props: any) => {
   const priorityColor = 
-    props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
-    props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-    props.priority === 'Normal' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-    'bg-gray-100 text-gray-700 border-gray-200';
+    props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400' :
+    props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400' :
+    props.priority === 'Normal' ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400' :
+    'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400';
 
   const getInitials = (name: string) => {
     if (!name) return "??";
@@ -74,110 +74,11 @@ export const cardTemplate = (props: any) => {
   );
 };
 
-export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters, onDragStop }: any) {
-  return (
-    <div className="h-full flex flex-col space-y-4">
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search name, WBS or ID..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => resetFilters.setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <Select value={priorityFilter} onValueChange={resetFilters.setPriorityFilter}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="Critical">Critical</SelectItem>
-              <SelectItem value="High">High</SelectItem>
-              <SelectItem value="Normal">Normal</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={assigneeFilter} onValueChange={resetFilters.setAssigneeFilter}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Assignee" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Assignees</SelectItem>
-              <SelectItem value="Jane Doe">Jane Doe</SelectItem>
-              <SelectItem value="Alex Smith">Alex Smith</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={resetFilters.reset}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <FilterX className="h-4 w-4 mr-2" />
-            Reset
-          </Button>
-          
-          <div className="ml-auto text-sm text-muted-foreground">
-            Showing {filteredTasks?.length} tasks
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-x-auto pb-4">
-        <div className="h-full min-w-[1000px] bg-transparent">
-          <KanbanComponent
-            id="kanban"
-            keyField="status"
-            dataSource={filteredTasks}
-            cardSettings={{ ...cardSettings, template: cardTemplate }}
-            swimlaneSettings={{ keyField: 'assignee' }}
-            height="100%"
-            style={{ backgroundColor: 'transparent' }}
-            dragStop={onDragStop}
-          >
-            <ColumnsDirective>
-              <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="font-bold text-foreground">To Do</span>
-                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
-                  </div>
-              )}/>
-              <ColumnDirective headerText="In Progress" keyField="In Progress" allowToggle={true} template={(props: any) => (
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span className="font-bold text-foreground">In Progress</span>
-                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
-                  </div>
-              )}/>
-              <ColumnDirective headerText="Testing" keyField="Testing" allowToggle={true} template={(props: any) => (
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                    <span className="font-bold text-foreground">Testing</span>
-                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
-                  </div>
-              )}/>
-              <ColumnDirective headerText="Done" keyField="Close" allowToggle={true} template={(props: any) => (
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="font-bold text-foreground">Done</span>
-                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
-                  </div>
-              )}/>
-            </ColumnsDirective>
-          </KanbanComponent>
-        </div>
-      </div>
-    </div>
-  );
+interface KanbanBoardCoreProps {
+  showHeader?: boolean;
 }
 
-export default function KanbanBoard() {
+export function KanbanBoardCore({ showHeader = false }: KanbanBoardCoreProps) {
   const { data: tasks, isLoading } = useTasks();
   const updateTask = useUpdateTask();
   const { toast } = useToast();
@@ -200,11 +101,9 @@ export default function KanbanBoard() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="h-full flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
+      <div className="h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
@@ -226,83 +125,121 @@ export default function KanbanBoard() {
     setAssigneeFilter("all");
   };
 
-  const cardSettings: CardSettingsModel = {
-    contentField: 'taskName',
-    headerField: 'id',
-    tagsField: 'priority',
-    grabberField: 'color',
-    footerCssField: 'className'
-  };
-
-  const cardTemplate = (props: any) => {
-    const priorityColor = 
-      props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
-      props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-      props.priority === 'Normal' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-      'bg-gray-100 text-gray-700 border-gray-200';
-
-    const getInitials = (name: string) => {
-      if (!name) return "??";
-      return name.split(' ').map(n => n[0]).join('').toUpperCase();
-    };
-
-    return (
-      <div className="e-card-content p-3">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-mono text-muted-foreground">{props.wbs ? `WBS: ${props.wbs}` : `#${props.id}`}</span>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
-            {props.priority || 'Normal'}
-          </span>
-        </div>
-        <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
-          {props.taskName}
-        </div>
-        {props.info && (
-          <div className="text-[11px] text-muted-foreground italic mb-2 line-clamp-2">
-            {props.info}
-          </div>
-        )}
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
-          <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full ${props.assignee === 'Jane Doe' ? 'bg-blue-500' : 'bg-purple-500'} border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm`}>
-              {getInitials(props.assignee)}
-            </div>
-            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[80px]">
-              {props.assignee || 'Unassigned'}
-            </span>
-          </div>
-          <div className={`text-xs font-medium ${
-            props.progress === 100 ? 'text-green-600' : 'text-muted-foreground'
-          }`}>
-            {props.progress}%
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <Layout>
-      <div className="h-full flex flex-col space-y-4">
+    <div className="h-full flex flex-col space-y-4">
+      {showHeader && (
         <div>
           <h1 className="text-3xl font-bold text-foreground">Task Board</h1>
           <p className="text-muted-foreground">Visualize and optimize your workflow.</p>
         </div>
+      )}
 
-        <KanbanView 
-          filteredTasks={filteredTasks}
-          searchTerm={searchTerm}
-          priorityFilter={priorityFilter}
-          assigneeFilter={assigneeFilter}
-          resetFilters={{
-            setSearchTerm,
-            setPriorityFilter,
-            setAssigneeFilter,
-            reset: resetFilters
-          }}
-          onDragStop={handleDragStop}
-        />
+      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search name, WBS or ID..."
+              className="pl-9"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="input-search-kanban"
+            />
+          </div>
+          
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-priority-filter-kanban">
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="Critical">Critical</SelectItem>
+              <SelectItem value="High">High</SelectItem>
+              <SelectItem value="Normal">Normal</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-assignee-filter-kanban">
+              <SelectValue placeholder="Assignee" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Assignees</SelectItem>
+              <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+              <SelectItem value="Alex Smith">Alex Smith</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={resetFilters}
+            className="text-muted-foreground hover:text-foreground"
+            data-testid="button-reset-filters-kanban"
+          >
+            <FilterX className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+          
+          <div className="ml-auto text-sm text-muted-foreground">
+            Showing {filteredTasks?.length} tasks
+          </div>
+        </div>
       </div>
+
+      <div className="flex-1 overflow-x-auto pb-4">
+        <div className="h-full min-w-[1000px] bg-transparent">
+          <KanbanComponent
+            id="kanban"
+            keyField="status"
+            dataSource={filteredTasks}
+            cardSettings={{ ...cardSettings, template: cardTemplate }}
+            swimlaneSettings={{ keyField: 'assignee' }}
+            height="100%"
+            style={{ backgroundColor: 'transparent' }}
+            dragStop={handleDragStop}
+          >
+            <ColumnsDirective>
+              <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="font-bold text-foreground">To Do</span>
+                    <span className="ml-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
+                  </div>
+              )}/>
+              <ColumnDirective headerText="In Progress" keyField="In Progress" allowToggle={true} template={(props: any) => (
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                    <span className="font-bold text-foreground">In Progress</span>
+                    <span className="ml-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
+                  </div>
+              )}/>
+              <ColumnDirective headerText="Testing" keyField="Testing" allowToggle={true} template={(props: any) => (
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                    <span className="font-bold text-foreground">Testing</span>
+                    <span className="ml-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
+                  </div>
+              )}/>
+              <ColumnDirective headerText="Done" keyField="Close" allowToggle={true} template={(props: any) => (
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <span className="font-bold text-foreground">Done</span>
+                    <span className="ml-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">{props.count}</span>
+                  </div>
+              )}/>
+            </ColumnsDirective>
+          </KanbanComponent>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function KanbanBoard() {
+  return (
+    <Layout>
+      <KanbanBoardCore showHeader={true} />
     </Layout>
   );
 }

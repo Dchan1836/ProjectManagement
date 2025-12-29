@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
-import { useState, useMemo } from "react";
+import { useTasks, useUpdateTask } from "@/hooks/use-tasks";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   KanbanComponent, 
@@ -7,7 +8,6 @@ import {
   ColumnDirective,
   CardSettingsModel
 } from '@syncfusion/ej2-react-kanban';
-import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -74,20 +74,7 @@ export const cardTemplate = (props: any) => {
   );
 };
 
-class TaskAdaptor extends UrlAdaptor {
-  processResponse(data: any, ds?: any, query?: any, xhr?: any, request?: any, changes?: any): Object {
-    if (Array.isArray(data)) {
-      return data.map((task: any) => ({
-        ...task,
-        startDate: new Date(task.startDate),
-        endDate: new Date(task.endDate),
-      }));
-    }
-    return data;
-  }
-}
-
-export function KanbanView({ dataManager, searchTerm, priorityFilter, assigneeFilter, resetFilters, onDragStop }: any) {
+export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters, onDragStop }: any) {
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
@@ -99,12 +86,11 @@ export function KanbanView({ dataManager, searchTerm, priorityFilter, assigneeFi
               className="pl-9"
               value={searchTerm}
               onChange={(e) => resetFilters.setSearchTerm(e.target.value)}
-              data-testid="input-kanban-search"
             />
           </div>
           
           <Select value={priorityFilter} onValueChange={resetFilters.setPriorityFilter}>
-            <SelectTrigger className="w-[150px]" data-testid="select-kanban-priority">
+            <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -116,7 +102,7 @@ export function KanbanView({ dataManager, searchTerm, priorityFilter, assigneeFi
           </Select>
 
           <Select value={assigneeFilter} onValueChange={resetFilters.setAssigneeFilter}>
-            <SelectTrigger className="w-[150px]" data-testid="select-kanban-assignee">
+            <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Assignee" />
             </SelectTrigger>
             <SelectContent>
@@ -131,11 +117,14 @@ export function KanbanView({ dataManager, searchTerm, priorityFilter, assigneeFi
             size="sm" 
             onClick={resetFilters.reset}
             className="text-muted-foreground hover:text-foreground"
-            data-testid="button-kanban-reset-filters"
           >
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
+          
+          <div className="ml-auto text-sm text-muted-foreground">
+            Showing {filteredTasks?.length} tasks
+          </div>
         </div>
       </div>
 
@@ -144,7 +133,7 @@ export function KanbanView({ dataManager, searchTerm, priorityFilter, assigneeFi
           <KanbanComponent
             id="kanban"
             keyField="status"
-            dataSource={dataManager}
+            dataSource={filteredTasks}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={{ keyField: 'assignee' }}
             height="100%"
@@ -189,41 +178,107 @@ export function KanbanView({ dataManager, searchTerm, priorityFilter, assigneeFi
 }
 
 export default function KanbanBoard() {
+  const { data: tasks, isLoading } = useTasks();
+  const updateTask = useUpdateTask();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
-  const dataManager = useMemo(() => new DataManager({
-    url: '/api/tasks',
-    adaptor: new TaskAdaptor(),
-    crossDomain: false
-  }), []);
-
-  const handleDragStop = async (args: any) => {
+  const handleDragStop = (args: any) => {
     const cardData = args.data?.[0];
     if (cardData && cardData.id) {
-      try {
-        const response = await fetch(`/api/tasks/${cardData.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: cardData.status }),
-        });
-        if (response.ok) {
-          toast({ title: "Task status updated" });
-        } else {
-          toast({ title: "Failed to update task", variant: "destructive" });
-        }
-      } catch {
-        toast({ title: "Failed to update task", variant: "destructive" });
-      }
+      updateTask.mutate({
+        id: cardData.id,
+        data: { status: cardData.status },
+      }, {
+        onSuccess: () => toast({ title: "Task status updated" }),
+        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      });
     }
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const filteredTasks = tasks?.filter((task: any) => {
+    const matchesSearch = !searchTerm || (
+      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (task.wbs && task.wbs.includes(searchTerm)) ||
+      (task.id && task.id.toString().includes(searchTerm))
+    );
+    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    
+    return matchesSearch && matchesPriority && matchesAssignee;
+  });
 
   const resetFilters = () => {
     setSearchTerm("");
     setPriorityFilter("all");
     setAssigneeFilter("all");
+  };
+
+  const cardSettings: CardSettingsModel = {
+    contentField: 'taskName',
+    headerField: 'id',
+    tagsField: 'priority',
+    grabberField: 'color',
+    footerCssField: 'className'
+  };
+
+  const cardTemplate = (props: any) => {
+    const priorityColor = 
+      props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
+      props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+      props.priority === 'Normal' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+      'bg-gray-100 text-gray-700 border-gray-200';
+
+    const getInitials = (name: string) => {
+      if (!name) return "??";
+      return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    };
+
+    return (
+      <div className="e-card-content p-3">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs font-mono text-muted-foreground">{props.wbs ? `WBS: ${props.wbs}` : `#${props.id}`}</span>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
+            {props.priority || 'Normal'}
+          </span>
+        </div>
+        <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
+          {props.taskName}
+        </div>
+        {props.info && (
+          <div className="text-[11px] text-muted-foreground italic mb-2 line-clamp-2">
+            {props.info}
+          </div>
+        )}
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full ${props.assignee === 'Jane Doe' ? 'bg-blue-500' : 'bg-purple-500'} border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm`}>
+              {getInitials(props.assignee)}
+            </div>
+            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[80px]">
+              {props.assignee || 'Unassigned'}
+            </span>
+          </div>
+          <div className={`text-xs font-medium ${
+            props.progress === 100 ? 'text-green-600' : 'text-muted-foreground'
+          }`}>
+            {props.progress}%
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -235,7 +290,7 @@ export default function KanbanBoard() {
         </div>
 
         <KanbanView 
-          dataManager={dataManager}
+          filteredTasks={filteredTasks}
           searchTerm={searchTerm}
           priorityFilter={priorityFilter}
           assigneeFilter={assigneeFilter}

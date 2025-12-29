@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const taskFields = {
@@ -183,6 +183,13 @@ export function GanttChartCore({
     setAssigneeFilter("all");
   };
 
+  const handleSave = () => {
+    if (ganttInstance.current) {
+      ganttInstance.current.endEdit();
+      toast({ title: "Changes saved" });
+    }
+  };
+
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -255,6 +262,16 @@ export function GanttChartCore({
           >
             <FilterX className="h-4 w-4 mr-2" />
             Reset
+          </Button>
+
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={handleSave}
+            data-testid="button-save-gantt"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save
           </Button>
           
           <div className="ml-auto text-sm text-muted-foreground">

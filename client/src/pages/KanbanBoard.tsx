@@ -83,6 +83,11 @@ export default function KanbanBoard() {
         <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
           {props.taskName}
         </div>
+        {props.notes && (
+          <div className="text-[11px] text-muted-foreground italic mb-2 line-clamp-2">
+            {props.notes}
+          </div>
+        )}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
           <div className="flex items-center gap-2">
             <div className={`w-6 h-6 rounded-full ${props.assignee === 'Jane Doe' ? 'bg-blue-500' : 'bg-purple-500'} border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm`}>

@@ -23,7 +23,8 @@ export class MemStorage implements IStorage {
         priority: "High",
         parentId: null,
         wbs: "1",
-        assignee: "Jane Doe"
+        assignee: "Jane Doe",
+        notes: "Initial project kickoff and planning"
       },
       {
         id: 2,
@@ -36,7 +37,8 @@ export class MemStorage implements IStorage {
         priority: "Normal",
         parentId: 1,
         wbs: "1.1",
-        assignee: "Jane Doe"
+        assignee: "Jane Doe",
+        notes: "Site selection completed"
       },
       {
         id: 3,
@@ -49,7 +51,8 @@ export class MemStorage implements IStorage {
         priority: "Critical",
         parentId: 1,
         wbs: "1.2",
-        assignee: "Alex Smith"
+        assignee: "Alex Smith",
+        notes: "Soil quality is stable"
       },
       {
         id: 4,
@@ -62,7 +65,8 @@ export class MemStorage implements IStorage {
         priority: "High",
         parentId: 1,
         wbs: "1.3",
-        assignee: "Jane Doe"
+        assignee: "Jane Doe",
+        notes: "Budgeting in progress"
       },
       {
         id: 5,
@@ -75,7 +79,8 @@ export class MemStorage implements IStorage {
         priority: "Normal",
         parentId: null,
         wbs: "2",
-        assignee: "Alex Smith"
+        assignee: "Alex Smith",
+        notes: "Main development cycle"
       },
       {
         id: 6,
@@ -88,7 +93,8 @@ export class MemStorage implements IStorage {
         priority: "Normal",
         parentId: 5,
         wbs: "2.1",
-        assignee: "Alex Smith"
+        assignee: "Alex Smith",
+        notes: "React and Tailwind setup"
       },
       {
         id: 7,
@@ -101,7 +107,8 @@ export class MemStorage implements IStorage {
         priority: "Critical",
         parentId: 5,
         wbs: "2.2",
-        assignee: "Jane Doe"
+        assignee: "Jane Doe",
+        notes: "Express and Drizzle configuration"
       },
       {
         id: 8,
@@ -114,7 +121,8 @@ export class MemStorage implements IStorage {
         priority: "High",
         parentId: 5,
         wbs: "2.3",
-        assignee: "Alex Smith"
+        assignee: "Alex Smith",
+        notes: "Connecting frontend to backend"
       },
       {
         id: 9,
@@ -127,7 +135,8 @@ export class MemStorage implements IStorage {
         priority: "Normal",
         parentId: null,
         wbs: "3",
-        assignee: "Jane Doe"
+        assignee: "Jane Doe",
+        notes: "QA and bug fixing"
       },
       {
         id: 10,
@@ -140,7 +149,8 @@ export class MemStorage implements IStorage {
         priority: "Normal",
         parentId: 9,
         wbs: "3.1",
-        assignee: "Alex Smith"
+        assignee: "Alex Smith",
+        notes: "Verifying individual modules"
       }
     ];
     this.idCounter = 11;

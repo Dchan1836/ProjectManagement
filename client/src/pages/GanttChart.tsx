@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { useTasks } from "@/hooks/use-tasks";
+import { useState, useRef } from "react";
 import { 
   GanttComponent, 
   Inject, 
@@ -13,9 +14,22 @@ import {
   ColumnsDirective,
   ColumnDirective
 } from '@syncfusion/ej2-react-gantt';
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, FilterX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function GanttChart() {
   const { data: tasks, isLoading } = useTasks();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const ganttInstance = useRef<GanttComponent>(null);
 
   if (isLoading) {
     return (
@@ -48,7 +62,20 @@ export default function GanttChart() {
     showDeleteConfirmDialog: true
   };
 
-  const toolbar = ['Add', 'Edit', 'Update', 'Delete', 'Cancel', 'ExpandAll', 'CollapseAll', 'Search'];
+  const toolbar = ['Add', 'Edit', 'Update', 'Delete', 'Cancel', 'ExpandAll', 'CollapseAll'];
+
+  const filteredTasks = tasks?.filter((task: any) => {
+    const matchesSearch = task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (task.wbs && task.wbs.includes(searchTerm)) ||
+                          task.id.toString().includes(searchTerm);
+    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+  };
 
   // Add custom template for the progress bar
   const progressTemplate = (props: any) => {
@@ -81,12 +108,54 @@ export default function GanttChart() {
           </button>
         </div>
 
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search name, WBS or ID..."
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Open">Open</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Testing">Testing</SelectItem>
+                <SelectItem value="Close">Done</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={resetFilters}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <FilterX className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+            
+            <div className="ml-auto text-sm text-muted-foreground">
+              Showing {filteredTasks?.length} tasks
+            </div>
+          </div>
+        </div>
+
         <div className="flex-1 bg-white rounded-2xl border border-border shadow-sm overflow-hidden p-1">
           <GanttComponent
-            dataSource={tasks}
+            ref={ganttInstance}
+            dataSource={filteredTasks}
             taskFields={taskFields}
             height="100%"
-            treeColumnIndex={1}
+            treeColumnIndex={2}
             allowSelection={true}
             allowFiltering={true}
             allowSorting={true}
@@ -98,7 +167,7 @@ export default function GanttChart() {
             projectEndDate={new Date('2024-12-31')}
             gridLines="Both"
             labelSettings={{ leftLabel: 'taskName' }}
-            splitterSettings={{ position: '40%' }}
+            splitterSettings={{ position: '45%' }}
             rowHeight={45}
             taskbarHeight={30}
           >

@@ -79,6 +79,7 @@ export default function GanttChart() {
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
+      (task.id && task.id.toString() === searchTerm) ||
       (task.id && task.id.toString().includes(searchTerm))
     );
 

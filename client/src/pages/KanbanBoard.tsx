@@ -1,14 +1,28 @@
 import { Layout } from "@/components/Layout";
 import { useTasks } from "@/hooks/use-tasks";
+import { useState } from "react";
 import { 
   KanbanComponent, 
   ColumnsDirective, 
   ColumnDirective,
   CardSettingsModel
 } from '@syncfusion/ej2-react-kanban';
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, FilterX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function KanbanBoard() {
   const { data: tasks, isLoading } = useTasks();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
 
   if (isLoading) {
     return (
@@ -19,6 +33,24 @@ export default function KanbanBoard() {
       </Layout>
     );
   }
+
+  const filteredTasks = tasks?.filter((task: any) => {
+    const matchesSearch = !searchTerm || (
+      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (task.wbs && task.wbs.includes(searchTerm)) ||
+      (task.id && task.id.toString().includes(searchTerm))
+    );
+    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    
+    return matchesSearch && matchesPriority && matchesAssignee;
+  });
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setPriorityFilter("all");
+    setAssigneeFilter("all");
+  };
 
   const cardSettings: CardSettingsModel = {
     contentField: 'taskName',
@@ -78,12 +110,63 @@ export default function KanbanBoard() {
           <p className="text-muted-foreground">Visualize and optimize your workflow.</p>
         </div>
 
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search name, WBS or ID..."
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                <SelectItem value="Critical">Critical</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+                <SelectItem value="Normal">Normal</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+                <SelectItem value="Alex Smith">Alex Smith</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={resetFilters}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <FilterX className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+            
+            <div className="ml-auto text-sm text-muted-foreground">
+              Showing {filteredTasks?.length} tasks
+            </div>
+          </div>
+        </div>
+
         <div className="flex-1 overflow-x-auto pb-4">
           <div className="h-full min-w-[1000px] bg-transparent">
             <KanbanComponent
               id="kanban"
               keyField="status"
-              dataSource={tasks}
+              dataSource={filteredTasks}
               cardSettings={{ ...cardSettings, template: cardTemplate }}
               swimlaneSettings={{ keyField: 'assignee' }}
               height="100%"

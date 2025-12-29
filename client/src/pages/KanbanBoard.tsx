@@ -73,13 +73,7 @@ export const cardTemplate = (props: any) => {
   );
 };
 
-export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
-  const actionComplete = (args: any) => {
-    if (args.requestType === 'cardChanged' || args.requestType === 'cardCreated' || args.requestType === 'cardRemoved') {
-      if (onActionComplete) onActionComplete();
-    }
-  };
-
+export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters }: any) {
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
@@ -143,7 +137,6 @@ export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assignee
             swimlaneSettings={{ keyField: 'assignee' }}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
-            actionComplete={actionComplete}
           >
             <ColumnsDirective>
               <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (

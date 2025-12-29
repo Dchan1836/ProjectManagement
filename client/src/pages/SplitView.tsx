@@ -4,11 +4,9 @@ import { useState } from "react";
 import { SplitterComponent, PaneDirective, PanesDirective } from '@syncfusion/ej2-react-layouts';
 import { GanttView } from "./GanttChart";
 import { KanbanView } from "./KanbanBoard";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function SplitView() {
   const { data: tasks, isLoading } = useTasks();
-  const queryClient = useQueryClient();
 
   // Gantt State
   const [ganttSearch, setGanttSearch] = useState("");
@@ -30,11 +28,6 @@ export default function SplitView() {
       </Layout>
     );
   }
-
-  // Handle data updates from child components
-  const handleDataChange = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-  };
 
   // Filtering Logic (duplicated from components for now, ideally could be a hook)
   const filterTasks = (tasks: any, search: string, status: string, priority: string, assignee: string) => {
@@ -74,7 +67,6 @@ export default function SplitView() {
                     statusFilter={ganttStatus}
                     priorityFilter={ganttPriority}
                     assigneeFilter={ganttAssignee}
-                    onActionComplete={handleDataChange}
                     resetFilters={{
                       setSearchTerm: setGanttSearch,
                       setStatusFilter: setGanttStatus,
@@ -97,7 +89,6 @@ export default function SplitView() {
                     searchTerm={kanbanSearch}
                     priorityFilter={kanbanPriority}
                     assigneeFilter={kanbanAssignee}
-                    onActionComplete={handleDataChange}
                     resetFilters={{
                       setSearchTerm: setKanbanSearch,
                       setPriorityFilter: setKanbanPriority,

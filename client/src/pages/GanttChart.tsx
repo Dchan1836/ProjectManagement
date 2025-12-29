@@ -35,7 +35,8 @@ export default function GanttChart() {
     duration: 'duration',
     progress: 'progress',
     parentID: 'parentId',
-    dependency: 'predecessor'
+    dependency: 'predecessor',
+    status: 'status'
   };
 
   const editSettings = {
@@ -103,6 +104,7 @@ export default function GanttChart() {
             <ColumnsDirective>
               <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
+              <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>
               <ColumnDirective field='startDate' headerText='Start Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>
               <ColumnDirective field='endDate' headerText='End Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>
               <ColumnDirective field='duration' headerText='Duration' width='90' textAlign='Right'></ColumnDirective>

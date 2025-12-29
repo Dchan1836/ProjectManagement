@@ -43,7 +43,8 @@ export default function SplitView() {
     duration: 'duration',
     progress: 'progress',
     parentID: 'parentId',
-    dependency: 'predecessor'
+    dependency: 'predecessor',
+    status: 'status'
   };
 
   const ganttEditSettings = {
@@ -88,7 +89,8 @@ export default function SplitView() {
                   >
                     <GanttColumnsDirective>
                       <GanttColumnDirective field='id' headerText='ID' width='60'></GanttColumnDirective>
-                      <GanttColumnDirective field='taskName' headerText='Task Name' width='200'></GanttColumnDirective>
+                      <GanttColumnDirective field='taskName' headerText='Task Name' width='150'></GanttColumnDirective>
+                      <GanttColumnDirective field='status' headerText='Status' width='100'></GanttColumnDirective>
                       <GanttColumnDirective field='progress' headerText='Progress' width='100'></GanttColumnDirective>
                     </GanttColumnsDirective>
                     <Inject services={[GanttSelection, GanttToolbar, GanttEdit, GanttFilter, GanttSort, GanttResize, DayMarkers]} />

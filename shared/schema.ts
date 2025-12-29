@@ -17,7 +17,16 @@ export const tasks = pgTable("tasks", {
   info: text("info"), // Task info
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true });
+export const insertTaskSchema = createInsertSchema(tasks, {
+  startDate: z.preprocess((val) => {
+    if (typeof val === 'string') return new Date(val);
+    return val;
+  }, z.date()),
+  endDate: z.preprocess((val) => {
+    if (typeof val === 'string') return new Date(val);
+    return val;
+  }, z.date()),
+}).omit({ id: true });
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;

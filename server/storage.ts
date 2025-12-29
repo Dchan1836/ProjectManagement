@@ -2,7 +2,10 @@ import { tasks, type Task, type InsertTask, type Metrics } from "@shared/schema"
 
 export interface IStorage {
   getTasks(): Promise<Task[]>;
+  getTask(id: number): Promise<Task | undefined>;
   createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: number): Promise<boolean>;
   getMetrics(): Promise<Metrics>;
 }
 
@@ -160,10 +163,43 @@ export class MemStorage implements IStorage {
     return this.tasks;
   }
 
+  async getTask(id: number): Promise<Task | undefined> {
+    return this.tasks.find(t => t.id === id);
+  }
+
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const task: Task = { ...insertTask, id: this.idCounter++ };
+    const task: Task = { 
+      id: this.idCounter++,
+      taskName: insertTask.taskName,
+      startDate: insertTask.startDate,
+      endDate: insertTask.endDate,
+      duration: insertTask.duration ?? null,
+      progress: insertTask.progress ?? 0,
+      status: insertTask.status,
+      priority: insertTask.priority ?? null,
+      parentId: insertTask.parentId ?? null,
+      wbs: insertTask.wbs ?? null,
+      assignee: insertTask.assignee ?? null,
+      info: insertTask.info ?? null,
+    };
     this.tasks.push(task);
     return task;
+  }
+
+  async updateTask(id: number, updates: Partial<InsertTask>): Promise<Task | undefined> {
+    const index = this.tasks.findIndex(t => t.id === id);
+    if (index === -1) return undefined;
+    
+    this.tasks[index] = { ...this.tasks[index], ...updates };
+    return this.tasks[index];
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    const index = this.tasks.findIndex(t => t.id === id);
+    if (index === -1) return false;
+    
+    this.tasks.splice(index, 1);
+    return true;
   }
 
   async getMetrics(): Promise<Metrics> {

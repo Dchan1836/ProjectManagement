@@ -19,8 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import * as XLSX from "xlsx";
 
 export default function TaskList() {
   const { data: tasks, isLoading } = useTasks();
@@ -56,12 +57,40 @@ export default function TaskList() {
     setAssigneeFilter("all");
   };
 
+  const exportToExcel = () => {
+    if (!filteredTasks) return;
+
+    const exportData = filteredTasks.map((task: any) => ({
+      WBS: task.wbs || "",
+      ID: task.id,
+      "Task Name": task.taskName,
+      Assignee: task.assignee || "",
+      Info: task.info || "",
+      Status: task.status,
+      Priority: task.priority || "Normal",
+      "Start Date": format(new Date(task.startDate), 'yyyy-MM-dd'),
+      "End Date": format(new Date(task.endDate), 'yyyy-MM-dd'),
+      "Progress (%)": task.progress
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
+    XLSX.writeFile(workbook, `project_tasks_${format(new Date(), 'yyyyMMdd')}.xlsx`);
+  };
+
   return (
     <Layout>
       <div className="h-full flex flex-col space-y-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">All Tasks</h1>
-          <p className="text-muted-foreground">Comprehensive list of all project tasks and their data.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">All Tasks</h1>
+            <p className="text-muted-foreground">Comprehensive list of all project tasks and their data.</p>
+          </div>
+          <Button onClick={exportToExcel} className="gap-2">
+            <Download className="h-4 w-4" />
+            Export Spreadsheet
+          </Button>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4 shadow-sm">

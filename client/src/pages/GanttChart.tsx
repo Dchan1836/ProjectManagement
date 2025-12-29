@@ -1,6 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   GanttComponent, 
@@ -15,6 +14,7 @@ import {
   ColumnsDirective,
   ColumnDirective
 } from '@syncfusion/ej2-react-gantt';
+import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -69,7 +69,27 @@ export const progressTemplate = (props: any) => {
   );
 };
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
+class TaskAdaptor extends UrlAdaptor {
+  processResponse(data: any, ds?: any, query?: any, xhr?: any, request?: any, changes?: any): Object {
+    if (Array.isArray(data)) {
+      return data.map((task: any) => ({
+        ...task,
+        startDate: new Date(task.startDate),
+        endDate: new Date(task.endDate),
+      }));
+    }
+    if (data && typeof data === 'object') {
+      return {
+        ...data,
+        startDate: data.startDate ? new Date(data.startDate) : null,
+        endDate: data.endDate ? new Date(data.endDate) : null,
+      };
+    }
+    return data;
+  }
+}
+
+export function GanttView({ dataManager, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
   const ganttInstance = useRef<GanttComponent>(null);
 
   return (
@@ -83,11 +103,12 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
               className="pl-9"
               value={searchTerm}
               onChange={(e) => resetFilters.setSearchTerm(e.target.value)}
+              data-testid="input-gantt-search"
             />
           </div>
           
           <Select value={statusFilter} onValueChange={resetFilters.setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[150px]" data-testid="select-gantt-status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -100,7 +121,7 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           </Select>
 
           <Select value={priorityFilter} onValueChange={resetFilters.setPriorityFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[150px]" data-testid="select-gantt-priority">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -112,7 +133,7 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           </Select>
 
           <Select value={assigneeFilter} onValueChange={resetFilters.setAssigneeFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[150px]" data-testid="select-gantt-assignee">
               <SelectValue placeholder="Assignee" />
             </SelectTrigger>
             <SelectContent>
@@ -127,22 +148,18 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
             size="sm" 
             onClick={resetFilters.reset}
             className="text-muted-foreground hover:text-foreground"
+            data-testid="button-gantt-reset-filters"
           >
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          
-          <div className="ml-auto text-sm text-muted-foreground">
-            Showing {filteredTasks?.length} tasks
-          </div>
         </div>
       </div>
 
       <div className="flex-1 bg-white rounded-2xl border border-border shadow-sm overflow-hidden p-1">
         <GanttComponent
           ref={ganttInstance}
-          dataSource={filteredTasks}
-          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
+          dataSource={dataManager}
           taskFields={taskFields}
           height="100%"
           treeColumnIndex={2}
@@ -183,94 +200,93 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
 }
 
 export default function GanttChart() {
-  const { data: tasks, isLoading } = useTasks();
-  const createTask = useCreateTask();
-  const updateTask = useUpdateTask();
-  const deleteTask = useDeleteTask();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
-  const handleActionComplete = (args: any) => {
+  const dataManager = useMemo(() => new DataManager({
+    url: '/api/tasks',
+    adaptor: new TaskAdaptor(),
+    crossDomain: false
+  }), []);
+
+  const handleActionComplete = async (args: any) => {
     if (args.requestType === 'save' && args.action === 'add') {
       const taskData = args.data;
-      createTask.mutate({
-        taskName: taskData.taskName,
-        startDate: taskData.startDate,
-        endDate: taskData.endDate,
-        duration: taskData.duration,
-        progress: taskData.progress || 0,
-        status: taskData.status || 'Open',
-        priority: taskData.priority,
-        parentId: taskData.parentId,
-        wbs: taskData.wbs,
-        assignee: taskData.assignee,
-        info: taskData.info,
-      }, {
-        onSuccess: () => toast({ title: "Task created successfully" }),
-        onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
-      });
+      try {
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            taskName: taskData.taskName,
+            startDate: taskData.startDate,
+            endDate: taskData.endDate,
+            duration: taskData.duration,
+            progress: taskData.progress || 0,
+            status: taskData.status || 'Open',
+            priority: taskData.priority,
+            parentId: taskData.parentId,
+            wbs: taskData.wbs,
+            assignee: taskData.assignee,
+            info: taskData.info,
+          }),
+        });
+        if (response.ok) {
+          toast({ title: "Task created successfully" });
+        } else {
+          toast({ title: "Failed to create task", variant: "destructive" });
+        }
+      } catch {
+        toast({ title: "Failed to create task", variant: "destructive" });
+      }
     } else if (args.requestType === 'save' && args.action === 'edit') {
       const taskData = args.data;
-      updateTask.mutate({
-        id: taskData.id,
-        data: {
-          taskName: taskData.taskName,
-          startDate: taskData.startDate,
-          endDate: taskData.endDate,
-          duration: taskData.duration,
-          progress: taskData.progress,
-          status: taskData.status,
-          priority: taskData.priority,
-          parentId: taskData.parentId,
-          wbs: taskData.wbs,
-          assignee: taskData.assignee,
-          info: taskData.info,
-        },
-      }, {
-        onSuccess: () => toast({ title: "Task updated successfully" }),
-        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
-      });
+      try {
+        const response = await fetch(`/api/tasks/${taskData.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            taskName: taskData.taskName,
+            startDate: taskData.startDate,
+            endDate: taskData.endDate,
+            duration: taskData.duration,
+            progress: taskData.progress,
+            status: taskData.status,
+            priority: taskData.priority,
+            parentId: taskData.parentId,
+            wbs: taskData.wbs,
+            assignee: taskData.assignee,
+            info: taskData.info,
+          }),
+        });
+        if (response.ok) {
+          toast({ title: "Task updated successfully" });
+        } else {
+          toast({ title: "Failed to update task", variant: "destructive" });
+        }
+      } catch {
+        toast({ title: "Failed to update task", variant: "destructive" });
+      }
     } else if (args.requestType === 'delete') {
       const taskData = args.data?.[0];
       if (taskData?.id) {
-        deleteTask.mutate(taskData.id, {
-          onSuccess: () => toast({ title: "Task deleted successfully" }),
-          onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
-        });
+        try {
+          const response = await fetch(`/api/tasks/${taskData.id}`, {
+            method: 'DELETE',
+          });
+          if (response.ok) {
+            toast({ title: "Task deleted successfully" });
+          } else {
+            toast({ title: "Failed to delete task", variant: "destructive" });
+          }
+        } catch {
+          toast({ title: "Failed to delete task", variant: "destructive" });
+        }
       }
     }
   };
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="h-full flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
-    );
-  }
-
-  const filteredTasks = tasks?.filter((task: any) => {
-    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    
-    // For Gantt charts with hierarchy, we often need to show parent tasks if their children match
-    // but in this simple filtering implementation, we'll just check if the task matches.
-    // However, we should ensure taskName check is robust.
-    const matchesSearch = !searchTerm || (
-      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
-      (task.wbs && task.wbs.includes(searchTerm)) ||
-      (task.id && task.id.toString() === searchTerm) ||
-      (task.id && task.id.toString().includes(searchTerm))
-    );
-
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
-  });
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -282,19 +298,18 @@ export default function GanttChart() {
   return (
     <Layout>
       <div className="h-full flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
             <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
           </div>
-          <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all active:scale-95">
+          <Button data-testid="button-export-report">
             Export Report
-          </button>
+          </Button>
         </div>
 
         <GanttView 
-          tasks={tasks}
-          filteredTasks={filteredTasks}
+          dataManager={dataManager}
           searchTerm={searchTerm}
           statusFilter={statusFilter}
           priorityFilter={priorityFilter}

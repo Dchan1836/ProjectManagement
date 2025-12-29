@@ -136,6 +136,7 @@ export default function TaskList() {
                 <TableHead className="w-[80px]">ID</TableHead>
                 <TableHead>Task Name</TableHead>
                 <TableHead>Assignee</TableHead>
+                <TableHead>Info</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Start Date</TableHead>
@@ -157,6 +158,7 @@ export default function TaskList() {
                     <TableCell className="font-mono text-muted-foreground">#{task.id}</TableCell>
                     <TableCell className="font-medium">{task.taskName}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{task.assignee || "-"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground italic max-w-[200px] truncate">{task.info || "-"}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={
                         task.status === 'Close' ? 'bg-green-50 text-green-700 border-green-200' :

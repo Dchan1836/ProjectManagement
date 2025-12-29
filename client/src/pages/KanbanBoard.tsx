@@ -76,15 +76,27 @@ export const cardTemplate = (props: any) => {
 
 interface KanbanBoardCoreProps {
   showHeader?: boolean;
+  tasks?: any[];
+  isLoading?: boolean;
+  updateTask?: any;
 }
 
-export function KanbanBoardCore({ showHeader = false }: KanbanBoardCoreProps) {
-  const { data: tasks, isLoading } = useTasks();
-  const updateTask = useUpdateTask();
+export function KanbanBoardCore({ 
+  showHeader = false,
+  tasks: injectedTasks,
+  isLoading: injectedLoading,
+  updateTask: injectedUpdateTask
+}: KanbanBoardCoreProps) {
+  const { data: fetchedTasks, isLoading: fetchedLoading } = useTasks();
+  const defaultUpdateTask = useUpdateTask();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+
+  const tasks = injectedTasks ?? fetchedTasks;
+  const isLoading = injectedLoading ?? fetchedLoading;
+  const updateTask = injectedUpdateTask ?? defaultUpdateTask;
 
   const handleDragStop = (args: any) => {
     const cardData = args.data?.[0];
@@ -193,6 +205,7 @@ export function KanbanBoardCore({ showHeader = false }: KanbanBoardCoreProps) {
             id="kanban"
             keyField="status"
             dataSource={filteredTasks}
+            key={JSON.stringify({ searchTerm, priorityFilter, assigneeFilter, taskCount: tasks?.length })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={{ keyField: 'assignee' }}
             height="100%"

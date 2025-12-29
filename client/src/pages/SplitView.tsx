@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SplitterComponent, PaneDirective, PanesDirective } from '@syncfusion/ej2-react-layouts';
 import { GanttView } from "./GanttChart";
 import { KanbanView } from "./KanbanBoard";
+import { queryClient } from "@/lib/queryClient";
 
 export default function SplitView() {
   const { data: tasks, isLoading } = useTasks();
@@ -28,6 +29,13 @@ export default function SplitView() {
       </Layout>
     );
   }
+
+  // Handle data updates to refresh both views
+  const handleActionComplete = (args: any) => {
+    if (args.requestType === 'save' || args.requestType === 'delete' || args.requestType === 'cardChanged') {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    }
+  };
 
   // Filtering Logic (duplicated from components for now, ideally could be a hook)
   const filterTasks = (tasks: any, search: string, status: string, priority: string, assignee: string) => {
@@ -79,6 +87,7 @@ export default function SplitView() {
                         setGanttAssignee("all");
                       }
                     }}
+                    onActionComplete={handleActionComplete}
                   />
                 </div>
               )} />
@@ -99,6 +108,7 @@ export default function SplitView() {
                         setKanbanAssignee("all");
                       }
                     }}
+                    onActionComplete={handleActionComplete}
                   />
                 </div>
               )} />

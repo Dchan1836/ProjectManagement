@@ -68,7 +68,7 @@ export const progressTemplate = (props: any) => {
   );
 };
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters }: any) {
+export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
   const ganttInstance = useRef<GanttComponent>(null);
 
   return (
@@ -159,6 +159,7 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           splitterSettings={{ position: '45%' }}
           rowHeight={45}
           taskbarHeight={30}
+          actionComplete={onActionComplete}
         >
           <ColumnsDirective>
             <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>

@@ -38,7 +38,7 @@ export default function KanbanBoard() {
     return (
       <div className="e-card-content p-3">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-mono text-muted-foreground">#{props.id}</span>
+          <span className="text-xs font-mono text-muted-foreground">{props.wbs ? `WBS: ${props.wbs}` : `#${props.id}`}</span>
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
             {props.priority || 'Normal'}
           </span>

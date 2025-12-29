@@ -21,7 +21,8 @@ export class MemStorage implements IStorage {
         progress: 100,
         status: "Close",
         priority: "High",
-        parentId: null
+        parentId: null,
+        wbs: "1"
       },
       {
         id: 2,
@@ -32,7 +33,8 @@ export class MemStorage implements IStorage {
         progress: 100,
         status: "Close",
         priority: "Normal",
-        parentId: 1
+        parentId: 1,
+        wbs: "1.1"
       },
       {
         id: 3,
@@ -43,7 +45,8 @@ export class MemStorage implements IStorage {
         progress: 100,
         status: "Close",
         priority: "Critical",
-        parentId: 1
+        parentId: 1,
+        wbs: "1.2"
       },
       {
         id: 4,
@@ -54,7 +57,8 @@ export class MemStorage implements IStorage {
         progress: 60,
         status: "In Progress",
         priority: "High",
-        parentId: 1
+        parentId: 1,
+        wbs: "1.3"
       },
       {
         id: 5,
@@ -65,7 +69,8 @@ export class MemStorage implements IStorage {
         progress: 40,
         status: "In Progress",
         priority: "Normal",
-        parentId: null
+        parentId: null,
+        wbs: "2"
       },
       {
         id: 6,
@@ -76,7 +81,8 @@ export class MemStorage implements IStorage {
         progress: 80,
         status: "In Progress",
         priority: "Normal",
-        parentId: 5
+        parentId: 5,
+        wbs: "2.1"
       },
       {
         id: 7,
@@ -87,7 +93,8 @@ export class MemStorage implements IStorage {
         progress: 60,
         status: "In Progress",
         priority: "Critical",
-        parentId: 5
+        parentId: 5,
+        wbs: "2.2"
       },
       {
         id: 8,
@@ -98,7 +105,8 @@ export class MemStorage implements IStorage {
         progress: 0,
         status: "Open",
         priority: "High",
-        parentId: 5
+        parentId: 5,
+        wbs: "2.3"
       },
       {
         id: 9,
@@ -109,9 +117,10 @@ export class MemStorage implements IStorage {
         progress: 0,
         status: "Open",
         priority: "Normal",
-        parentId: null
+        parentId: null,
+        wbs: "3"
       },
-       {
+      {
         id: 10,
         taskName: "Unit Testing",
         startDate: new Date("2024-06-01"),
@@ -120,7 +129,8 @@ export class MemStorage implements IStorage {
         progress: 0,
         status: "Testing",
         priority: "Normal",
-        parentId: 9
+        parentId: 9,
+        wbs: "3.1"
       }
     ];
     this.idCounter = 11;

@@ -36,7 +36,8 @@ export default function GanttChart() {
     progress: 'progress',
     parentID: 'parentId',
     dependency: 'predecessor',
-    status: 'status'
+    status: 'status',
+    wbs: 'wbs'
   };
 
   const editSettings = {
@@ -102,6 +103,7 @@ export default function GanttChart() {
             taskbarHeight={30}
           >
             <ColumnsDirective>
+              <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
               <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>

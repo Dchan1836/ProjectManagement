@@ -12,6 +12,7 @@ export const tasks = pgTable("tasks", {
   status: text("status").notNull(), // Open, In Progress, Testing, Close
   priority: text("priority").default("Normal"),
   parentId: integer("parent_id"), // For hierarchical data in Gantt
+  wbs: text("wbs"), // Work Breakdown Structure
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true });

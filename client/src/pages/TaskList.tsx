@@ -40,7 +40,8 @@ export default function TaskList() {
 
   const filteredTasks = tasks?.filter((task: any) => {
     const matchesSearch = task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          (task.wbs && task.wbs.includes(searchTerm));
+                          (task.wbs && task.wbs.includes(searchTerm)) ||
+                          task.id.toString().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
@@ -65,7 +66,7 @@ export default function TaskList() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search name or WBS..."
+                placeholder="Search name, WBS or ID..."
                 className="pl-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

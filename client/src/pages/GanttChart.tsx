@@ -69,7 +69,24 @@ export const progressTemplate = (props: any) => {
   );
 };
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
+interface GanttViewProps {
+  tasks?: any[];
+  filteredTasks?: any[];
+  searchTerm: string;
+  statusFilter: string;
+  priorityFilter: string;
+  assigneeFilter: string;
+  resetFilters: {
+    setSearchTerm: (value: string) => void;
+    setStatusFilter: (value: string) => void;
+    setPriorityFilter: (value: string) => void;
+    setAssigneeFilter: (value: string) => void;
+    reset: () => void;
+  };
+  onActionComplete: (args: any) => void;
+}
+
+export function GanttView({ filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: GanttViewProps) {
   const ganttInstance = useRef<GanttComponent>(null);
 
   return (
@@ -138,7 +155,7 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-border shadow-sm overflow-hidden p-1">
+      <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
@@ -188,6 +205,7 @@ export default function GanttChart() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const { toast } = useToast();
+  const ganttInstance = useRef<GanttComponent>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -258,10 +276,6 @@ export default function GanttChart() {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    
-    // For Gantt charts with hierarchy, we often need to show parent tasks if their children match
-    // but in this simple filtering implementation, we'll just check if the task matches.
-    // However, we should ensure taskName check is robust.
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
@@ -282,7 +296,7 @@ export default function GanttChart() {
   return (
     <Layout>
       <div className="h-full flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
             <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
@@ -292,22 +306,112 @@ export default function GanttChart() {
           </button>
         </div>
 
-        <GanttView 
-          tasks={tasks}
-          filteredTasks={filteredTasks}
-          searchTerm={searchTerm}
-          statusFilter={statusFilter}
-          priorityFilter={priorityFilter}
-          assigneeFilter={assigneeFilter}
-          resetFilters={{
-            setSearchTerm,
-            setStatusFilter,
-            setPriorityFilter,
-            setAssigneeFilter,
-            reset: resetFilters
-          }}
-          onActionComplete={handleActionComplete}
-        />
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search name, WBS or ID..."
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                data-testid="input-search-gantt"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px]" data-testid="select-status-filter-gantt">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Open">Open</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Testing">Testing</SelectItem>
+                <SelectItem value="Close">Done</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[150px]" data-testid="select-priority-filter-gantt">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                <SelectItem value="Critical">Critical</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+                <SelectItem value="Normal">Normal</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger className="w-[150px]" data-testid="select-assignee-filter-gantt">
+                <SelectValue placeholder="Assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+                <SelectItem value="Alex Smith">Alex Smith</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={resetFilters}
+              className="text-muted-foreground hover:text-foreground"
+              data-testid="button-reset-filters-gantt"
+            >
+              <FilterX className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+            
+            <div className="ml-auto text-sm text-muted-foreground">
+              Showing {filteredTasks?.length} tasks
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">
+          <GanttComponent
+            ref={ganttInstance}
+            dataSource={filteredTasks}
+            key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
+            taskFields={taskFields}
+            height="100%"
+            treeColumnIndex={2}
+            allowSelection={true}
+            allowFiltering={true}
+            allowSorting={true}
+            allowResizing={true}
+            highlightWeekends={true}
+            toolbar={toolbar}
+            editSettings={editSettings}
+            projectStartDate={new Date('2024-01-01')}
+            projectEndDate={new Date('2024-12-31')}
+            gridLines="Both"
+            labelSettings={{ leftLabel: 'taskName' }}
+            splitterSettings={{ position: '45%' }}
+            rowHeight={45}
+            taskbarHeight={30}
+            actionComplete={handleActionComplete}
+          >
+            <ColumnsDirective>
+              <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>
+              <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
+              <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
+              <ColumnDirective field='assignee' headerText='Assignee' width='120'></ColumnDirective>
+              <ColumnDirective field='info' headerText='Info' width='200' clipMode='EllipsisWithTooltip'></ColumnDirective>
+              <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
+              <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>
+              <ColumnDirective field='startDate' headerText='Start Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>
+              <ColumnDirective field='endDate' headerText='End Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>
+              <ColumnDirective field='duration' headerText='Duration' width='90' textAlign='Right'></ColumnDirective>
+              <ColumnDirective field='progress' headerText='Progress' width='120' template={progressTemplate} textAlign='Left'></ColumnDirective>
+            </ColumnsDirective>
+            <Inject services={[Selection, Toolbar, Edit, Filter, Sort, Resize, DayMarkers]} />
+          </GanttComponent>
+        </div>
       </div>
     </Layout>
   );

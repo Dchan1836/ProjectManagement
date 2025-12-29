@@ -12,6 +12,7 @@ import {
   Search,
   Settings
 } from "lucide-react";
+import logoImage from "@assets/upskilled_evolution_logo_1767034599609.jpg";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,11 +34,9 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row overflow-hidden font-sans">
       {/* Mobile Header */}
       <header className="md:hidden bg-card border-b border-border p-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-2 font-display text-xl font-bold text-primary">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-            P
-          </div>
-          PlanIt
+        <div className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
+          <img src={logoImage} alt="Upskilled Evolution" className="w-8 h-8 rounded-lg object-cover" />
+          Upskilled
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -54,13 +53,9 @@ export function Layout({ children }: LayoutProps) {
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}>
         <div className="p-6 h-full flex flex-col">
-          <div className="hidden md:flex items-center gap-3 mb-10 font-display text-2xl font-bold text-primary">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            PlanIt
+          <div className="hidden md:flex items-center gap-3 mb-10 font-display text-2xl font-bold text-foreground">
+            <img src={logoImage} alt="Upskilled Evolution" className="w-10 h-10 rounded-xl object-cover shadow-lg" />
+            Upskilled
           </div>
 
           <nav className="space-y-2 flex-1">

@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@shared/routes";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { InsertTask } from "@shared/schema";
 
 // Extend the shared type to include runtime-only date conversions if needed
 // Syncfusion needs actual Date objects, not ISO strings
@@ -13,6 +15,9 @@ export interface FormattedTask {
   status: string;
   priority: string | null;
   parentId: number | null;
+  wbs?: string | null;
+  assignee?: string | null;
+  info?: string | null;
 }
 
 export function useTasks() {
@@ -31,6 +36,44 @@ export function useTasks() {
         startDate: new Date(task.startDate),
         endDate: new Date(task.endDate),
       })) as FormattedTask[];
+    },
+  });
+}
+
+export function useCreateTask() {
+  return useMutation({
+    mutationFn: async (task: InsertTask) => {
+      const res = await apiRequest("POST", "/api/tasks", task);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.metrics.get.path] });
+    },
+  });
+}
+
+export function useUpdateTask() {
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertTask> }) => {
+      const res = await apiRequest("PUT", `/api/tasks/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.metrics.get.path] });
+    },
+  });
+}
+
+export function useDeleteTask() {
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/tasks/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.metrics.get.path] });
     },
   });
 }

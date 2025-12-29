@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
-import { useTasks } from "@/hooks/use-tasks";
+import { useTasks, useUpdateTask } from "@/hooks/use-tasks";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { 
   KanbanComponent, 
   ColumnsDirective, 
@@ -73,7 +74,7 @@ export const cardTemplate = (props: any) => {
   );
 };
 
-export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters }: any) {
+export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assigneeFilter, resetFilters, onDragStop }: any) {
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
@@ -137,6 +138,7 @@ export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assignee
             swimlaneSettings={{ keyField: 'assignee' }}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
+            dragStop={onDragStop}
           >
             <ColumnsDirective>
               <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (
@@ -177,9 +179,24 @@ export function KanbanView({ filteredTasks, searchTerm, priorityFilter, assignee
 
 export default function KanbanBoard() {
   const { data: tasks, isLoading } = useTasks();
+  const updateTask = useUpdateTask();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+
+  const handleDragStop = (args: any) => {
+    const cardData = args.data?.[0];
+    if (cardData && cardData.id) {
+      updateTask.mutate({
+        id: cardData.id,
+        data: { status: cardData.status },
+      }, {
+        onSuccess: () => toast({ title: "Task status updated" }),
+        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -283,6 +300,7 @@ export default function KanbanBoard() {
             setAssigneeFilter,
             reset: resetFilters
           }}
+          onDragStop={handleDragStop}
         />
       </div>
     </Layout>

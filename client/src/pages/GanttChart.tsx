@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
-import { useTasks } from "@/hooks/use-tasks";
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { 
   GanttComponent, 
   Inject, 
@@ -68,7 +69,7 @@ export const progressTemplate = (props: any) => {
   );
 };
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters }: any) {
+export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
   const ganttInstance = useRef<GanttComponent>(null);
 
   return (
@@ -159,6 +160,7 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           splitterSettings={{ position: '45%' }}
           rowHeight={45}
           taskbarHeight={30}
+          actionComplete={onActionComplete}
         >
           <ColumnsDirective>
             <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>
@@ -182,10 +184,65 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
 
 export default function GanttChart() {
   const { data: tasks, isLoading } = useTasks();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+
+  const handleActionComplete = (args: any) => {
+    if (args.requestType === 'save' && args.action === 'add') {
+      const taskData = args.data;
+      createTask.mutate({
+        taskName: taskData.taskName,
+        startDate: taskData.startDate,
+        endDate: taskData.endDate,
+        duration: taskData.duration,
+        progress: taskData.progress || 0,
+        status: taskData.status || 'Open',
+        priority: taskData.priority,
+        parentId: taskData.parentId,
+        wbs: taskData.wbs,
+        assignee: taskData.assignee,
+        info: taskData.info,
+      }, {
+        onSuccess: () => toast({ title: "Task created successfully" }),
+        onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
+      });
+    } else if (args.requestType === 'save' && args.action === 'edit') {
+      const taskData = args.data;
+      updateTask.mutate({
+        id: taskData.id,
+        data: {
+          taskName: taskData.taskName,
+          startDate: taskData.startDate,
+          endDate: taskData.endDate,
+          duration: taskData.duration,
+          progress: taskData.progress,
+          status: taskData.status,
+          priority: taskData.priority,
+          parentId: taskData.parentId,
+          wbs: taskData.wbs,
+          assignee: taskData.assignee,
+          info: taskData.info,
+        },
+      }, {
+        onSuccess: () => toast({ title: "Task updated successfully" }),
+        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      });
+    } else if (args.requestType === 'delete') {
+      const taskData = args.data?.[0];
+      if (taskData?.id) {
+        deleteTask.mutate(taskData.id, {
+          onSuccess: () => toast({ title: "Task deleted successfully" }),
+          onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+        });
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -249,6 +306,7 @@ export default function GanttChart() {
             setAssigneeFilter,
             reset: resetFilters
           }}
+          onActionComplete={handleActionComplete}
         />
       </div>
     </Layout>

@@ -1,7 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { useMetrics, useTasks } from "@/hooks/use-tasks";
 import { MetricsCard } from "@/components/MetricsCard";
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Responsive as ResponsiveGridLayout, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { 
@@ -22,7 +22,7 @@ import {
   Cell
 } from 'recharts';
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const Responsive = WidthProvider(ResponsiveGridLayout);
 
 export default function Dashboard() {
   const { data: metrics, isLoading: metricsLoading } = useMetrics();

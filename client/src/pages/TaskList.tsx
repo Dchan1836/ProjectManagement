@@ -47,7 +47,7 @@ export default function TaskList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tasks?.map((task) => (
+              {tasks?.map((task: any) => (
                 <TableRow key={task.id}>
                   <TableCell className="font-mono">{task.wbs || "-"}</TableCell>
                   <TableCell className="font-mono text-muted-foreground">#{task.id}</TableCell>

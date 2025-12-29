@@ -1,12 +1,17 @@
 import { Layout } from "@/components/Layout";
-import { useTasks } from "@/hooks/use-tasks";
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState } from "react";
 import { SplitterComponent, PaneDirective, PanesDirective } from '@syncfusion/ej2-react-layouts';
 import { GanttView } from "./GanttChart";
 import { KanbanView } from "./KanbanBoard";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SplitView() {
   const { data: tasks, isLoading } = useTasks();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const { toast } = useToast();
 
   // Gantt State
   const [ganttSearch, setGanttSearch] = useState("");
@@ -18,6 +23,70 @@ export default function SplitView() {
   const [kanbanSearch, setKanbanSearch] = useState("");
   const [kanbanPriority, setKanbanPriority] = useState("all");
   const [kanbanAssignee, setKanbanAssignee] = useState("all");
+
+  const handleGanttActionComplete = (args: any) => {
+    if (args.requestType === 'save' && args.action === 'add') {
+      const taskData = args.data;
+      createTask.mutate({
+        taskName: taskData.taskName,
+        startDate: taskData.startDate,
+        endDate: taskData.endDate,
+        duration: taskData.duration,
+        progress: taskData.progress || 0,
+        status: taskData.status || 'Open',
+        priority: taskData.priority,
+        parentId: taskData.parentId,
+        wbs: taskData.wbs,
+        assignee: taskData.assignee,
+        info: taskData.info,
+      }, {
+        onSuccess: () => toast({ title: "Task created" }),
+        onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
+      });
+    } else if (args.requestType === 'save' && args.action === 'edit') {
+      const taskData = args.data;
+      updateTask.mutate({
+        id: taskData.id,
+        data: {
+          taskName: taskData.taskName,
+          startDate: taskData.startDate,
+          endDate: taskData.endDate,
+          duration: taskData.duration,
+          progress: taskData.progress,
+          status: taskData.status,
+          priority: taskData.priority,
+          parentId: taskData.parentId,
+          wbs: taskData.wbs,
+          assignee: taskData.assignee,
+          info: taskData.info,
+        },
+      }, {
+        onSuccess: () => toast({ title: "Task updated" }),
+        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      });
+    } else if (args.requestType === 'delete') {
+      const taskData = args.data?.[0];
+      if (taskData?.id) {
+        deleteTask.mutate(taskData.id, {
+          onSuccess: () => toast({ title: "Task deleted" }),
+          onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+        });
+      }
+    }
+  };
+
+  const handleKanbanDragStop = (args: any) => {
+    const cardData = args.data?.[0];
+    if (cardData && cardData.id) {
+      updateTask.mutate({
+        id: cardData.id,
+        data: { status: cardData.status },
+      }, {
+        onSuccess: () => toast({ title: "Task status updated" }),
+        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -79,6 +148,7 @@ export default function SplitView() {
                         setGanttAssignee("all");
                       }
                     }}
+                    onActionComplete={handleGanttActionComplete}
                   />
                 </div>
               )} />
@@ -99,6 +169,7 @@ export default function SplitView() {
                         setKanbanAssignee("all");
                       }
                     }}
+                    onDragStop={handleKanbanDragStop}
                   />
                 </div>
               )} />

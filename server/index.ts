@@ -3,13 +3,6 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
-import os from 'os';
-
-function isWindowsNode() {
-  const platform = os.platform();
-  // 'win32' is the identifier for Windows in Node.js
-  return platform === 'win32';
-}
 const app = express();
 const httpServer = createServer(app);
 
@@ -92,30 +85,14 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
-
-  if (isWindowsNode()) {
-    console.log("Running on Windows (Node.js)");
-    const listenConfig = { port, host: "0.0.0.0",
-        // reusePort: true,
-        };
-    httpServer.listen(
-        listenConfig,
-        () => {
-          log(`serving on port ${port}`);
-        },
-      );
-  } else {
-    console.log("Running on a non-Windows OS (Node.js)");
-    httpServer.listen(
-        {
-          port,
-          host: "0.0.0.0",
-          reusePort: true,
-        },
-        () => {
-          log(`serving on port ${port}`);
-        },
-      );
-  }
-
+  httpServer.listen(
+    {
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    },
+    () => {
+      log(`serving on port ${port}`);
+    },
+  );
 })();

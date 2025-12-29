@@ -45,7 +45,8 @@ export default function SplitView() {
     parentID: 'parentId',
     dependency: 'predecessor',
     status: 'status',
-    wbs: 'wbs'
+    wbs: 'wbs',
+    resourceInfo: 'assignee'
   };
 
   const ganttEditSettings = {
@@ -92,6 +93,7 @@ export default function SplitView() {
                       <GanttColumnDirective field='wbs' headerText='WBS' width='60'></GanttColumnDirective>
                       <GanttColumnDirective field='id' headerText='ID' width='60'></GanttColumnDirective>
                       <GanttColumnDirective field='taskName' headerText='Task Name' width='150'></GanttColumnDirective>
+                      <GanttColumnDirective field='assignee' headerText='Assignee' width='100'></GanttColumnDirective>
                       <GanttColumnDirective field='status' headerText='Status' width='100'></GanttColumnDirective>
                       <GanttColumnDirective field='progress' headerText='Progress' width='100'></GanttColumnDirective>
                     </GanttColumnsDirective>

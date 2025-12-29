@@ -121,6 +121,7 @@ export default function TaskList() {
                 <TableHead className="w-[80px]">WBS</TableHead>
                 <TableHead className="w-[80px]">ID</TableHead>
                 <TableHead>Task Name</TableHead>
+                <TableHead>Assignee</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Start Date</TableHead>

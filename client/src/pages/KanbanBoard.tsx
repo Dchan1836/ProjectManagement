@@ -35,6 +35,11 @@ export default function KanbanBoard() {
       props.priority === 'Normal' ? 'bg-blue-100 text-blue-700 border-blue-200' :
       'bg-gray-100 text-gray-700 border-gray-200';
 
+    const getInitials = (name: string) => {
+      if (!name) return "??";
+      return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    };
+
     return (
       <div className="e-card-content p-3">
         <div className="flex justify-between items-center mb-2">
@@ -47,13 +52,13 @@ export default function KanbanBoard() {
           {props.taskName}
         </div>
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
-          <div className="flex -space-x-2">
-            <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white">
-              JD
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full ${props.assignee === 'Jane Doe' ? 'bg-blue-500' : 'bg-purple-500'} border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm`}>
+              {getInitials(props.assignee)}
             </div>
-            <div className="w-6 h-6 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center text-[10px] text-white">
-              AS
-            </div>
+            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[80px]">
+              {props.assignee || 'Unassigned'}
+            </span>
           </div>
           <div className={`text-xs font-medium ${
             props.progress === 100 ? 'text-green-600' : 'text-muted-foreground'

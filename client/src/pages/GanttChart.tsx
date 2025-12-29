@@ -30,6 +30,7 @@ export default function GanttChart() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
   const ganttInstance = useRef<GanttComponent>(null);
 
   if (isLoading) {
@@ -53,7 +54,8 @@ export default function GanttChart() {
     dependency: 'predecessor',
     status: 'status',
     wbs: 'wbs',
-    priority: 'priority'
+    priority: 'priority',
+    resourceInfo: 'assignee'
   };
 
   const editSettings = {
@@ -72,13 +74,15 @@ export default function GanttChart() {
                           task.id.toString().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
   });
 
   const resetFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
     setPriorityFilter("all");
+    setAssigneeFilter("all");
   };
 
   // Add custom template for the progress bar
@@ -149,6 +153,17 @@ export default function GanttChart() {
               </SelectContent>
             </Select>
 
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+                <SelectItem value="Alex Smith">Alex Smith</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Button 
               variant="ghost" 
               size="sm" 
@@ -191,6 +206,7 @@ export default function GanttChart() {
               <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
               <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
+              <ColumnDirective field='assignee' headerText='Assignee' width='120'></ColumnDirective>
               <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
               <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>
               <ColumnDirective field='startDate' headerText='Start Date' width='120' format='yMd' textAlign='Right'></ColumnDirective>

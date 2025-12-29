@@ -68,8 +68,14 @@ export const progressTemplate = (props: any) => {
   );
 };
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters }: any) {
+export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters, onActionComplete }: any) {
   const ganttInstance = useRef<GanttComponent>(null);
+
+  const actionComplete = (args: any) => {
+    if (args.requestType === 'save' || args.requestType === 'delete' || args.requestType === 'add') {
+      if (onActionComplete) onActionComplete();
+    }
+  };
 
   return (
     <div className="h-full flex flex-col space-y-4">
@@ -152,6 +158,7 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           highlightWeekends={true}
           toolbar={toolbar}
           editSettings={editSettings}
+          actionComplete={actionComplete}
           projectStartDate={new Date('2024-01-01')}
           projectEndDate={new Date('2024-12-31')}
           gridLines="Both"

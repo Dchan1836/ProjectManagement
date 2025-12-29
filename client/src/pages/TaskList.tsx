@@ -27,6 +27,7 @@ export default function TaskList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
 
   if (isLoading) {
     return (
@@ -44,13 +45,15 @@ export default function TaskList() {
                           task.id.toString().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
   });
 
   const resetFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
     setPriorityFilter("all");
+    setAssigneeFilter("all");
   };
 
   return (
@@ -98,6 +101,17 @@ export default function TaskList() {
               </SelectContent>
             </Select>
 
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+                <SelectItem value="Alex Smith">Alex Smith</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Button 
               variant="ghost" 
               size="sm" 
@@ -132,7 +146,7 @@ export default function TaskList() {
             <TableBody>
               {filteredTasks?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
                     No tasks found matching your filters.
                   </TableCell>
                 </TableRow>
@@ -142,6 +156,7 @@ export default function TaskList() {
                     <TableCell className="font-mono">{task.wbs || "-"}</TableCell>
                     <TableCell className="font-mono text-muted-foreground">#{task.id}</TableCell>
                     <TableCell className="font-medium">{task.taskName}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{task.assignee || "-"}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={
                         task.status === 'Close' ? 'bg-green-50 text-green-700 border-green-200' :

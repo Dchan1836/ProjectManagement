@@ -103,4 +103,37 @@
   .e-splitter {
     @apply border-none bg-transparent !important;
   }
+
+  /* Dashboard Layout Styling */
+  #dashboard-layout {
+    @apply bg-transparent !important;
+  }
+
+  #dashboard-layout .e-panel {
+    @apply bg-white rounded-2xl border border-border shadow-sm overflow-hidden !important;
+  }
+
+  #dashboard-layout .e-panel:hover {
+    @apply shadow-md !important;
+  }
+
+  #dashboard-layout .e-panel-container {
+    @apply h-full flex flex-col !important;
+  }
+
+  #dashboard-layout .e-panel-header {
+    @apply cursor-move select-none !important;
+  }
+
+  #dashboard-layout .e-resize-handler {
+    @apply opacity-30 hover:opacity-100 transition-opacity !important;
+  }
+
+  #dashboard-layout .e-dashboard-gridline {
+    @apply border-primary/20 !important;
+  }
+
+  #dashboard-layout .e-holder {
+    @apply bg-primary/10 border-2 border-dashed border-primary rounded-2xl !important;
+  }
 }

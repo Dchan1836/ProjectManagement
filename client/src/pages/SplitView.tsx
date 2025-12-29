@@ -2,8 +2,24 @@ import { Layout } from "@/components/Layout";
 import { SplitterComponent, PaneDirective, PanesDirective } from '@syncfusion/ej2-react-layouts';
 import { GanttChartCore } from "./GanttChart";
 import { KanbanBoardCore } from "./KanbanBoard";
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 
 export default function SplitView() {
+  const { data: tasks, isLoading } = useTasks();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="h-full flex flex-col space-y-4">
@@ -17,12 +33,22 @@ export default function SplitView() {
             <PanesDirective>
               <PaneDirective size="50%" min="30%" content={() => (
                 <div className="h-full p-2 overflow-auto">
-                  <GanttChartCore />
+                  <GanttChartCore 
+                    tasks={tasks}
+                    isLoading={isLoading}
+                    createTask={createTask}
+                    updateTask={updateTask}
+                    deleteTask={deleteTask}
+                  />
                 </div>
               )} />
               <PaneDirective size="50%" min="30%" content={() => (
                 <div className="h-full p-2 overflow-auto">
-                  <KanbanBoardCore />
+                  <KanbanBoardCore 
+                    tasks={tasks}
+                    isLoading={isLoading}
+                    updateTask={updateTask}
+                  />
                 </div>
               )} />
             </PanesDirective>

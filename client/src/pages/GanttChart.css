@@ -1,6 +1,0 @@
-.e-gantt .e-gantt-tree-grid-pane .e-columnheader,
- .e-gantt .e-gantt-tree-grid-pane .e-headercell {
-     height: 50px !important; /* Set a desired consistent height */
-    min-height: 20px;
- }
-

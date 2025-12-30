@@ -71,25 +71,13 @@ export const progressTemplate = (props: any) => {
 
 interface GanttChartCoreProps {
   showHeader?: boolean;
-  tasks?: any[];
-  isLoading?: boolean;
-  createTask?: any;
-  updateTask?: any;
-  deleteTask?: any;
 }
 
-export function GanttChartCore({ 
-  showHeader = false, 
-  tasks: injectedTasks, 
-  isLoading: injectedLoading,
-  createTask: injectedCreateTask,
-  updateTask: injectedUpdateTask,
-  deleteTask: injectedDeleteTask
-}: GanttChartCoreProps) {
-  const { data: fetchedTasks, isLoading: fetchedLoading } = useTasks();
-  const defaultCreateTask = useCreateTask();
-  const defaultUpdateTask = useUpdateTask();
-  const defaultDeleteTask = useDeleteTask();
+export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
+  const { data: tasks, isLoading } = useTasks();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
   const { toast } = useToast();
   const ganttInstance = useRef<GanttComponent>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,14 +85,13 @@ export function GanttChartCore({
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
-  const tasks = injectedTasks ?? fetchedTasks;
-  const isLoading = injectedLoading ?? fetchedLoading;
-  const createTask = injectedCreateTask ?? defaultCreateTask;
-  const updateTask = injectedUpdateTask ?? defaultUpdateTask;
-  const deleteTask = injectedDeleteTask ?? defaultDeleteTask;
-
   const handleActionComplete = (args: any) => {
-    if (args.requestType === 'save' && args.action === 'add') {
+    if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
+    || args.requestType === 'scroll'
+    || args.requestType === 'refresh'
+    || args.type === 'refresh'
+    || args.requestType === 'openEditDialog') {
+    } else if (/*args.requestType === 'save' && */args.action === 'add') {
       const taskData = args.data;
       createTask.mutate({
         taskName: taskData.taskName,
@@ -122,7 +109,12 @@ export function GanttChartCore({
         onSuccess: () => toast({ title: "Task created successfully" }),
         onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
       });
-    } else if (args.requestType === 'save' && args.action === 'edit') {
+
+    } else if (args.requestType === 'save' && (
+    args.action === 'DialogEditing'
+    || args.action === 'TaskbarEditing'
+    || args.action === 'CellEditing'))
+    {
       const taskData = args.data;
       updateTask.mutate({
         id: taskData.id,
@@ -209,7 +201,7 @@ export function GanttChartCore({
               data-testid="input-search-gantt"
             />
           </div>
-          
+
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[150px]" data-testid="select-status-filter-gantt">
               <SelectValue placeholder="Status" />
@@ -256,7 +248,7 @@ export function GanttChartCore({
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          
+
           <div className="ml-auto text-sm text-muted-foreground">
             Showing {filteredTasks?.length} tasks
           </div>
@@ -267,7 +259,7 @@ export function GanttChartCore({
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
-          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter, taskCount: tasks?.length })}
+          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
           taskFields={taskFields}
           height="100%"
           treeColumnIndex={2}

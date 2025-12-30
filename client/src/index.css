@@ -100,6 +100,18 @@
     line-height: 36px !important;
   }
   
+  /* Remove empty filter row below headers */
+  .e-gantt .e-filterbar,
+  .e-gantt .e-treegrid .e-filterbar {
+    display: none !important;
+  }
+  
+  /* Remove any add row that appears below headers */
+  .e-gantt .e-addrow,
+  .e-gantt .e-treegrid .e-addrow {
+    display: none !important;
+  }
+  
   .e-kanban {
     @apply bg-transparent font-sans !important;
   }

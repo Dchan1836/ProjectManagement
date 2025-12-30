@@ -13,7 +13,8 @@ import {
   Resize, 
   DayMarkers,
   ColumnsDirective,
-  ColumnDirective
+  ColumnDirective,
+  ContextMenu,
 } from '@syncfusion/ej2-react-gantt';
 import { Input } from "@/components/ui/input";
 import {
@@ -174,7 +175,46 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setPriorityFilter("all");
     setAssigneeFilter("all");
   };
-
+const contextMenuOpen = (args) => {
+            let record = args.rowData;
+            console.log(`contextMenuOpen`);
+            if (args.type !== 'Header' && record) {
+                if (!record.hasChildRecords) {
+                    args.hideItems.push('Collapse the Row');
+                    args.hideItems.push('Expand the Row');
+                }
+                else {
+                    if (record.expanded) {
+                        args.hideItems.push('Expand the Row');
+                    }
+                    else {
+                        args.hideItems.push('Collapse the Row');
+                    }
+                }
+            }
+        };
+        const contextMenuClick = (args) => {
+            console.log(`contentMenuClick`);
+            let record = args.rowData;
+            if (args.item.id === 'collapserow') {
+                ganttInstance.current.collapseByID(Number(record.ganttProperties.taskId));
+            }
+            if (args.item.id === 'expandrow') {
+                ganttInstance.current.expandByID(Number(record.ganttProperties.taskId));
+            }
+        };
+        const contextMenuItems = ['AutoFitAll', 'AutoFit', 'TaskInformation', 'DeleteTask', 'Save', 'Cancel',
+            'SortAscending', 'SortDescending', 'Add', 'DeleteDependency', 'Convert', 'Indent', 'Outdent',
+            { text: 'Collapse the Row', target: '.e-content', id: 'collapserow' },
+            { text: 'Expand the Row', target: '.e-content', id: 'expandrow' }];
+        function change() {
+            const ganttDependencyViewContainer = document.querySelector('.e-gantt-dependency-view-container');
+            if (switchRef.checked) {
+                ganttDependencyViewContainer.style.visibility = 'hidden';
+            } else {
+                ganttDependencyViewContainer.style.visibility  = 'visible';
+            }
+        }
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -270,6 +310,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           highlightWeekends={true}
           toolbar={toolbar}
           editSettings={editSettings}
+          enableContextMenu={true}  // Right click on a Gantt task
+          contextMenuItems={contextMenuItems}
+          contextMenuOpen={contextMenuOpen.bind(this)}
+          contextMenuClick={contextMenuClick.bind(this)}
           projectStartDate={new Date('2024-04-01')}
           projectEndDate={new Date('2024-12-31')}
           gridLines="Both"
@@ -292,7 +336,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
             <ColumnDirective field='duration' headerText='Duration' width='90' textAlign='Right'></ColumnDirective>
             <ColumnDirective field='progress' headerText='Progress' width='120' template={progressTemplate} textAlign='Left'></ColumnDirective>
           </ColumnsDirective>
-          <Inject services={[Selection, Toolbar, Edit, Filter, Sort, Resize, DayMarkers]} />
+          <Inject services={[Selection, Toolbar, Edit, Filter, Sort, Resize, DayMarkers, ContextMenu]} />
         </GanttComponent>
       </div>
     </div>

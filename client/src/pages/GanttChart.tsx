@@ -275,8 +275,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           gridLines="Both"
           labelSettings={{ leftLabel: 'taskName' }}
           splitterSettings={{ position: '45%' }}
-          rowHeight={45}
-          taskbarHeight={30}
+          rowHeight={36}
+          taskbarHeight={24}
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>

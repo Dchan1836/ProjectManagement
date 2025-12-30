@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
-import { useTasks } from "@/hooks/use-tasks";
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { 
   GanttComponent, 
   Inject, 
@@ -24,6 +25,16 @@ import {
 } from "@/components/ui/select";
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import './GanttChart.css';
+import styled from 'styled-components';
+
+
+const MyButton = styled.button`
+  background: blue;
+  color: white;
+  padding: 10px 20px;
+`;
+
 
 export const taskFields = {
   id: 'id',
@@ -68,11 +79,135 @@ export const progressTemplate = (props: any) => {
   );
 };
 
-export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, priorityFilter, assigneeFilter, resetFilters }: any) {
+interface GanttChartCoreProps {
+  showHeader?: boolean;
+}
+
+export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
+  const { data: tasks, isLoading } = useTasks();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const { toast } = useToast();
   const ganttInstance = useRef<GanttComponent>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
+
+
+  const actionBegin = (args: any) => {
+    // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
+    // console.log(elements);
+    // const targetString = 'e-rhandler e-rcursor';
+    // if(document.getElementsByClassName() === targetString){
+    //   console.log("found component");
+    // }
+  }
+  const handleActionComplete = (args: any) => {
+    if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
+    || args.requestType === 'scroll'
+    || args.requestType === 'refresh'
+    || args.type === 'refresh'
+    || args.requestType === 'openEditDialog') {
+    } else if (/*args.requestType === 'save' && */args.action === 'add') {
+      const taskData = args.data;
+      createTask.mutate({
+        taskName: taskData.taskName,
+        startDate: taskData.startDate,
+        endDate: taskData.endDate,
+        duration: taskData.duration,
+        progress: taskData.progress || 0,
+        status: taskData.status || 'Open',
+        priority: taskData.priority,
+        parentId: taskData.parentId,
+        wbs: taskData.wbs,
+        assignee: taskData.assignee,
+        info: taskData.info,
+      }, {
+        onSuccess: () => toast({ title: "Task created successfully" }),
+        onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
+      });
+
+    } else if (args.requestType === 'save' && (
+    args.action === 'DialogEditing'
+    || args.action === 'TaskbarEditing'
+    || args.action === 'CellEditing'))
+    {
+      const taskData = args.data;
+      updateTask.mutate({
+        id: taskData.id,
+        data: {
+          taskName: taskData.taskName,
+          startDate: taskData.startDate,
+          endDate: taskData.endDate,
+          duration: taskData.duration,
+          progress: taskData.progress,
+          status: taskData.status,
+          priority: taskData.priority,
+          parentId: taskData.parentId,
+          wbs: taskData.wbs,
+          assignee: taskData.assignee,
+          info: taskData.info,
+        },
+      }, {
+        onSuccess: () => toast({ title: "Task updated successfully" }),
+        onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      });
+    } else if (args.requestType === 'delete') {
+      const taskData = args.data?.[0];
+      if (taskData?.id) {
+        deleteTask.mutate(taskData.id, {
+          onSuccess: () => toast({ title: "Task deleted successfully" }),
+          onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+        });
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const filteredTasks = tasks?.filter((task: any) => {
+    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
+    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    const matchesSearch = !searchTerm || (
+      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (task.wbs && task.wbs.includes(searchTerm)) ||
+      (task.id && task.id.toString() === searchTerm) ||
+      (task.id && task.id.toString().includes(searchTerm))
+    );
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
+  });
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setAssigneeFilter("all");
+  };
 
   return (
     <div className="h-full flex flex-col space-y-4">
+      {showHeader && (
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
+            <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
+          </div>
+          <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all active:scale-95">
+            Export Report
+          </button>
+        </div>
+      )}
+
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[200px]">
@@ -81,12 +216,13 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
               placeholder="Search name, WBS or ID..."
               className="pl-9"
               value={searchTerm}
-              onChange={(e) => resetFilters.setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="input-search-gantt"
             />
           </div>
-          
-          <Select value={statusFilter} onValueChange={resetFilters.setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-status-filter-gantt">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -98,8 +234,8 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
             </SelectContent>
           </Select>
 
-          <Select value={priorityFilter} onValueChange={resetFilters.setPriorityFilter}>
-            <SelectTrigger className="w-[150px]">
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-priority-filter-gantt">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -110,8 +246,8 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
             </SelectContent>
           </Select>
 
-          <Select value={assigneeFilter} onValueChange={resetFilters.setAssigneeFilter}>
-            <SelectTrigger className="w-[150px]">
+          <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-assignee-filter-gantt">
               <SelectValue placeholder="Assignee" />
             </SelectTrigger>
             <SelectContent>
@@ -124,20 +260,21 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={resetFilters.reset}
+            onClick={resetFilters}
             className="text-muted-foreground hover:text-foreground"
+            data-testid="button-reset-filters-gantt"
           >
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          
+
           <div className="ml-auto text-sm text-muted-foreground">
             Showing {filteredTasks?.length} tasks
           </div>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-border shadow-sm overflow-hidden p-1">
+      <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
@@ -152,13 +289,15 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
           highlightWeekends={true}
           toolbar={toolbar}
           editSettings={editSettings}
-          projectStartDate={new Date('2024-01-01')}
+          projectStartDate={new Date('2024-04-01')}
           projectEndDate={new Date('2024-12-31')}
           gridLines="Both"
           labelSettings={{ leftLabel: 'taskName' }}
           splitterSettings={{ position: '45%' }}
           rowHeight={45}
           taskbarHeight={30}
+          actionBegin={actionBegin}
+          actionComplete={handleActionComplete}
         >
           <ColumnsDirective>
             <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>
@@ -181,76 +320,9 @@ export function GanttView({ tasks, filteredTasks, searchTerm, statusFilter, prio
 }
 
 export default function GanttChart() {
-  const { data: tasks, isLoading } = useTasks();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [assigneeFilter, setAssigneeFilter] = useState("all");
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="h-full flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
-    );
-  }
-
-  const filteredTasks = tasks?.filter((task: any) => {
-    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    
-    // For Gantt charts with hierarchy, we often need to show parent tasks if their children match
-    // but in this simple filtering implementation, we'll just check if the task matches.
-    // However, we should ensure taskName check is robust.
-    const matchesSearch = !searchTerm || (
-      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
-      (task.wbs && task.wbs.includes(searchTerm)) ||
-      (task.id && task.id.toString() === searchTerm) ||
-      (task.id && task.id.toString().includes(searchTerm))
-    );
-
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
-  });
-
-  const resetFilters = () => {
-    setSearchTerm("");
-    setStatusFilter("all");
-    setPriorityFilter("all");
-    setAssigneeFilter("all");
-  };
-
   return (
     <Layout>
-      <div className="h-full flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
-            <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
-          </div>
-          <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all active:scale-95">
-            Export Report
-          </button>
-        </div>
-
-        <GanttView 
-          tasks={tasks}
-          filteredTasks={filteredTasks}
-          searchTerm={searchTerm}
-          statusFilter={statusFilter}
-          priorityFilter={priorityFilter}
-          assigneeFilter={assigneeFilter}
-          resetFilters={{
-            setSearchTerm,
-            setStatusFilter,
-            setPriorityFilter,
-            setAssigneeFilter,
-            reset: resetFilters
-          }}
-        />
-      </div>
+      <GanttChartCore showHeader={true} />
     </Layout>
   );
 }

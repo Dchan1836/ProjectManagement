@@ -118,6 +118,14 @@
     height: 1% !important;
   }
   
+  /* Disable text wrap on Gantt columns */
+  .e-gantt .e-rowcell,
+  .e-gantt .e-headercell {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
   .e-kanban {
     @apply bg-transparent font-sans !important;
   }

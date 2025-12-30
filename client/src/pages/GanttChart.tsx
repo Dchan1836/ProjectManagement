@@ -85,6 +85,15 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
+
+  const actionBegin = (args: any) => {
+    // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
+    // console.log(elements);
+    // const targetString = 'e-rhandler e-rcursor';
+    // if(document.getElementsByClassName() === targetString){
+    //   console.log("found component");
+    // }
+  }
   const handleActionComplete = (args: any) => {
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
@@ -275,8 +284,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           gridLines="Both"
           labelSettings={{ leftLabel: 'taskName' }}
           splitterSettings={{ position: '45%' }}
-          rowHeight={36}
-          taskbarHeight={24}
+          rowHeight={45}
+          taskbarHeight={30}
+          actionBegin={actionBegin}
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>

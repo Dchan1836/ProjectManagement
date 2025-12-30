@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import './GanttChart.css';
 export const taskFields = {
   id: 'id',
   name: 'taskName',

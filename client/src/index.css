@@ -112,6 +112,11 @@
     display: none !important;
   }
   
+  /* Hide resize handler row below header */
+  .e-gantt .e-rhandler.e-rcursor {
+    height: 0% !important;
+  }
+  
   .e-kanban {
     @apply bg-transparent font-sans !important;
   }

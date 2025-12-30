@@ -91,6 +91,44 @@
     @apply bg-secondary border-b border-border;
   }
 
+  /* Gantt Header Row Height Customization */
+  .e-gantt .e-headercell {
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+
+  .e-gantt .e-timeline-top-header-cell,
+  .e-gantt .e-timeline-header-cell {
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+
+  /* Remove empty filter row below headers */
+  .e-gantt .e-filterbar,
+  .e-gantt .e-treegrid .e-filterbar {
+    display: none !important;
+  }
+
+  /* Remove any add row that appears below headers */
+  .e-gantt .e-addrow,
+  .e-gantt .e-treegrid .e-addrow {
+    display: none !important;
+  }
+
+  /* Minimize column resize handlers in header */
+  .e-gantt .e-rhandler,
+  .e-gantt .e-rcursor {
+    height: 1% !important;
+  }
+
+  /* Disable text wrap on Gantt columns */
+  .e-gantt .e-rowcell,
+  .e-gantt .e-headercell {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
   .e-kanban {
     @apply bg-transparent font-sans !important;
   }
@@ -140,5 +178,3 @@
     @apply bg-primary/10 border-2 border-dashed border-primary rounded-2xl !important;
   }
 }
-
-

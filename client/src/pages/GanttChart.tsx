@@ -86,7 +86,12 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
   const handleActionComplete = (args: any) => {
-    if (args.requestType === 'save' && args.action === 'add') {
+    if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
+    || args.requestType === 'scroll'
+    || args.requestType === 'refresh'
+    || args.type === 'refresh'
+    || args.requestType === 'openEditDialog') {
+    } else if (/*args.requestType === 'save' && */args.action === 'add') {
       const taskData = args.data;
       createTask.mutate({
         taskName: taskData.taskName,
@@ -104,7 +109,12 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         onSuccess: () => toast({ title: "Task created successfully" }),
         onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
       });
-    } else if (args.requestType === 'save' && args.action === 'edit') {
+
+    } else if (args.requestType === 'save' && (
+    args.action === 'DialogEditing'
+    || args.action === 'TaskbarEditing'
+    || args.action === 'CellEditing'))
+    {
       const taskData = args.data;
       updateTask.mutate({
         id: taskData.id,

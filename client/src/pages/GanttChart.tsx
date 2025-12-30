@@ -25,6 +25,15 @@ import {
 } from "@/components/ui/select";
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import styled from 'styled-components';
+
+
+const MyButton = styled.button`
+  background: blue;
+  color: white;
+  padding: 10px 20px;
+`;
+
 
 export const taskFields = {
   id: 'id',

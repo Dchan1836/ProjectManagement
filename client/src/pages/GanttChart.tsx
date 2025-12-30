@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import './GanttChart.css';
 import styled from 'styled-components';
 
 

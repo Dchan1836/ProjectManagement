@@ -25,6 +25,7 @@ export class MemStorage implements IStorage {
         status: "Close",
         priority: "High",
         parentId: null,
+        predecessor: null,
         wbs: "1",
         assignee: "Jane Doe",
         info: "Initial project kickoff and planning"
@@ -39,6 +40,7 @@ export class MemStorage implements IStorage {
         status: "Close",
         priority: "Normal",
         parentId: 1,
+        predecessor: null,
         wbs: "1.1",
         assignee: "Jane Doe",
         info: "Site selection completed"
@@ -53,6 +55,7 @@ export class MemStorage implements IStorage {
         status: "Close",
         priority: "Critical",
         parentId: 1,
+        predecessor: "2FS",
         wbs: "1.2",
         assignee: "Alex Smith",
         info: "Soil quality is stable"
@@ -67,6 +70,7 @@ export class MemStorage implements IStorage {
         status: "In Progress",
         priority: "High",
         parentId: 1,
+        predecessor: "3FS",
         wbs: "1.3",
         assignee: "Jane Doe",
         info: "Budgeting in progress"
@@ -81,6 +85,7 @@ export class MemStorage implements IStorage {
         status: "In Progress",
         priority: "Normal",
         parentId: null,
+        predecessor: "1FS",
         wbs: "2",
         assignee: "Alex Smith",
         info: "Main development cycle"
@@ -95,6 +100,7 @@ export class MemStorage implements IStorage {
         status: "In Progress",
         priority: "Normal",
         parentId: 5,
+        predecessor: null,
         wbs: "2.1",
         assignee: "Alex Smith",
         info: "React and Tailwind setup"
@@ -109,6 +115,7 @@ export class MemStorage implements IStorage {
         status: "In Progress",
         priority: "Critical",
         parentId: 5,
+        predecessor: "6SS",
         wbs: "2.2",
         assignee: "Jane Doe",
         info: "Express and Drizzle configuration"
@@ -123,6 +130,7 @@ export class MemStorage implements IStorage {
         status: "Open",
         priority: "High",
         parentId: 5,
+        predecessor: "6FS,7FS",
         wbs: "2.3",
         assignee: "Alex Smith",
         info: "Connecting frontend to backend"
@@ -137,6 +145,7 @@ export class MemStorage implements IStorage {
         status: "Open",
         priority: "Normal",
         parentId: null,
+        predecessor: "5FS",
         wbs: "3",
         assignee: "Jane Doe",
         info: "QA and bug fixing"
@@ -151,6 +160,7 @@ export class MemStorage implements IStorage {
         status: "Testing",
         priority: "Normal",
         parentId: 9,
+        predecessor: null,
         wbs: "3.1",
         assignee: "Alex Smith",
         info: "Verifying individual modules"
@@ -178,6 +188,7 @@ export class MemStorage implements IStorage {
       status: insertTask.status,
       priority: insertTask.priority ?? null,
       parentId: insertTask.parentId ?? null,
+      predecessor: insertTask.predecessor ?? null,
       wbs: insertTask.wbs ?? null,
       assignee: insertTask.assignee ?? null,
       info: insertTask.info ?? null,

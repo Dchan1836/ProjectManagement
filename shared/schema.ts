@@ -12,6 +12,7 @@ export const tasks = pgTable("tasks", {
   status: text("status").notNull(), // Open, In Progress, Testing, Close
   priority: text("priority").default("Normal"),
   parentId: integer("parent_id"), // For hierarchical data in Gantt
+  predecessor: text("predecessor"), // Task dependencies (e.g., "2FS", "3SS+1")
   wbs: text("wbs"), // Work Breakdown Structure
   assignee: text("assignee"), // Task assignee
   info: text("info"), // Task info

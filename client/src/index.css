@@ -112,10 +112,10 @@
     display: none !important;
   }
   
-  /* Hide column resize handlers in header */
+  /* Minimize column resize handlers in header */
   .e-gantt .e-rhandler,
   .e-gantt .e-rcursor {
-    display: none !important;
+    height: 1% !important;
   }
   
   .e-kanban {

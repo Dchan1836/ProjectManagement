@@ -88,6 +88,18 @@
     @apply bg-secondary border-b border-border;
   }
   
+  /* Gantt Header Row Height Customization */
+  .e-gantt .e-headercell {
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+  
+  .e-gantt .e-timeline-top-header-cell,
+  .e-gantt .e-timeline-header-cell {
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+  
   .e-kanban {
     @apply bg-transparent font-sans !important;
   }

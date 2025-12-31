@@ -1,7 +1,8 @@
 import { Layout } from "@/components/Layout";
 import { useTasks, useUpdateTask } from "@/hooks/use-tasks";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
 import { 
   KanbanComponent, 
   ColumnsDirective, 
@@ -89,10 +90,13 @@ export function KanbanBoardCore({
 }: KanbanBoardCoreProps) {
   const { data: fetchedTasks, isLoading: fetchedLoading } = useTasks();
   const defaultUpdateTask = useUpdateTask();
+  const kanbanInstance = useRef(null);
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [swimlaneKey, setSwimlaneKey] = useState({ keyField: 'assignee' }); // Default to 'Assignee' for swimlanes
+
 
   const tasks = injectedTasks ?? fetchedTasks;
   const isLoading = injectedLoading ?? fetchedLoading;
@@ -135,8 +139,24 @@ export function KanbanBoardCore({
     setSearchTerm("");
     setPriorityFilter("all");
     setAssigneeFilter("all");
+
   };
 
+  const toggleSwimlanes = (event) => {
+    // Toggle between 'Assignee' (with swimlanes) and an empty string (no swimlanes)
+    if(swimlaneKey.keyField === 'assignee' ) {
+        setSwimlaneKey({keyField: null });
+        // Message to Enable
+        event.target.style.width = '260px';
+    } else
+    {
+        setSwimlaneKey( { keyField: 'assignee' });
+        // Message to Disable
+        event.target.style.width = '150px';
+    }
+    kanbanInstance.current.dataBind();
+    // kanbanInstance.current.refresh();
+    };
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -145,7 +165,9 @@ export function KanbanBoardCore({
           <p className="text-muted-foreground">Visualize and optimize your workflow.</p>
         </div>
       )}
-
+<ButtonComponent onClick={toggleSwimlanes} cssClass='e-info e-small' style={{width: '150px',}}>
+        {swimlaneKey.keyField === 'assignee' ? 'Disable Swimlanes' : 'Enable Swimlanes (by Assignee)'}
+      </ButtonComponent>
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[200px]">
@@ -203,11 +225,12 @@ export function KanbanBoardCore({
         <div className="h-full min-w-[1000px] bg-transparent">
           <KanbanComponent
             id="kanban"
+            ref={kanbanInstance}
             keyField="status"
             dataSource={filteredTasks}
             key={JSON.stringify({ searchTerm, priorityFilter, assigneeFilter, taskCount: tasks?.length })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
-            swimlaneSettings={{ keyField: 'assignee' }}
+            swimlaneSettings={swimlaneKey}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
             dragStop={handleDragStop}

@@ -178,3 +178,6 @@
     @apply bg-primary/10 border-2 border-dashed border-primary rounded-2xl !important;
   }
 }
+div:has(>#ME20) {
+      height: 100%;
+}

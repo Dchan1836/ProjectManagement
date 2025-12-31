@@ -32,8 +32,8 @@ export default function SplitView() {
           <SplitterComponent height="100%" orientation="Vertical">
             <PanesDirective>
               <PaneDirective size="50%" min="30%" content={() => (
-                <div className="h-full p-2 overflow-auto">
-                  <GanttChartCore 
+                <div id="ME20" className="h-full p-2 overflow-auto">
+                  <GanttChartCore
                     tasks={tasks}
                     isLoading={isLoading}
                     createTask={createTask}
@@ -43,7 +43,7 @@ export default function SplitView() {
                 </div>
               )} />
               <PaneDirective size="50%" min="30%" content={() => (
-                <div className="h-full p-2 overflow-auto">
+                <div id="ME20" className="h-full p-2 overflow-auto">
                   <KanbanBoardCore 
                     tasks={tasks}
                     isLoading={isLoading}

@@ -143,25 +143,39 @@ export function KanbanBoardCore({
   };
 
   const handleActionComplete = (args: any) => {
+    console.log('Kanban actionComplete:', args.requestType, args);
+    
     if (args.requestType === 'cardChanged' && args.changedRecords?.length > 0) {
       const cardData = args.changedRecords[0];
+      console.log('Card data to save:', cardData);
+      
+      const taskId = cardData.id || cardData.Id;
+      if (!taskId) {
+        console.error('No task ID found in card data');
+        return;
+      }
+      
       updateTask.mutate({
-        id: cardData.id,
+        id: taskId,
         data: {
-          taskName: cardData.taskName,
-          status: cardData.status,
-          priority: cardData.priority,
-          progress: cardData.progress,
-          assignee: cardData.assignee,
-          info: cardData.info,
+          taskName: cardData.taskName || cardData.TaskName,
+          status: cardData.status || cardData.Status,
+          priority: cardData.priority || cardData.Priority,
+          progress: cardData.progress ?? cardData.Progress ?? 0,
+          assignee: cardData.assignee || cardData.Assignee,
+          info: cardData.info || cardData.Info,
         },
       }, {
         onSuccess: () => toast({ title: "Task saved successfully" }),
-        onError: () => toast({ title: "Failed to save task", variant: "destructive" }),
+        onError: (err) => {
+          console.error('Failed to save task:', err);
+          toast({ title: "Failed to save task", variant: "destructive" });
+        },
       });
     } else if (args.requestType === 'cardRemoved' && args.deletedRecords?.length > 0) {
       const cardData = args.deletedRecords[0];
-      deleteTask.mutate(cardData.id, {
+      const taskId = cardData.id || cardData.Id;
+      deleteTask.mutate(taskId, {
         onSuccess: () => toast({ title: "Task deleted successfully" }),
         onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
       });

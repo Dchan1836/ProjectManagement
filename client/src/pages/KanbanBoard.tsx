@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const cardSettings: CardSettingsModel = {
@@ -60,11 +60,7 @@ export const createCardTemplate = (onDelete: (id: number) => void) => (props: an
             className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded"
             data-testid={`button-delete-task-${props.id}`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 6h18"></path>
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-            </svg>
+            <Trash2 className="h-3 w-3" />
           </button>
         </div>
       </div>
@@ -147,8 +143,6 @@ export function KanbanBoardCore({
   };
 
   const handleActionComplete = (args: any) => {
-    console.log('Kanban actionComplete:', args.requestType, args);
-    
     if (args.requestType === 'cardChanged' && args.changedRecords?.length > 0) {
       const cardData = args.changedRecords[0];
       updateTask.mutate({
@@ -170,22 +164,6 @@ export function KanbanBoardCore({
       deleteTask.mutate(cardData.id, {
         onSuccess: () => toast({ title: "Task deleted successfully" }),
         onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
-      });
-    } else if (args.requestType === 'save' && args.data) {
-      const cardData = args.data;
-      updateTask.mutate({
-        id: cardData.id,
-        data: {
-          taskName: cardData.taskName,
-          status: cardData.status,
-          priority: cardData.priority,
-          progress: cardData.progress,
-          assignee: cardData.assignee,
-          info: cardData.info,
-        },
-      }, {
-        onSuccess: () => toast({ title: "Task saved successfully" }),
-        onError: () => toast({ title: "Failed to save task", variant: "destructive" }),
       });
     }
   };

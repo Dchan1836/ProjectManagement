@@ -106,8 +106,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     // }
   }
   const handleActionComplete = (args: any) => {
-    console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
-    console.log(args.action);
+    // if(args.requestType !== 'scroll'){
+    //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
+    // }
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'
@@ -138,6 +139,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     || args.action === 'CellEditing'))
     {
       const taskData = args.data;
+      console.log(`duration: ${args.data.duration} typeofduration: ${typeof(args.data.duration)} startdate: ${args.data.startDate} typeofstartdate: ${typeof(args.data.startDate)} id: ${args.data.id} typeofid: ${typeof(args.data.id)} `);
       updateTask.mutate({
         id: taskData.id,
         data: {

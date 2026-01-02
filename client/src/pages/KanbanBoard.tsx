@@ -142,7 +142,43 @@ export function KanbanBoardCore({
     });
   };
 
+  const handleActionComplete = (args: any) => {
+    if (args.requestType === 'cardChanged' && args.changedRecords?.length > 0) {
+      const cardData = args.changedRecords[0];
+      updateTask.mutate({
+        id: cardData.id,
+        data: {
+          taskName: cardData.taskName,
+          status: cardData.status,
+          priority: cardData.priority,
+          progress: cardData.progress,
+          assignee: cardData.assignee,
+          info: cardData.info,
+        },
+      }, {
+        onSuccess: () => toast({ title: "Task saved successfully" }),
+        onError: () => toast({ title: "Failed to save task", variant: "destructive" }),
+      });
+    } else if (args.requestType === 'cardRemoved' && args.deletedRecords?.length > 0) {
+      const cardData = args.deletedRecords[0];
+      deleteTask.mutate(cardData.id, {
+        onSuccess: () => toast({ title: "Task deleted successfully" }),
+        onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+      });
+    }
+  };
+
   const cardTemplate = createCardTemplate(handleDeleteTask);
+
+  const dialogFields = [
+    { text: 'ID', key: 'id', type: 'Input' },
+    { key: 'taskName', type: 'TextArea', validationRules: { required: true } },
+    { key: 'status', type: 'DropDown' },
+    { key: 'priority', type: 'DropDown' },
+    { key: 'progress', type: 'Numeric' },
+    { key: 'assignee', type: 'DropDown' },
+    { key: 'info', type: 'TextArea' },
+  ];
 
   if (isLoading) {
     return (
@@ -260,9 +296,11 @@ export function KanbanBoardCore({
             key={JSON.stringify({ searchTerm, priorityFilter, assigneeFilter, taskCount: tasks?.length })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
+            dialogSettings={{ fields: dialogFields }}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
             dragStop={handleDragStop}
+            actionComplete={handleActionComplete}
           >
             <ColumnsDirective>
               <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (

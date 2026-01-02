@@ -106,6 +106,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     // }
   }
   const handleActionComplete = (args: any) => {
+    console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
+    console.log(args.action);
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'

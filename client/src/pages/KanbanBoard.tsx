@@ -163,6 +163,12 @@ export function KanbanBoardCore({
           priority: cardData.priority || cardData.Priority,
           progress: cardData.progress ?? cardData.Progress ?? 0,
           assignee: cardData.assignee || cardData.Assignee,
+          startDate: cardData.startDate,
+          endDate: cardData.endDate,
+          duration: cardData.duration,
+          parentId: cardData.parentId,
+          predecessor: cardData.predecessor,
+          wbs: cardData.wbs,
           info: cardData.info || cardData.Info,
         },
       }, {
@@ -186,12 +192,18 @@ export function KanbanBoardCore({
 
   const dialogFields = [
     { text: 'ID', key: 'id', type: 'TextBox' },
-    { key: 'taskName', type: 'TextArea', validationRules: { required: true } },
-    { key: 'status', type: 'DropDown' },
-    { key: 'priority', type: 'DropDown' },
-    { key: 'progress', type: 'Numeric' },
-    { key: 'assignee', type: 'DropDown' },
-    { key: 'info', type: 'TextArea' },
+    { text: 'Task Name', key: 'taskName', type: 'TextArea', validationRules: { required: true } },
+    { text: 'Status', key: 'status', type: 'DropDown' },
+    { text: 'Priority', key: 'priority', type: 'DropDown' },
+    { text: 'Progress', key: 'progress', type: 'Numeric' },
+    { text: 'Assignee', key: 'assignee', type: 'DropDown' },
+    { text: 'Start Date', key: 'startDate', type: 'TextBox' },
+    { text: 'End Date', key: 'endDate', type: 'TextBox' },
+    { text: 'Duration', key: 'duration', type: 'Numeric' },
+    { text: 'Parent ID', key: 'parentId', type: 'Numeric' },
+    { text: 'Predecessor', key: 'predecessor', type: 'TextBox' },
+    { text: 'WBS', key: 'wbs', type: 'TextBox' },
+    { text: 'Info', key: 'info', type: 'TextArea' },
   ];
 
   const handleDialogOpen = (args: any) => {

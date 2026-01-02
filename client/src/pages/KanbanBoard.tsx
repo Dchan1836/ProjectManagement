@@ -217,6 +217,47 @@ export function KanbanBoardCore({
     }
   };
 
+  const handleDialogClose = (args: any) => {
+    console.log('Dialog close:', args);
+    // Check if dialog was closed with Save (not Cancel or Delete)
+    if (args.name === 'dialogClose' && args.data) {
+      const cardData = args.data;
+      const taskId = cardData.id || cardData.Id;
+      
+      if (!taskId) {
+        console.error('No task ID found');
+        return;
+      }
+      
+      // Only save if the dialog wasn't cancelled
+      if (args.cancel !== true) {
+        updateTask.mutate({
+          id: taskId,
+          data: {
+            taskName: cardData.taskName,
+            status: cardData.status,
+            priority: cardData.priority,
+            progress: cardData.progress ?? 0,
+            assignee: cardData.assignee,
+            startDate: cardData.startDate,
+            endDate: cardData.endDate,
+            duration: cardData.duration,
+            parentId: cardData.parentId,
+            predecessor: cardData.predecessor,
+            wbs: cardData.wbs,
+            info: cardData.info,
+          },
+        }, {
+          onSuccess: () => toast({ title: "Task saved successfully" }),
+          onError: (err) => {
+            console.error('Failed to save task:', err);
+            toast({ title: "Failed to save task", variant: "destructive" });
+          },
+        });
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -335,6 +376,7 @@ export function KanbanBoardCore({
             swimlaneSettings={swimlaneKey}
             dialogSettings={{ fields: dialogFields }}
             dialogOpen={handleDialogOpen}
+            dialogClose={handleDialogClose}
             allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: 'transparent' }}

@@ -194,7 +194,7 @@ export function KanbanBoardCore({
     { text: 'ID', key: 'id', type: 'TextBox' },
     { text: 'Task Name', key: 'taskName', type: 'TextArea', validationRules: { required: true } },
     { text: 'Status', key: 'status', type: 'DropDown' },
-    { text: 'Priority', key: 'priority', type: 'DropDown' },
+    { text: 'Priority', key: 'priority', type: 'TextBox' },
     { text: 'Progress', key: 'progress', type: 'Numeric' },
     { text: 'Assignee', key: 'assignee', type: 'DropDown' },
     { text: 'Start Date', key: 'startDate', type: 'TextBox' },

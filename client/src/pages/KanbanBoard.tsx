@@ -185,7 +185,7 @@ export function KanbanBoardCore({
   const cardTemplate = createCardTemplate(handleDeleteTask);
 
   const dialogFields = [
-    { text: 'ID', key: 'id', type: 'Input' },
+    { text: 'ID', key: 'id', type: 'TextBox' },
     { key: 'taskName', type: 'TextArea', validationRules: { required: true } },
     { key: 'status', type: 'DropDown' },
     { key: 'priority', type: 'DropDown' },
@@ -193,6 +193,17 @@ export function KanbanBoardCore({
     { key: 'assignee', type: 'DropDown' },
     { key: 'info', type: 'TextArea' },
   ];
+
+  const handleDialogOpen = (args: any) => {
+    if (args.element) {
+      const idInput = args.element.querySelector('input[name="id"]');
+      if (idInput) {
+        idInput.setAttribute('readonly', 'true');
+        idInput.style.backgroundColor = 'var(--muted)';
+        idInput.style.cursor = 'not-allowed';
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -311,6 +322,7 @@ export function KanbanBoardCore({
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
             dialogSettings={{ fields: dialogFields }}
+            dialogOpen={handleDialogOpen}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
             dragStop={handleDragStop}

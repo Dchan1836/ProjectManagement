@@ -142,12 +142,12 @@ export function KanbanBoardCore({
     });
   };
 
-  const handleActionComplete = (args: any) => {
-    console.log('Kanban actionComplete:', args.requestType, args);
+  const handleActionBegin = (args: any) => {
+    console.log('Kanban actionBegin:', args.requestType);
     
-    if (args.requestType === 'cardChanged' && args.changedRecords?.length > 0) {
+    if (args.requestType === 'cardChange' && args.changedRecords?.length > 0) {
       const cardData = args.changedRecords[0];
-      console.log('Card data to save:', cardData);
+      console.log('Card data to save:', JSON.stringify(cardData));
       
       const taskId = cardData.id || cardData.Id;
       if (!taskId) {
@@ -172,7 +172,7 @@ export function KanbanBoardCore({
           toast({ title: "Failed to save task", variant: "destructive" });
         },
       });
-    } else if (args.requestType === 'cardRemoved' && args.deletedRecords?.length > 0) {
+    } else if (args.requestType === 'cardRemove' && args.deletedRecords?.length > 0) {
       const cardData = args.deletedRecords[0];
       const taskId = cardData.id || cardData.Id;
       deleteTask.mutate(taskId, {
@@ -323,10 +323,11 @@ export function KanbanBoardCore({
             swimlaneSettings={swimlaneKey}
             dialogSettings={{ fields: dialogFields }}
             dialogOpen={handleDialogOpen}
+            allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
             dragStop={handleDragStop}
-            actionComplete={handleActionComplete}
+            actionBegin={handleActionBegin}
           >
             <ColumnsDirective>
               <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (

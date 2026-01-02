@@ -1,5 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { useTasks, useUpdateTask } from "@/hooks/use-tasks";
+import { useTasks, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const cardSettings: CardSettingsModel = {
@@ -28,7 +28,7 @@ export const cardSettings: CardSettingsModel = {
   footerCssField: 'className'
 };
 
-export const cardTemplate = (props: any) => {
+export const createCardTemplate = (onDelete: (id: number) => void) => (props: any) => {
   const priorityColor = 
     props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400' :
     props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400' :
@@ -40,13 +40,29 @@ export const cardTemplate = (props: any) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Delete task "${props.taskName}"?`)) {
+      onDelete(props.id);
+    }
+  };
+
   return (
     <div className="e-card-content p-3">
       <div className="flex justify-between items-center mb-2">
         <span className="text-xs font-mono text-muted-foreground">{props.wbs ? `WBS: ${props.wbs}` : `#${props.id}`}</span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
-          {props.priority || 'Normal'}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
+            {props.priority || 'Normal'}
+          </span>
+          <button
+            onClick={handleDelete}
+            className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded"
+            data-testid={`button-delete-task-${props.id}`}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
       </div>
       <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
         {props.taskName}
@@ -80,16 +96,19 @@ interface KanbanBoardCoreProps {
   tasks?: any[];
   isLoading?: boolean;
   updateTask?: any;
+  deleteTask?: any;
 }
 
 export function KanbanBoardCore({ 
   showHeader = false,
   tasks: injectedTasks,
   isLoading: injectedLoading,
-  updateTask: injectedUpdateTask
+  updateTask: injectedUpdateTask,
+  deleteTask: injectedDeleteTask
 }: KanbanBoardCoreProps) {
   const { data: fetchedTasks, isLoading: fetchedLoading } = useTasks();
   const defaultUpdateTask = useUpdateTask();
+  const defaultDeleteTask = useDeleteTask();
   const kanbanInstance = useRef(null);
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,6 +120,7 @@ export function KanbanBoardCore({
   const tasks = injectedTasks ?? fetchedTasks;
   const isLoading = injectedLoading ?? fetchedLoading;
   const updateTask = injectedUpdateTask ?? defaultUpdateTask;
+  const deleteTask = injectedDeleteTask ?? defaultDeleteTask;
 
   const handleDragStop = (args: any) => {
     const cardData = args.data?.[0];
@@ -114,6 +134,15 @@ export function KanbanBoardCore({
       });
     }
   };
+
+  const handleDeleteTask = (id: number) => {
+    deleteTask.mutate(id, {
+      onSuccess: () => toast({ title: "Task deleted successfully" }),
+      onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+    });
+  };
+
+  const cardTemplate = createCardTemplate(handleDeleteTask);
 
   if (isLoading) {
     return (

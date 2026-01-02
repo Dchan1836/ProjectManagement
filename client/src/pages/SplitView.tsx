@@ -48,6 +48,7 @@ export default function SplitView() {
                     tasks={tasks}
                     isLoading={isLoading}
                     updateTask={updateTask}
+                    deleteTask={deleteTask}
                   />
                 </div>
               )} />

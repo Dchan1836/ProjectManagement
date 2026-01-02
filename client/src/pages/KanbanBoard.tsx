@@ -214,45 +214,86 @@ export function KanbanBoardCore({
         idInput.style.backgroundColor = 'var(--muted)';
         idInput.style.cursor = 'not-allowed';
       }
-    }
-  };
-
-  const handleDialogClose = (args: any) => {
-    console.log('Dialog close:', args);
-    // Check if dialog was closed with Save (not Cancel or Delete)
-    if (args.name === 'dialogClose' && args.data) {
-      const cardData = args.data;
-      const taskId = cardData.id || cardData.Id;
       
-      if (!taskId) {
-        console.error('No task ID found');
-        return;
-      }
-      
-      // Only save if the dialog wasn't cancelled
-      if (args.cancel !== true) {
-        updateTask.mutate({
-          id: taskId,
-          data: {
-            taskName: cardData.taskName,
-            status: cardData.status,
-            priority: cardData.priority,
-            progress: cardData.progress ?? 0,
-            assignee: cardData.assignee,
-            startDate: cardData.startDate,
-            endDate: cardData.endDate,
-            duration: cardData.duration,
-            parentId: cardData.parentId,
-            predecessor: cardData.predecessor,
-            wbs: cardData.wbs,
-            info: cardData.info,
-          },
-        }, {
-          onSuccess: () => toast({ title: "Task saved successfully" }),
-          onError: (err) => {
-            console.error('Failed to save task:', err);
-            toast({ title: "Failed to save task", variant: "destructive" });
-          },
+      // Find and replace the Save button with custom handler
+      const saveBtn = args.element.querySelector('.e-dialog-edit');
+      if (saveBtn) {
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        
+        newSaveBtn.addEventListener('click', (e: Event) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Collect form data from dialog inputs
+          const formData: any = {};
+          const inputs = args.element.querySelectorAll('input, textarea, select');
+          inputs.forEach((input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+            const name = input.getAttribute('name');
+            if (name) {
+              formData[name] = input.value;
+            }
+          });
+          
+          // Also get data from Syncfusion dropdowns
+          const dropdowns = args.element.querySelectorAll('.e-dropdownlist');
+          dropdowns.forEach((dd: any) => {
+            if (dd.ej2_instances && dd.ej2_instances[0]) {
+              const instance = dd.ej2_instances[0];
+              const name = instance.element?.getAttribute('name');
+              if (name) {
+                formData[name] = instance.value;
+              }
+            }
+          });
+          
+          // Get numeric inputs
+          const numerics = args.element.querySelectorAll('.e-numerictextbox');
+          numerics.forEach((num: any) => {
+            if (num.ej2_instances && num.ej2_instances[0]) {
+              const instance = num.ej2_instances[0];
+              const name = instance.element?.getAttribute('name');
+              if (name) {
+                formData[name] = instance.value;
+              }
+            }
+          });
+          
+          const taskId = parseInt(formData.id || args.data?.id);
+          if (!taskId) {
+            console.error('No task ID found');
+            return;
+          }
+          
+          updateTask.mutate({
+            id: taskId,
+            data: {
+              taskName: formData.taskName,
+              status: formData.status,
+              priority: formData.priority,
+              progress: parseInt(formData.progress) || 0,
+              assignee: formData.assignee,
+              startDate: formData.startDate,
+              endDate: formData.endDate,
+              duration: parseInt(formData.duration) || null,
+              parentId: parseInt(formData.parentId) || null,
+              predecessor: formData.predecessor || null,
+              wbs: formData.wbs,
+              info: formData.info,
+            },
+          }, {
+            onSuccess: () => {
+              toast({ title: "Task saved successfully" });
+              // Close the dialog
+              if (kanbanInstance.current) {
+                (kanbanInstance.current as any).closeDialog();
+              }
+            },
+            onError: (err) => {
+              console.error('Failed to save task:', err);
+              toast({ title: "Failed to save task", variant: "destructive" });
+            },
+          });
         });
       }
     }
@@ -376,7 +417,6 @@ export function KanbanBoardCore({
             swimlaneSettings={swimlaneKey}
             dialogSettings={{ fields: dialogFields }}
             dialogOpen={handleDialogOpen}
-            dialogClose={handleDialogClose}
             allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: 'transparent' }}

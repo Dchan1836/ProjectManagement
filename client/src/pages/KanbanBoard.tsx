@@ -1,6 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { useTasks, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useState, useRef } from "react";
+import { useState, useRef, useContext, createContext } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
 import {
@@ -122,6 +122,9 @@ export function KanbanBoardCore({
   const updateTask = injectedUpdateTask ?? defaultUpdateTask;
   const deleteTask = injectedDeleteTask ?? defaultDeleteTask;
 
+  // function getKanbanInstance(){
+  //   return kanbanInstance.current;
+  // }
   const handleDragStop = (args: any) => {
     const cardData = args.data?.[0];
     if (cardData && cardData.id) {
@@ -205,8 +208,10 @@ export function KanbanBoardCore({
     { text: 'WBS', key: 'wbs', type: 'TextBox' },
     { text: 'Info', key: 'info', type: 'TextArea' },
   ];
-
   const handleDialogOpen = (args: any) => {
+    // const InstanceContext = createContext(kanbanInstance.current)
+    // const instance = () => useContext(InstanceContext);
+    // console.log(kanbanInstance.current);
     if (args.element) {
       const idInput = args.element.querySelector('input[name="id"]');
       if (idInput) {
@@ -284,12 +289,22 @@ export function KanbanBoardCore({
           }, {
             onSuccess: () => {
               toast({ title: "Task saved successfully" });
-              // Close the dialog
+              // Close the dialog using multiple methods for reliability
               if (kanbanInstance.current) {
-                (kanbanInstance.current as any).closeDialog();
+                try {
+                  (kanbanInstance.current as any).closeDialog();
+                } catch (e) {
+                  // Fallback: click the cancel button to close
+                  const cancelBtn = args.element?.querySelector('.e-dialog-cancel');
+                  if (cancelBtn) (cancelBtn as HTMLButtonElement).click();
+                }
+              } else {
+                // Fallback: click the cancel button to close
+                const cancelBtn = args.element?.querySelector('.e-dialog-cancel');
+                if (cancelBtn) (cancelBtn as HTMLButtonElement).click();
               }
             },
-            onError: (err) => {
+            onError: (err: any) => {
               console.error('Failed to save task:', err);
               toast({ title: "Failed to save task", variant: "destructive" });
             },

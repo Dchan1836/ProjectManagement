@@ -1,9 +1,9 @@
 import { Layout } from "@/components/Layout";
-import { useTasks, useUpdateTask } from "@/hooks/use-tasks";
+import { useTasks, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
-import { 
+import {
   KanbanComponent, 
   ColumnsDirective, 
   ColumnDirective,
@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const cardSettings: CardSettingsModel = {
@@ -28,7 +28,7 @@ export const cardSettings: CardSettingsModel = {
   footerCssField: 'className'
 };
 
-export const cardTemplate = (props: any) => {
+export const createCardTemplate = (onDelete: (id: number) => void) => (props: any) => {
   const priorityColor = 
     props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400' :
     props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400' :
@@ -40,13 +40,29 @@ export const cardTemplate = (props: any) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Delete task "${props.taskName}"?`)) {
+      onDelete(props.id);
+    }
+  };
+
   return (
     <div className="e-card-content p-3">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs font-mono text-muted-foreground">{props.wbs ? `WBS: ${props.wbs}` : `#${props.id}`}</span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
-          {props.priority || 'Normal'}
-        </span>
+        <span className="text-xs font-mono text-muted-foreground">#{props.id}{props.wbs ? ` | WBS: ${props.wbs}` : ''}</span>
+        <div className="flex items-center gap-1">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
+            {props.priority || 'Normal'}
+          </span>
+          <button
+            onClick={handleDelete}
+            className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded"
+            data-testid={`button-delete-task-${props.id}`}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
       </div>
       <div className="e-card-header-title font-semibold text-foreground mb-3 text-sm leading-tight">
         {props.taskName}
@@ -80,16 +96,19 @@ interface KanbanBoardCoreProps {
   tasks?: any[];
   isLoading?: boolean;
   updateTask?: any;
+  deleteTask?: any;
 }
 
 export function KanbanBoardCore({ 
   showHeader = false,
   tasks: injectedTasks,
   isLoading: injectedLoading,
-  updateTask: injectedUpdateTask
+  updateTask: injectedUpdateTask,
+  deleteTask: injectedDeleteTask
 }: KanbanBoardCoreProps) {
   const { data: fetchedTasks, isLoading: fetchedLoading } = useTasks();
   const defaultUpdateTask = useUpdateTask();
+  const defaultDeleteTask = useDeleteTask();
   const kanbanInstance = useRef(null);
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,6 +120,7 @@ export function KanbanBoardCore({
   const tasks = injectedTasks ?? fetchedTasks;
   const isLoading = injectedLoading ?? fetchedLoading;
   const updateTask = injectedUpdateTask ?? defaultUpdateTask;
+  const deleteTask = injectedDeleteTask ?? defaultDeleteTask;
 
   const handleDragStop = (args: any) => {
     const cardData = args.data?.[0];
@@ -115,6 +135,77 @@ export function KanbanBoardCore({
     }
   };
 
+  const handleDeleteTask = (id: number) => {
+    deleteTask.mutate(id, {
+      onSuccess: () => toast({ title: "Task deleted successfully" }),
+      onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+    });
+  };
+
+  const handleActionBegin = (args: any) => {
+    console.log('Kanban actionBegin:', args.requestType);
+
+    if (args.requestType === 'cardChange' && args.changedRecords?.length > 0) {
+      const cardData = args.changedRecords[0];
+      console.log('Card data to save:', JSON.stringify(cardData));
+
+      const taskId = cardData.id || cardData.Id;
+      if (!taskId) {
+        console.error('No task ID found in card data');
+        return;
+      }
+
+      updateTask.mutate({
+        id: taskId,
+        data: {
+          taskName: cardData.taskName || cardData.TaskName,
+          status: cardData.status || cardData.Status,
+          priority: cardData.priority || cardData.Priority,
+          progress: Number(cardData.progress ?? cardData.Progress ?? 0),
+          assignee: cardData.assignee || cardData.Assignee,
+          startDate: cardData.startDate,
+          endDate: cardData.endDate,
+          duration: Number(cardData.duration),
+          parentId: Number(cardData.parentId),
+          predecessor: cardData.predecessor,
+          wbs: cardData.wbs,
+          info: cardData.info || cardData.Info,
+        },
+      }, {
+        onSuccess: () => toast({ title: "Task saved successfully" }),
+        onError: (err) => {
+          console.error('Failed to save task:', err);
+          toast({ title: "Failed to save task", variant: "destructive" });
+        },
+      });
+    } else if (args.requestType === 'cardRemove' && args.deletedRecords?.length > 0) {
+      const cardData = args.deletedRecords[0];
+      const taskId = cardData.id || cardData.Id;
+      deleteTask.mutate(taskId, {
+        onSuccess: () => toast({ title: "Task deleted successfully" }),
+        onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
+      });
+    }
+  };
+
+  const cardTemplate = createCardTemplate(handleDeleteTask);
+
+  const dialogFields = [
+    { text: 'ID', key: 'duration', type: 'TextBox' },
+    { text: 'Task Name', key: 'taskName', type: 'TextArea', validationRules: { required: true } },
+    { text: 'Status', key: 'status', type: 'DropDown' },
+    { text: 'Priority', key: 'priority', type: 'TextBox' },
+    { text: 'Progress', key: 'progress', type: 'Numeric' },
+    { text: 'Assignee', key: 'assignee', type: 'DropDown' },
+    { text: 'Start Date', key: 'startDate', type: 'TextBox' },
+    { text: 'End Date', key: 'endDate', type: 'TextBox' },
+    { text: 'Duration', key: 'duration', type: 'Numeric' },
+    { text: 'Parent ID', key: 'parentId', type: 'Numeric' },
+    { text: 'Predecessor', key: 'predecessor', type: 'TextBox' },
+    { text: 'WBS', key: 'wbs', type: 'TextBox' },
+    { text: 'Info', key: 'info', type: 'TextArea' },
+  ];
+
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -125,13 +216,13 @@ export function KanbanBoardCore({
 
   const filteredTasks = tasks?.filter((task: any) => {
     const matchesSearch = !searchTerm || (
-      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (task.wbs && task.wbs.includes(searchTerm)) ||
       (task.id && task.id.toString().includes(searchTerm))
     );
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    
+
     return matchesSearch && matchesPriority && matchesAssignee;
   });
 
@@ -180,7 +271,7 @@ export function KanbanBoardCore({
               data-testid="input-search-kanban"
             />
           </div>
-          
+
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
             <SelectTrigger className="w-[150px]" data-testid="select-priority-filter-kanban">
               <SelectValue placeholder="Priority" />
@@ -204,9 +295,9 @@ export function KanbanBoardCore({
             </SelectContent>
           </Select>
 
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={resetFilters}
             className="text-muted-foreground hover:text-foreground"
             data-testid="button-reset-filters-kanban"
@@ -214,7 +305,7 @@ export function KanbanBoardCore({
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          
+
           <div className="ml-auto text-sm text-muted-foreground">
             Showing {filteredTasks?.length} tasks
           </div>
@@ -231,9 +322,13 @@ export function KanbanBoardCore({
             key={JSON.stringify({ searchTerm, priorityFilter, assigneeFilter, taskCount: tasks?.length })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
+            dialogSettings={{ fields: dialogFields }}
+//            dialogOpen={handleDialogOpen}
+            allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: 'transparent' }}
             dragStop={handleDragStop}
+            actionBegin={handleActionBegin}
           >
             <ColumnsDirective>
               <ColumnDirective headerText="To Do" keyField="Open" allowToggle={true} template={(props: any) => (

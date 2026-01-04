@@ -27,6 +27,16 @@ import {
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import './GanttChart.css';
+import styled from 'styled-components';
+
+
+const MyButton = styled.button`
+  background: blue;
+  color: white;
+  padding: 10px 20px;
+`;
+
+
 export const taskFields = {
   id: 'id',
   name: 'taskName',
@@ -86,7 +96,19 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
+
+  const actionBegin = (args: any) => {
+    // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
+    // console.log(elements);
+    // const targetString = 'e-rhandler e-rcursor';
+    // if(document.getElementsByClassName() === targetString){
+    //   console.log("found component");
+    // }
+  }
   const handleActionComplete = (args: any) => {
+    // if(args.requestType !== 'scroll'){
+    //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
+    // }
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'
@@ -117,6 +139,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     || args.action === 'CellEditing'))
     {
       const taskData = args.data;
+      console.log(`duration: ${args.data.duration} typeofduration: ${typeof(args.data.duration)} startdate: ${args.data.startDate} typeofstartdate: ${typeof(args.data.startDate)} id: ${args.data.id} typeofid: ${typeof(args.data.id)} `);
       updateTask.mutate({
         id: taskData.id,
         data: {
@@ -321,6 +344,7 @@ const contextMenuOpen = (args) => {
           splitterSettings={{ position: '45%' }}
           rowHeight={45}
           taskbarHeight={30}
+          actionBegin={actionBegin}
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>

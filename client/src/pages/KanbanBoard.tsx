@@ -234,6 +234,11 @@ export function KanbanBoardCore({
 
   const cardTemplate = createCardTemplate(handleDeleteTask);
 
+  const roleOptions = [
+    { text: "Developer", value: "Developer" },
+    { text: "Construction", value: "Construction" },
+  ];
+
   const dialogFields = [
     { text: "Task ID", key: "taskId", type: "TextBox" },
     {
@@ -246,7 +251,7 @@ export function KanbanBoardCore({
     { text: "Priority", key: "priority", type: "TextBox" },
     { text: "Progress", key: "progress", type: "Numeric" },
     { text: "Assignee", key: "assignee", type: "DropDown" },
-    { text: "Role", key: "role", type: "DropDown" },
+    { text: "Role", key: "role", type: "DropDown", dataSource: roleOptions },
     { text: "Start Date", key: "startDate", type: "TextBox" },
     { text: "End Date", key: "endDate", type: "TextBox" },
     { text: "Duration", key: "duration", type: "Numeric" },

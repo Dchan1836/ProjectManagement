@@ -16,6 +16,7 @@ import {
   ColumnDirective,
   ContextMenu,
 } from '@syncfusion/ej2-react-gantt';
+import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -28,6 +29,13 @@ import { Search, FilterX, Filter as FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import './GanttChart.css';
 import styled from 'styled-components';
+
+const hierarchyModeData = [
+  { text: 'Parent', value: 'Parent' },
+  { text: 'Child', value: 'Child' },
+  { text: 'Both', value: 'Both' },
+  { text: 'None', value: 'None' },
+];
 
 
 const MyButton = styled.button`
@@ -97,6 +105,16 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [hierarchyMode, setHierarchyMode] = useState("Parent");
+
+  const onHierarchyModeChange = (args: any) => {
+    const mode = args.value as string;
+    setHierarchyMode(mode);
+    if (ganttInstance.current) {
+      ganttInstance.current.filterSettings.hierarchyMode = mode as any;
+      ganttInstance.current.clearFiltering();
+    }
+  };
 
 
   const actionBegin = (args: any) => {
@@ -229,6 +247,11 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setPriorityFilter("all");
     setAssigneeFilter("all");
     setRoleFilter("all");
+    setHierarchyMode("Parent");
+    if (ganttInstance.current) {
+      ganttInstance.current.filterSettings.hierarchyMode = "Parent";
+      ganttInstance.current.clearFiltering();
+    }
   };
 const contextMenuOpen = (args) => {
             let record = args.rowData;
@@ -360,6 +383,19 @@ const contextMenuOpen = (args) => {
               <SelectItem value="both">Both Roles</SelectItem>
             </SelectContent>
           </Select>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Hierarchy:</span>
+            <DropDownListComponent 
+              dataSource={hierarchyModeData}
+              fields={{ text: 'text', value: 'value' }}
+              value={hierarchyMode}
+              change={onHierarchyModeChange}
+              width={120}
+              popupHeight="200px"
+              data-testid="select-hierarchy-mode"
+            />
+          </div>
 
           <Button 
             variant="ghost" 

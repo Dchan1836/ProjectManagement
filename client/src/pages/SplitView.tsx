@@ -23,17 +23,17 @@ export default function SplitView() {
   return (
     <Layout>
       <div className="h-full flex flex-col space-y-4">
-        <div>
+        {/* <div>
           <h1 className="text-3xl font-bold text-foreground">Interactive Split View</h1>
           <p className="text-muted-foreground">Edit tasks in Gantt or Kanban simultaneously.</p>
-        </div>
+        </div> */}
 
         <div className="flex-1 min-h-0 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           <SplitterComponent height="100%" orientation="Vertical">
             <PanesDirective>
               <PaneDirective size="50%" min="30%" content={() => (
-                <div className="h-full p-2 overflow-auto">
-                  <GanttChartCore 
+                <div id="ME20" className="h-full p-2 overflow-auto">
+                  <GanttChartCore
                     tasks={tasks}
                     isLoading={isLoading}
                     createTask={createTask}
@@ -43,11 +43,12 @@ export default function SplitView() {
                 </div>
               )} />
               <PaneDirective size="50%" min="30%" content={() => (
-                <div className="h-full p-2 overflow-auto">
+                <div id="ME20" className="h-full p-2 overflow-auto">
                   <KanbanBoardCore 
                     tasks={tasks}
                     isLoading={isLoading}
                     updateTask={updateTask}
+                    deleteTask={deleteTask}
                   />
                 </div>
               )} />

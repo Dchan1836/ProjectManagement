@@ -16,6 +16,7 @@ export const tasks = pgTable("tasks", {
   wbs: text("wbs"), // Work Breakdown Structure
   assignee: text("assignee"), // Task assignee
   info: text("info"), // Task info
+  role: text("role").array(), // Role types (e.g., ["Developer", "Construction"])
 });
 
 export const insertTaskSchema = createInsertSchema(tasks, {

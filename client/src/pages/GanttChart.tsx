@@ -16,6 +16,7 @@ import {
   ColumnDirective,
   ContextMenu,
 } from '@syncfusion/ej2-react-gantt';
+import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,10 +25,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Filter as FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import './GanttChart.css';
 import styled from 'styled-components';
+
+const hierarchyModeData = [
+  { text: 'Parent', value: 'Parent' },
+  { text: 'Child', value: 'Child' },
+  { text: 'Both', value: 'Both' },
+  { text: 'None', value: 'None' },
+];
 
 
 const MyButton = styled.button`
@@ -91,10 +99,22 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const deleteTask = useDeleteTask();
   const { toast } = useToast();
   const ganttInstance = useRef<GanttComponent>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [hierarchyMode, setHierarchyMode] = useState("Parent");
+
+  const onHierarchyModeChange = (args: any) => {
+    const mode = args.value as string;
+    setHierarchyMode(mode);
+    if (ganttInstance.current) {
+      ganttInstance.current.filterSettings.hierarchyMode = mode as any;
+      ganttInstance.current.clearFiltering();
+    }
+  };
 
 
   const actionBegin = (args: any) => {
@@ -106,6 +126,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     // }
   }
   const handleActionComplete = (args: any) => {
+    // if(args.requestType !== 'scroll'){
+    //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
+    // }
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'
@@ -136,6 +159,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     || args.action === 'CellEditing'))
     {
       const taskData = args.data;
+      console.log(`duration: ${args.data.duration} typeofduration: ${typeof(args.data.duration)} startdate: ${args.data.startDate} typeofstartdate: ${typeof(args.data.startDate)} id: ${args.data.id} typeofid: ${typeof(args.data.id)} `);
       updateTask.mutate({
         id: taskData.id,
         data: {
@@ -174,10 +198,39 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     );
   }
 
+  const matchesRoleFilter = (task: any) => {
+    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
+    if (roleFilter === "all") return true;
+    if (roleFilter === "both") return taskRoles.includes("Developer") && taskRoles.includes("Construction");
+    return taskRoles.includes(roleFilter);
+  };
+
+  const getMatchingTaskIds = () => {
+    if (!tasks) return new Set<number>();
+    const matchingIds = new Set<number>();
+    
+    tasks.forEach((task: any) => {
+      if (matchesRoleFilter(task)) {
+        matchingIds.add(task.id);
+        let parentId = task.parentId;
+        while (parentId) {
+          matchingIds.add(parentId);
+          const parentTask = tasks.find((t: any) => t.id === parentId);
+          parentId = parentTask?.parentId;
+        }
+      }
+    });
+    
+    return matchingIds;
+  };
+
+  const roleMatchingIds = getMatchingTaskIds();
+
   const filteredTasks = tasks?.filter((task: any) => {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    const matchesRole = roleFilter === "all" || roleMatchingIds.has(task.id);
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
@@ -185,7 +238,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       (task.id && task.id.toString().includes(searchTerm))
     );
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee && matchesRole;
   });
 
   const resetFilters = () => {
@@ -193,6 +246,12 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setStatusFilter("all");
     setPriorityFilter("all");
     setAssigneeFilter("all");
+    setRoleFilter("all");
+    setHierarchyMode("Parent");
+    if (ganttInstance.current) {
+      ganttInstance.current.filterSettings.hierarchyMode = "Parent";
+      ganttInstance.current.clearFiltering();
+    }
   };
 const contextMenuOpen = (args) => {
             let record = args.rowData;
@@ -238,17 +297,33 @@ const contextMenuOpen = (args) => {
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
             <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
-          </div>
+          </div> */}
           <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all active:scale-95">
             Export Report
           </button>
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFilters(!showFilters)}
+          data-testid="button-toggle-filters-gantt"
+        >
+          <FilterIcon className="h-4 w-4 mr-2" />
+          {showFilters ? "Hide Filters" : "Show Filters"}
+        </Button>
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredTasks?.length} tasks
+        </div>
+      </div>
+
+      {showFilters && (
+      <div className="bg-card border border-border rounded-xl p-4 shadow-sm mb-4">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -297,6 +372,31 @@ const contextMenuOpen = (args) => {
             </SelectContent>
           </Select>
 
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-role-filter-gantt">
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="Developer">Developer</SelectItem>
+              <SelectItem value="Construction">Construction</SelectItem>
+              <SelectItem value="both">Both Roles</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Hierarchy:</span>
+            <DropDownListComponent 
+              dataSource={hierarchyModeData}
+              fields={{ text: 'text', value: 'value' }}
+              value={hierarchyMode}
+              change={onHierarchyModeChange}
+              width={120}
+              popupHeight="200px"
+              data-testid="select-hierarchy-mode"
+            />
+          </div>
+
           <Button 
             variant="ghost" 
             size="sm" 
@@ -307,18 +407,15 @@ const contextMenuOpen = (args) => {
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-
-          <div className="ml-auto text-sm text-muted-foreground">
-            Showing {filteredTasks?.length} tasks
-          </div>
         </div>
       </div>
+      )}
 
       <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
-          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
+          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter, roleFilter, taskCount: filteredTasks?.length })}
           taskFields={taskFields}
           height="100%"
           treeColumnIndex={2}
@@ -348,6 +445,7 @@ const contextMenuOpen = (args) => {
             <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
             <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
             <ColumnDirective field='assignee' headerText='Assignee' width='120'></ColumnDirective>
+            <ColumnDirective field='role' headerText='Role' width='120'></ColumnDirective>
             <ColumnDirective field='info' headerText='Info' width='200' clipMode='EllipsisWithTooltip'></ColumnDirective>
             <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
             <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>

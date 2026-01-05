@@ -96,14 +96,25 @@ export const createCardTemplate =
               {props.assignee || "Unassigned"}
             </span>
           </div>
-          <div
-            className={`text-xs font-medium ${
-              props.progress === 100
-                ? "text-green-600"
-                : "text-muted-foreground"
-            }`}
-          >
-            {props.progress}%
+          <div className="flex items-center gap-2">
+            {props.role && (
+              <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${
+                props.role === "Construction" 
+                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                  : "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
+              }`}>
+                {props.role}
+              </span>
+            )}
+            <div
+              className={`text-xs font-medium ${
+                props.progress === 100
+                  ? "text-green-600"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {props.progress}%
+            </div>
           </div>
         </div>
       </div>
@@ -189,6 +200,7 @@ export function KanbanBoardCore({
             priority: cardData.priority || cardData.Priority,
             progress: Number(cardData.progress ?? cardData.Progress ?? 0),
             assignee: cardData.assignee || cardData.Assignee,
+            role: cardData.role || cardData.Role,
             startDate: cardData.startDate,
             endDate: cardData.endDate,
             duration: Number(cardData.duration) || null,
@@ -234,6 +246,7 @@ export function KanbanBoardCore({
     { text: "Priority", key: "priority", type: "TextBox" },
     { text: "Progress", key: "progress", type: "Numeric" },
     { text: "Assignee", key: "assignee", type: "DropDown" },
+    { text: "Role", key: "role", type: "DropDown" },
     { text: "Start Date", key: "startDate", type: "TextBox" },
     { text: "End Date", key: "endDate", type: "TextBox" },
     { text: "Duration", key: "duration", type: "Numeric" },

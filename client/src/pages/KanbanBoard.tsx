@@ -191,7 +191,7 @@ export function KanbanBoardCore({
   const cardTemplate = createCardTemplate(handleDeleteTask);
 
   const dialogFields = [
-    { text: 'ID', key: 'id', type: 'TextBox' },
+    { text: 'Task ID', key: 'id', type: 'TextBox' },
     { text: 'Task Name', key: 'taskName', type: 'TextArea', validationRules: { required: true } },
     { text: 'Status', key: 'status', type: 'DropDown' },
     { text: 'Priority', key: 'priority', type: 'TextBox' },
@@ -206,98 +206,103 @@ export function KanbanBoardCore({
     { text: 'Info', key: 'info', type: 'TextArea' },
   ];
 
-  const handleDialogOpen = (args: any) => {
-    if (args.element) {
-      const idInput = args.element.querySelector('input[name="id"]');
-      if (idInput) {
-        idInput.setAttribute('readonly', 'true');
-        idInput.style.backgroundColor = 'var(--muted)';
-        idInput.style.cursor = 'not-allowed';
-      }
+  // const handleDialogOpen = (args: any) => {
+  //   if (args.element) {
+  //     const idInput = args.element.querySelector('input[name="id"]');
+  //     if (idInput) {
+  //       idInput.setAttribute('readonly', 'true');
+  //       idInput.style.backgroundColor = 'var(--muted)';
+  //       idInput.style.cursor = 'not-allowed';
+  //     }
       
-      // Find and replace the Save button with custom handler
-      const saveBtn = args.element.querySelector('.e-dialog-edit');
-      if (saveBtn) {
-        const newSaveBtn = saveBtn.cloneNode(true);
-        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+  //     // Find and replace the Save button with custom handler
+  //     const saveBtn = args.element.querySelector('.e-dialog-edit');
+  //     if (saveBtn) {
+  //       const newSaveBtn = saveBtn.cloneNode(true);
+  //       saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
         
-        newSaveBtn.addEventListener('click', (e: Event) => {
-          e.preventDefault();
-          e.stopPropagation();
+  //       newSaveBtn.addEventListener('click', (e: Event) => {
+  //         e.preventDefault();
+  //         e.stopPropagation();
           
-          // Collect form data from dialog inputs
-          const formData: any = {};
-          const inputs = args.element.querySelectorAll('input, textarea, select');
-          inputs.forEach((input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
-            const name = input.getAttribute('name');
-            if (name) {
-              formData[name] = input.value;
-            }
-          });
+  //         // Collect form data from dialog inputs
+  //         const formData: any = {};
+  //         const inputs = args.element.querySelectorAll('input, textarea, select');
+  //         inputs.forEach((input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+  //           const name = input.getAttribute('name');
+  //           if (name) {
+  //             formData[name] = input.value;
+  //           }
+  //         });
           
-          // Also get data from Syncfusion dropdowns
-          const dropdowns = args.element.querySelectorAll('.e-dropdownlist');
-          dropdowns.forEach((dd: any) => {
-            if (dd.ej2_instances && dd.ej2_instances[0]) {
-              const instance = dd.ej2_instances[0];
-              const name = instance.element?.getAttribute('name');
-              if (name) {
-                formData[name] = instance.value;
-              }
-            }
-          });
+  //         // Also get data from Syncfusion dropdowns
+  //         const dropdowns = args.element.querySelectorAll('.e-dropdownlist');
+  //         dropdowns.forEach((dd: any) => {
+  //           if (dd.ej2_instances && dd.ej2_instances[0]) {
+  //             const instance = dd.ej2_instances[0];
+  //             const name = instance.element?.getAttribute('name');
+  //             if (name) {
+  //               formData[name] = instance.value;
+  //             }
+  //           }
+  //         });
           
-          // Get numeric inputs
-          const numerics = args.element.querySelectorAll('.e-numerictextbox');
-          numerics.forEach((num: any) => {
-            if (num.ej2_instances && num.ej2_instances[0]) {
-              const instance = num.ej2_instances[0];
-              const name = instance.element?.getAttribute('name');
-              if (name) {
-                formData[name] = instance.value;
-              }
-            }
-          });
+  //         // Get numeric inputs
+  //         const numerics = args.element.querySelectorAll('.e-numerictextbox');
+  //         numerics.forEach((num: any) => {
+  //           if (num.ej2_instances && num.ej2_instances[0]) {
+  //             const instance = num.ej2_instances[0];
+  //             const name = instance.element?.getAttribute('name');
+  //             if (name) {
+  //               formData[name] = instance.value;
+  //             }
+  //           }
+  //         });
           
-          const taskId = parseInt(formData.id || args.data?.id);
-          if (!taskId) {
-            console.error('No task ID found');
-            return;
-          }
+  //         const taskId = parseInt(formData.id || args.data?.id);
+  //         if (!taskId) {
+  //           console.error('No task ID found');
+  //           return;
+  //         }
           
-          updateTask.mutate({
-            id: taskId,
-            data: {
-              taskName: formData.taskName,
-              status: formData.status,
-              priority: formData.priority,
-              progress: parseInt(formData.progress) || 0,
-              assignee: formData.assignee,
-              startDate: formData.startDate,
-              endDate: formData.endDate,
-              duration: parseInt(formData.duration) || null,
-              parentId: parseInt(formData.parentId) || null,
-              predecessor: formData.predecessor || null,
-              wbs: formData.wbs,
-              info: formData.info,
-            },
-          }, {
-            onSuccess: () => {
-              toast({ title: "Task saved successfully" });
-              // Close the dialog
-              if (kanbanInstance.current) {
-                (kanbanInstance.current as any).closeDialog();
-              }
-            },
-            onError: (err) => {
-              console.error('Failed to save task:', err);
-              toast({ title: "Failed to save task", variant: "destructive" });
-            },
-          });
-        });
-      }
-    }
-  };
+  //         updateTask.mutate({
+  //           id: taskId,
+  //           data: {
+  //             taskName: formData.taskName,
+  //             status: formData.status,
+  //             priority: formData.priority,
+  //             progress: parseInt(formData.progress) || 0,
+  //             assignee: formData.assignee,
+  //             startDate: formData.startDate,
+  //             endDate: formData.endDate,
+  //             duration: parseInt(formData.duration) || null,
+  //             parentId: parseInt(formData.parentId) || null,
+  //             predecessor: formData.predecessor || null,
+  //             wbs: formData.wbs,
+  //             info: formData.info,
+  //           },
+  //         }, {
+  //           onSuccess: () => {
+  //             toast({ title: "Task saved successfully" });
+  //             // Close the dialog
+  //             if (kanbanInstance.current) {
+  //               (kanbanInstance.current as any).closeDialog();
+  //             }
+  //           },
+  //           onError: (err) => {
+  //             console.error('Failed to save task:', err);
+  //             toast({ title: "Failed to save task", variant: "destructive" });
+  //           },
+  //         });
+
+  //         // if (kanbanInstance.current) {
+  //         //   (kanbanInstance.current as any).closeDialog();
+  //         // }
+  //       });
+
+  //     }
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -416,7 +421,7 @@ export function KanbanBoardCore({
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
             dialogSettings={{ fields: dialogFields }}
-            dialogOpen={handleDialogOpen}
+            //dialogOpen={handleDialogOpen}
             allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: 'transparent' }}

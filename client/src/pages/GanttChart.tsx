@@ -180,13 +180,39 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     );
   }
 
+  const matchesRoleFilter = (task: any) => {
+    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
+    if (roleFilter === "all") return true;
+    if (roleFilter === "both") return taskRoles.includes("Developer") && taskRoles.includes("Construction");
+    return taskRoles.includes(roleFilter);
+  };
+
+  const getMatchingTaskIds = () => {
+    if (!tasks) return new Set<number>();
+    const matchingIds = new Set<number>();
+    
+    tasks.forEach((task: any) => {
+      if (matchesRoleFilter(task)) {
+        matchingIds.add(task.id);
+        let parentId = task.parentId;
+        while (parentId) {
+          matchingIds.add(parentId);
+          const parentTask = tasks.find((t: any) => t.id === parentId);
+          parentId = parentTask?.parentId;
+        }
+      }
+    });
+    
+    return matchingIds;
+  };
+
+  const roleMatchingIds = getMatchingTaskIds();
+
   const filteredTasks = tasks?.filter((task: any) => {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
-    const matchesRole = roleFilter === "all" || 
-      (roleFilter === "both" ? (taskRoles.includes("Developer") && taskRoles.includes("Construction")) : taskRoles.includes(roleFilter));
+    const matchesRole = roleFilter === "all" || roleMatchingIds.has(task.id);
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||

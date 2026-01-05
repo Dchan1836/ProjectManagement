@@ -146,6 +146,9 @@ export function KanbanBoardCore({
     console.log('Kanban actionBegin:', args.requestType);
     
     if (args.requestType === 'cardChange' && args.changedRecords?.length > 0) {
+      // Cancel default action to prevent React/Syncfusion DOM conflict
+      args.cancel = true;
+      
       const cardData = args.changedRecords[0];
       console.log('Card data to save:', JSON.stringify(cardData));
       
@@ -165,14 +168,20 @@ export function KanbanBoardCore({
           assignee: cardData.assignee || cardData.Assignee,
           startDate: cardData.startDate,
           endDate: cardData.endDate,
-          duration: Number(cardData.duration),
-          parentId: Number(cardData.parentId),
+          duration: Number(cardData.duration) || null,
+          parentId: Number(cardData.parentId) || null,
           predecessor: cardData.predecessor,
           wbs: cardData.wbs,
           info: cardData.info || cardData.Info,
         },
       }, {
-        onSuccess: () => toast({ title: "Task saved successfully" }),
+        onSuccess: () => {
+          toast({ title: "Task saved successfully" });
+          // Close dialog manually after successful save
+          if (kanbanInstance.current) {
+            (kanbanInstance.current as any).closeDialog();
+          }
+        },
         onError: (err) => {
           console.error('Failed to save task:', err);
           toast({ title: "Failed to save task", variant: "destructive" });

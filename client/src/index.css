@@ -141,6 +141,49 @@
     @apply rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow duration-200 !important;
   }
 
+  /* Custom DatePicker Styling for Kanban Dialog */
+  .e-custom-datepicker.e-datepicker {
+    @apply w-full !important;
+  }
+
+  .e-custom-datepicker .e-input-group {
+    @apply h-9 rounded-md border border-input bg-background px-3 py-1 text-sm !important;
+  }
+
+  .e-custom-datepicker .e-input-group:hover,
+  .e-custom-datepicker .e-input-group.e-input-focus {
+    @apply border-ring ring-1 ring-ring !important;
+  }
+
+  .e-custom-datepicker .e-input {
+    @apply text-foreground !important;
+  }
+
+  .e-custom-datepicker .e-input::placeholder {
+    @apply text-muted-foreground !important;
+  }
+
+  .e-custom-datepicker .e-date-icon {
+    @apply text-muted-foreground !important;
+  }
+
+  /* Kanban Dialog Styling */
+  .e-kanban .e-dialog {
+    @apply rounded-xl shadow-lg !important;
+  }
+
+  .e-kanban .e-dialog .e-dlg-header-content {
+    @apply bg-background border-b border-border !important;
+  }
+
+  .e-kanban .e-dialog .e-dlg-content {
+    @apply bg-background p-0 !important;
+  }
+
+  .e-kanban .e-dialog .e-footer-content {
+    @apply hidden !important;
+  }
+
   .e-splitter {
     @apply border-none bg-transparent !important;
   }

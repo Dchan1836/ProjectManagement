@@ -235,10 +235,10 @@ export default function TaskList() {
     <Layout>
       <div className="h-full flex flex-col space-y-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-bold text-foreground">All Tasks</h1>
             <p className="text-muted-foreground">Click any cell to edit. Press Enter to save, Escape to cancel.</p>
-          </div>
+          </div> */}
           <div className="flex gap-2">
             {editingCell && (
               <div className="flex gap-1">

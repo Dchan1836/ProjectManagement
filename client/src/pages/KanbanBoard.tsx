@@ -427,14 +427,14 @@ export function KanbanBoardCore({
   };
   return (
     <div className="h-full flex flex-col space-y-4">
-      {showHeader && (
+      {/* {showHeader && (
         <div>
           <h1 className="text-3xl font-bold text-foreground">Task Board</h1>
           <p className="text-muted-foreground">
             Visualize and optimize your workflow.
           </p>
         </div>
-      )}
+      )} */}
       <div className="flex items-center gap-2 flex-wrap">
         <ButtonComponent
           onClick={toggleSwimlanes}

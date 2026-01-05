@@ -39,12 +39,16 @@ export const createCardTemplate =
             ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400"
             : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
 
-    const roleColor =
-      props.role === "Developer"
-        ? "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400"
-        : props.role === "Construction"
-          ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
-          : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
+    const getRoleColor = (role: string) => {
+      if (role === "Developer") {
+        return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400";
+      } else if (role === "Construction") {
+        return "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400";
+      }
+      return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
+    };
+
+    const roles = Array.isArray(props.role) ? props.role : (props.role ? [props.role] : []);
 
     const getInitials = (name: string) => {
       if (!name) return "??";
@@ -69,12 +73,15 @@ export const createCardTemplate =
             #{props.taskId}
             {props.wbs ? ` | WBS: ${props.wbs}` : ""}
           </span>
-          <div className="flex items-center gap-1">
-            <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleColor}`}
-            >
-              {props.role || "Developer"}
-            </span>
+          <div className="flex items-center gap-1 flex-wrap">
+            {roles.map((role: string, index: number) => (
+              <span
+                key={index}
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getRoleColor(role)}`}
+              >
+                {role}
+              </span>
+            ))}
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}
             >
@@ -243,7 +250,7 @@ export function KanbanBoardCore({
       validationRules: { required: true },
     },
     { text: "Status", key: "status", type: "DropDown" },
-    { text: "Role", key: "role", type: "DropDown" },
+    { text: "Role", key: "role", type: "TextBox" },
     { text: "Priority", key: "priority", type: "TextBox" },
     { text: "Progress", key: "progress", type: "Numeric" },
     { text: "Assignee", key: "assignee", type: "DropDown" },
@@ -363,11 +370,11 @@ export function KanbanBoardCore({
   }
 
   const formatDateToMMDDYYYY = (dateString: string | null | undefined) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
@@ -390,8 +397,8 @@ export function KanbanBoardCore({
       priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee =
       assigneeFilter === "all" || task.assignee === assigneeFilter;
-    const matchesRole =
-      roleFilter === "all" || task.role === roleFilter;
+    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
+    const matchesRole = roleFilter === "all" || taskRoles.includes(roleFilter);
 
     return matchesSearch && matchesPriority && matchesAssignee && matchesRole;
   });
@@ -452,74 +459,74 @@ export function KanbanBoardCore({
       </div>
 
       {showFilters && (
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search name, WBS or ID..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              data-testid="input-search-kanban"
-            />
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search name, WBS or ID..."
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                data-testid="input-search-kanban"
+              />
+            </div>
+
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger
+                className="w-[150px]"
+                data-testid="select-priority-filter-kanban"
+              >
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                <SelectItem value="Critical">Critical</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+                <SelectItem value="Normal">Normal</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger
+                className="w-[150px]"
+                data-testid="select-assignee-filter-kanban"
+              >
+                <SelectValue placeholder="Assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+                <SelectItem value="Alex Smith">Alex Smith</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger
+                className="w-[150px]"
+                data-testid="select-role-filter-kanban"
+              >
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="Developer">Developer</SelectItem>
+                <SelectItem value="Construction">Construction</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              className="text-muted-foreground hover:text-foreground"
+              data-testid="button-reset-filters-kanban"
+            >
+              <FilterX className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
           </div>
-
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger
-              className="w-[150px]"
-              data-testid="select-priority-filter-kanban"
-            >
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="Critical">Critical</SelectItem>
-              <SelectItem value="High">High</SelectItem>
-              <SelectItem value="Normal">Normal</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
-            <SelectTrigger
-              className="w-[150px]"
-              data-testid="select-assignee-filter-kanban"
-            >
-              <SelectValue placeholder="Assignee" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Assignees</SelectItem>
-              <SelectItem value="Jane Doe">Jane Doe</SelectItem>
-              <SelectItem value="Alex Smith">Alex Smith</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger
-              className="w-[150px]"
-              data-testid="select-role-filter-kanban"
-            >
-              <SelectValue placeholder="Role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="Developer">Developer</SelectItem>
-              <SelectItem value="Construction">Construction</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={resetFilters}
-            className="text-muted-foreground hover:text-foreground"
-            data-testid="button-reset-filters-kanban"
-          >
-            <FilterX className="h-4 w-4 mr-2" />
-            Reset
-          </Button>
         </div>
-      </div>
       )}
 
       <div className="flex-1 overflow-x-auto pb-4">

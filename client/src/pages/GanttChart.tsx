@@ -184,7 +184,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    const matchesRole = roleFilter === "all" || task.role === roleFilter;
+    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
+    const matchesRole = roleFilter === "all" || taskRoles.includes(roleFilter);
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||

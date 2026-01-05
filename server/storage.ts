@@ -29,7 +29,7 @@ export class MemStorage implements IStorage {
         wbs: "1",
         assignee: "Jane Doe",
         info: "Initial project kickoff and planning",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 2,
@@ -45,7 +45,7 @@ export class MemStorage implements IStorage {
         wbs: "1.1",
         assignee: "Jane Doe",
         info: "Site selection completed",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 3,
@@ -61,7 +61,7 @@ export class MemStorage implements IStorage {
         wbs: "1.2",
         assignee: "Alex Smith",
         info: "Soil quality is stable",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 4,
@@ -77,7 +77,7 @@ export class MemStorage implements IStorage {
         wbs: "1.3",
         assignee: "Jane Doe",
         info: "Budgeting in progress",
-        role: "Construction"
+        role: ["Construction", "Developer"]
       },
       {
         id: 5,
@@ -93,7 +93,7 @@ export class MemStorage implements IStorage {
         wbs: "2",
         assignee: "Alex Smith",
         info: "Main development cycle",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 6,
@@ -109,7 +109,7 @@ export class MemStorage implements IStorage {
         wbs: "2.1",
         assignee: "Alex Smith",
         info: "React and Tailwind setup",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 7,
@@ -125,7 +125,7 @@ export class MemStorage implements IStorage {
         wbs: "2.2",
         assignee: "Jane Doe",
         info: "Express and Drizzle configuration",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 8,
@@ -141,7 +141,7 @@ export class MemStorage implements IStorage {
         wbs: "2.3",
         assignee: "Alex Smith",
         info: "Connecting frontend to backend",
-        role: "Developer"
+        role: ["Developer", "Construction"]
       },
       {
         id: 9,
@@ -157,7 +157,7 @@ export class MemStorage implements IStorage {
         wbs: "3",
         assignee: "Jane Doe",
         info: "QA and bug fixing",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 10,
@@ -173,7 +173,7 @@ export class MemStorage implements IStorage {
         wbs: "3.1",
         assignee: "Alex Smith",
         info: "Verifying individual modules",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 11,
@@ -189,7 +189,7 @@ export class MemStorage implements IStorage {
         wbs: "3.2",
         assignee: "Jane Doe",
         info: "End-to-end system testing",
-        role: "Developer"
+        role: ["Developer", "Construction"]
       },
       {
         id: 12,
@@ -205,7 +205,7 @@ export class MemStorage implements IStorage {
         wbs: "3.3",
         assignee: "Alex Smith",
         info: "Client validation and sign-off",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 13,
@@ -221,7 +221,7 @@ export class MemStorage implements IStorage {
         wbs: "4",
         assignee: "Jane Doe",
         info: "Production deployment and go-live",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 14,
@@ -237,7 +237,7 @@ export class MemStorage implements IStorage {
         wbs: "4.1",
         assignee: "Alex Smith",
         info: "Configure production servers",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 15,
@@ -253,7 +253,7 @@ export class MemStorage implements IStorage {
         wbs: "4.2",
         assignee: "Jane Doe",
         info: "Migrate data to production",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 16,
@@ -269,7 +269,7 @@ export class MemStorage implements IStorage {
         wbs: "4.3",
         assignee: "Alex Smith",
         info: "Deploy application to production",
-        role: "Developer"
+        role: ["Developer", "Construction"]
       },
       {
         id: 17,
@@ -284,8 +284,8 @@ export class MemStorage implements IStorage {
         predecessor: "16FS",
         wbs: "4.4",
         assignee: "Jane Doe",
-        role: "Construction",
-        info: "Final production validation"
+        info: "Final production validation",
+        role: ["Construction"]
       },
       {
         id: 18,
@@ -301,7 +301,7 @@ export class MemStorage implements IStorage {
         wbs: "4.5",
         assignee: "Alex Smith",
         info: "Create user and technical documentation",
-        role: "Developer"
+        role: ["Developer"]
       },
       {
         id: 19,
@@ -317,7 +317,7 @@ export class MemStorage implements IStorage {
         wbs: "5",
         assignee: "Jane Doe",
         info: "Clear and prepare construction site",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 20,
@@ -333,7 +333,7 @@ export class MemStorage implements IStorage {
         wbs: "5.1",
         assignee: "Alex Smith",
         info: "Pour concrete foundation",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 21,
@@ -349,7 +349,7 @@ export class MemStorage implements IStorage {
         wbs: "5.2",
         assignee: "Jane Doe",
         info: "Erect steel and wood framing",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 22,
@@ -365,7 +365,7 @@ export class MemStorage implements IStorage {
         wbs: "5.3",
         assignee: "Alex Smith",
         info: "Install electrical systems and wiring",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 23,
@@ -381,7 +381,7 @@ export class MemStorage implements IStorage {
         wbs: "5.4",
         assignee: "Jane Doe",
         info: "Install water and drainage systems",
-        role: "Construction"
+        role: ["Construction"]
       },
       {
         id: 24,
@@ -397,7 +397,7 @@ export class MemStorage implements IStorage {
         wbs: "5.5",
         assignee: "Alex Smith",
         info: "Building code compliance inspection",
-        role: "Construction"
+        role: ["Construction", "Developer"]
       }
     ];
     this.idCounter = 25;

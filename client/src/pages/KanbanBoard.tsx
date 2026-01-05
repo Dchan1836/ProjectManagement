@@ -22,13 +22,13 @@ import { Button } from "@/components/ui/button";
 
 export const cardSettings: CardSettingsModel = {
   contentField: 'taskName',
-  headerField: 'id',
+  headerField: 'taskId',
   tagsField: 'priority',
   grabberField: 'color',
   footerCssField: 'className'
 };
 
-export const createCardTemplate = (onDelete: (id: number) => void) => (props: any) => {
+export const createCardTemplate = (onDelete: (taskId: number) => void) => (props: any) => {
   const priorityColor = 
     props.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400' :
     props.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400' :
@@ -43,14 +43,14 @@ export const createCardTemplate = (onDelete: (id: number) => void) => (props: an
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Delete task "${props.taskName}"?`)) {
-      onDelete(props.id);
+      onDelete(props.taskId);
     }
   };
 
   return (
     <div className="e-card-content p-3">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs font-mono text-muted-foreground">#{props.id}{props.wbs ? ` | WBS: ${props.wbs}` : ''}</span>
+        <span className="text-xs font-mono text-muted-foreground">#{props.taskId}{props.wbs ? ` | WBS: ${props.wbs}` : ''}</span>
         <div className="flex items-center gap-1">
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}>
             {props.priority || 'Normal'}
@@ -58,7 +58,7 @@ export const createCardTemplate = (onDelete: (id: number) => void) => (props: an
           <button
             onClick={handleDelete}
             className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded"
-            data-testid={`button-delete-task-${props.id}`}
+            data-testid={`button-delete-task-${props.taskId}`}
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -124,9 +124,9 @@ export function KanbanBoardCore({
 
   const handleDragStop = (args: any) => {
     const cardData = args.data?.[0];
-    if (cardData && cardData.id) {
+    if (cardData && cardData.taskId) {
       updateTask.mutate({
-        id: cardData.id,
+        id: cardData.taskId,
         data: { status: cardData.status },
       }, {
         onSuccess: () => toast({ title: "Task status updated" }),
@@ -135,8 +135,8 @@ export function KanbanBoardCore({
     }
   };
 
-  const handleDeleteTask = (id: number) => {
-    deleteTask.mutate(id, {
+  const handleDeleteTask = (taskId: number) => {
+    deleteTask.mutate(taskId, {
       onSuccess: () => toast({ title: "Task deleted successfully" }),
       onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
     });
@@ -149,7 +149,7 @@ export function KanbanBoardCore({
       const cardData = args.changedRecords[0];
       console.log('Card data to save:', JSON.stringify(cardData));
       
-      const taskId = cardData.id || cardData.Id;
+      const taskId = cardData.taskId || cardData.TaskId;
       if (!taskId) {
         console.error('No task ID found in card data');
         return;
@@ -180,7 +180,7 @@ export function KanbanBoardCore({
       });
     } else if (args.requestType === 'cardRemove' && args.deletedRecords?.length > 0) {
       const cardData = args.deletedRecords[0];
-      const taskId = cardData.id || cardData.Id;
+      const taskId = cardData.taskId || cardData.TaskId;
       deleteTask.mutate(taskId, {
         onSuccess: () => toast({ title: "Task deleted successfully" }),
         onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
@@ -191,7 +191,7 @@ export function KanbanBoardCore({
   const cardTemplate = createCardTemplate(handleDeleteTask);
 
   const dialogFields = [
-    { text: 'Task ID', key: 'id', type: 'TextBox' },
+    { text: 'Task ID', key: 'taskId', type: 'TextBox' },
     { text: 'Task Name', key: 'taskName', type: 'TextArea', validationRules: { required: true } },
     { text: 'Status', key: 'status', type: 'DropDown' },
     { text: 'Priority', key: 'priority', type: 'TextBox' },
@@ -312,11 +312,16 @@ export function KanbanBoardCore({
     );
   }
 
-  const filteredTasks = tasks?.filter((task: any) => {
+  const tasksWithTaskId = tasks?.map((task: any) => ({
+    ...task,
+    taskId: task.id,
+  }));
+
+  const filteredTasks = tasksWithTaskId?.filter((task: any) => {
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
-      (task.id && task.id.toString().includes(searchTerm))
+      (task.taskId && task.taskId.toString().includes(searchTerm))
     );
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;

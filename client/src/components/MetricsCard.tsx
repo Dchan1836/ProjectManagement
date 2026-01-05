@@ -13,7 +13,7 @@ interface MetricsCardProps {
 
 export function MetricsCard({ title, value, icon, trend, colorClass }: MetricsCardProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 group">
+    <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 group"  style={{height: '100%'}}>
       <div className="flex justify-between items-start mb-4">
         <div className={`p-3 rounded-xl ${colorClass} bg-opacity-10 text-opacity-100 group-hover:scale-110 transition-transform duration-300`}>
           {icon}

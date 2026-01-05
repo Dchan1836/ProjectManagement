@@ -161,12 +161,12 @@ export function KanbanBoardCore({
           taskName: cardData.taskName || cardData.TaskName,
           status: cardData.status || cardData.Status,
           priority: cardData.priority || cardData.Priority,
-          progress: cardData.progress ?? cardData.Progress ?? 0,
+          progress: Number(cardData.progress ?? cardData.Progress ?? 0),
           assignee: cardData.assignee || cardData.Assignee,
           startDate: cardData.startDate,
           endDate: cardData.endDate,
-          duration: cardData.duration,
-          parentId: cardData.parentId,
+          duration: Number(cardData.duration),
+          parentId: Number(cardData.parentId),
           predecessor: cardData.predecessor,
           wbs: cardData.wbs,
           info: cardData.info || cardData.Info,
@@ -190,21 +190,172 @@ export function KanbanBoardCore({
 
   const cardTemplate = createCardTemplate(handleDeleteTask);
 
-  const dialogFields = [
-    { text: 'Task ID', key: 'taskId', type: 'TextBox' },
-    { text: 'Task Name', key: 'taskName', type: 'TextArea', validationRules: { required: true } },
-    { text: 'Status', key: 'status', type: 'DropDown' },
-    { text: 'Priority', key: 'priority', type: 'TextBox' },
-    { text: 'Progress', key: 'progress', type: 'Numeric' },
-    { text: 'Assignee', key: 'assignee', type: 'DropDown' },
-    { text: 'Start Date', key: 'startDate', type: 'TextBox' },
-    { text: 'End Date', key: 'endDate', type: 'TextBox' },
-    { text: 'Duration', key: 'duration', type: 'Numeric' },
-    { text: 'Parent ID', key: 'parentId', type: 'Numeric' },
-    { text: 'Predecessor', key: 'predecessor', type: 'TextBox' },
-    { text: 'WBS', key: 'wbs', type: 'TextBox' },
-    { text: 'Info', key: 'info', type: 'TextArea' },
-  ];
+  const dialogTemplate = (props: any) => {
+    return (
+      <div className="e-kanban-dialog-content p-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Task ID</label>
+            <input
+              name="taskId"
+              defaultValue={props.taskId}
+              readOnly
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-muted cursor-not-allowed"
+              data-testid="input-dialog-taskId"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">WBS</label>
+            <input
+              name="wbs"
+              defaultValue={props.wbs || ''}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-wbs"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-1">
+          <label className="text-sm font-medium text-muted-foreground">Task Name</label>
+          <textarea
+            name="taskName"
+            defaultValue={props.taskName || ''}
+            rows={2}
+            className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            data-testid="input-dialog-taskName"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Status</label>
+            <select
+              name="status"
+              defaultValue={props.status || 'Open'}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="select-dialog-status"
+            >
+              <option value="Open">To Do</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Testing">Testing</option>
+              <option value="Close">Done</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Priority</label>
+            <select
+              name="priority"
+              defaultValue={props.priority || 'Normal'}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="select-dialog-priority"
+            >
+              <option value="Low">Low</option>
+              <option value="Normal">Normal</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Assignee</label>
+            <select
+              name="assignee"
+              defaultValue={props.assignee || ''}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="select-dialog-assignee"
+            >
+              <option value="">Unassigned</option>
+              <option value="Jane Doe">Jane Doe</option>
+              <option value="Alex Smith">Alex Smith</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Progress (%)</label>
+            <input
+              name="progress"
+              type="number"
+              min="0"
+              max="100"
+              defaultValue={props.progress ?? 0}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-progress"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Start Date</label>
+            <input
+              name="startDate"
+              type="date"
+              defaultValue={props.startDate ? new Date(props.startDate).toISOString().split('T')[0] : ''}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-startDate"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">End Date</label>
+            <input
+              name="endDate"
+              type="date"
+              defaultValue={props.endDate ? new Date(props.endDate).toISOString().split('T')[0] : ''}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-endDate"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Duration (days)</label>
+            <input
+              name="duration"
+              type="number"
+              min="0"
+              defaultValue={props.duration ?? ''}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-duration"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Parent ID</label>
+            <input
+              name="parentId"
+              type="number"
+              defaultValue={props.parentId ?? ''}
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-parentId"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Predecessor</label>
+            <input
+              name="predecessor"
+              defaultValue={props.predecessor || ''}
+              placeholder="e.g., 2FS, 3SS"
+              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              data-testid="input-dialog-predecessor"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-1">
+          <label className="text-sm font-medium text-muted-foreground">Info / Notes</label>
+          <textarea
+            name="info"
+            defaultValue={props.info || ''}
+            rows={3}
+            placeholder="Additional information about this task..."
+            className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            data-testid="input-dialog-info"
+          />
+        </div>
+      </div>
+    );
+  };
 
   // const handleDialogOpen = (args: any) => {
   //   if (args.element) {
@@ -425,7 +576,7 @@ export function KanbanBoardCore({
             key={JSON.stringify({ searchTerm, priorityFilter, assigneeFilter, taskCount: tasks?.length })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
-            dialogSettings={{ fields: dialogFields }}
+            dialogSettings={{ template: dialogTemplate }}
             //dialogOpen={handleDialogOpen}
             allowDragAndDrop={true}
             height="100%"

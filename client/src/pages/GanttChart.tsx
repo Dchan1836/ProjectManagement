@@ -353,7 +353,7 @@ const contextMenuOpen = (args) => {
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
-          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter, roleFilter })}
+          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter, roleFilter, taskCount: filteredTasks?.length })}
           taskFields={taskFields}
           height="100%"
           treeColumnIndex={2}

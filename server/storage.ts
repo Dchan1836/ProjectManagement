@@ -302,9 +302,105 @@ export class MemStorage implements IStorage {
         assignee: "Alex Smith",
         info: "Create user and technical documentation",
         role: "Developer"
+      },
+      {
+        id: 19,
+        taskName: "Site Preparation",
+        startDate: new Date("2024-07-01"),
+        endDate: new Date("2024-07-10"),
+        duration: 10,
+        progress: 0,
+        status: "Open",
+        priority: "High",
+        parentId: null,
+        predecessor: null,
+        wbs: "5",
+        assignee: "Jane Doe",
+        info: "Clear and prepare construction site",
+        role: "Construction"
+      },
+      {
+        id: 20,
+        taskName: "Foundation Work",
+        startDate: new Date("2024-07-11"),
+        endDate: new Date("2024-07-25"),
+        duration: 15,
+        progress: 0,
+        status: "Open",
+        priority: "Critical",
+        parentId: 19,
+        predecessor: "19FS",
+        wbs: "5.1",
+        assignee: "Alex Smith",
+        info: "Pour concrete foundation",
+        role: "Construction"
+      },
+      {
+        id: 21,
+        taskName: "Structural Framing",
+        startDate: new Date("2024-07-26"),
+        endDate: new Date("2024-08-15"),
+        duration: 21,
+        progress: 0,
+        status: "Open",
+        priority: "High",
+        parentId: 19,
+        predecessor: "20FS",
+        wbs: "5.2",
+        assignee: "Jane Doe",
+        info: "Erect steel and wood framing",
+        role: "Construction"
+      },
+      {
+        id: 22,
+        taskName: "Electrical Wiring",
+        startDate: new Date("2024-08-16"),
+        endDate: new Date("2024-08-30"),
+        duration: 15,
+        progress: 0,
+        status: "Open",
+        priority: "Normal",
+        parentId: 19,
+        predecessor: "21FS",
+        wbs: "5.3",
+        assignee: "Alex Smith",
+        info: "Install electrical systems and wiring",
+        role: "Construction"
+      },
+      {
+        id: 23,
+        taskName: "Plumbing Installation",
+        startDate: new Date("2024-08-16"),
+        endDate: new Date("2024-08-28"),
+        duration: 13,
+        progress: 0,
+        status: "Open",
+        priority: "Normal",
+        parentId: 19,
+        predecessor: "21FS",
+        wbs: "5.4",
+        assignee: "Jane Doe",
+        info: "Install water and drainage systems",
+        role: "Construction"
+      },
+      {
+        id: 24,
+        taskName: "Final Inspection",
+        startDate: new Date("2024-09-01"),
+        endDate: new Date("2024-09-05"),
+        duration: 5,
+        progress: 0,
+        status: "Open",
+        priority: "Critical",
+        parentId: 19,
+        predecessor: "22FS,23FS",
+        wbs: "5.5",
+        assignee: "Alex Smith",
+        info: "Building code compliance inspection",
+        role: "Construction"
       }
     ];
-    this.idCounter = 19;
+    this.idCounter = 25;
   }
 
   async getTasks(): Promise<Task[]> {

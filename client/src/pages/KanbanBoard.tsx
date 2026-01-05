@@ -134,6 +134,7 @@ export function KanbanBoardCore({
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [swimlaneKey, setSwimlaneKey] = useState({ keyField: "assignee" }); // Default to 'Assignee' for swimlanes
 
   const tasks = injectedTasks ?? fetchedTasks;
@@ -376,14 +377,17 @@ export function KanbanBoardCore({
       priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee =
       assigneeFilter === "all" || task.assignee === assigneeFilter;
+    const matchesRole =
+      roleFilter === "all" || task.role === roleFilter;
 
-    return matchesSearch && matchesPriority && matchesAssignee;
+    return matchesSearch && matchesPriority && matchesAssignee && matchesRole;
   });
 
   const resetFilters = () => {
     setSearchTerm("");
     setPriorityFilter("all");
     setAssigneeFilter("all");
+    setRoleFilter("all");
   };
 
   const toggleSwimlanes = (event) => {
@@ -477,6 +481,20 @@ export function KanbanBoardCore({
             </SelectContent>
           </Select>
 
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger
+              className="w-[150px]"
+              data-testid="select-role-filter-kanban"
+            >
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="Developer">Developer</SelectItem>
+              <SelectItem value="Construction">Construction</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Button
             variant="ghost"
             size="sm"
@@ -502,6 +520,7 @@ export function KanbanBoardCore({
               searchTerm,
               priorityFilter,
               assigneeFilter,
+              roleFilter,
               taskCount: tasks?.length,
             })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}

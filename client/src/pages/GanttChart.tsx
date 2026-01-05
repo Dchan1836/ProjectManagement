@@ -96,6 +96,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
 
 
   const actionBegin = (args: any) => {
@@ -183,6 +184,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
+    const matchesRole = roleFilter === "all" || task.role === roleFilter;
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
@@ -190,7 +192,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       (task.id && task.id.toString().includes(searchTerm))
     );
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee && matchesRole;
   });
 
   const resetFilters = () => {
@@ -198,6 +200,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setStatusFilter("all");
     setPriorityFilter("all");
     setAssigneeFilter("all");
+    setRoleFilter("all");
   };
 const contextMenuOpen = (args) => {
             let record = args.rowData;
@@ -318,6 +321,17 @@ const contextMenuOpen = (args) => {
             </SelectContent>
           </Select>
 
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-[150px]" data-testid="select-role-filter-gantt">
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="Developer">Developer</SelectItem>
+              <SelectItem value="Construction">Construction</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Button 
             variant="ghost" 
             size="sm" 
@@ -336,7 +350,7 @@ const contextMenuOpen = (args) => {
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
-          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
+          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter, roleFilter })}
           taskFields={taskFields}
           height="100%"
           treeColumnIndex={2}

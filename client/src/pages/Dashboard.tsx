@@ -154,18 +154,7 @@ export default function Dashboard() {
       content: '<div id="recent-activities-content"></div>'
     }
   ];
-  let resize = ['e-south-east', 'e-east', 'e-west', 'e-north', 'e-south'];
-function onResizeStart() {
-        console.log("Resize start");
-    }
-    //Dashboard Layout's drag event function
-    function onResize(args) {
-        // console.log("Resizing");
-    }
-    //Dashboard Layout's dragstop event function
-    function onResizeStop(args) {
-        console.log("Resize stop");
-    }
+
   return (
     <Layout>
       <div className="space-y-6 h-full flex flex-col">
@@ -180,17 +169,16 @@ function onResizeStart() {
             id="dashboard-layout"
             cellSpacing={cellSpacing}
             columns={4}
-            allowResizing={true}
-            resizableHandles={resize} resizeStart={onResizeStart.bind(this)} resize={onResize.bind(this)} resizeStop={onResizeStop.bind(this)}
             cellAspectRatio={1.2}
             allowDragging={true}
+            allowResizing={true}
             allowFloating={true}
             draggableHandle=".e-panel-header"
           >
             <div id="panel-metrics-projects" className="e-panel" data-row="0" data-col="0" data-sizex="1" data-sizey="1">
               <div className="e-panel-container">
                 <PanelHeader title="Total Projects" />
-                <div className="p-4 h-[100%]">
+                <div className="p-4">
                   <MetricsCard
                     title="Total Projects"
                     value={metrics?.totalProjects ?? 0}
@@ -205,7 +193,7 @@ function onResizeStart() {
             <div id="panel-metrics-progress" className="e-panel" data-row="0" data-col="1" data-sizex="1" data-sizey="1">
               <div className="e-panel-container">
                 <PanelHeader title="In Progress" />
-                <div className="p-4 h-[100%]" >
+                <div className="p-4">
                   <MetricsCard
                     title="In Progress"
                     value={metrics?.inProgressTasks ?? 0}
@@ -220,7 +208,7 @@ function onResizeStart() {
             <div id="panel-metrics-completed" className="e-panel" data-row="0" data-col="2" data-sizex="1" data-sizey="1">
               <div className="e-panel-container">
                 <PanelHeader title="Completed" />
-                <div className="p-4  h-[100%]">
+                <div className="p-4">
                   <MetricsCard
                     title="Completed"
                     value={metrics?.completedTasks ?? 0}
@@ -235,7 +223,7 @@ function onResizeStart() {
             <div id="panel-metrics-critical" className="e-panel" data-row="0" data-col="3" data-sizex="1" data-sizey="1">
               <div className="e-panel-container">
                 <PanelHeader title="Critical Tasks" />
-                <div className="p-4" style={{ height:'100%'}}>
+                <div className="p-4">
                   <MetricsCard
                     title="Critical Tasks"
                     value={metrics?.criticalTasks ?? 0}

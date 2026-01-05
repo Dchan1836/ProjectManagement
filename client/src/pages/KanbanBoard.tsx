@@ -39,6 +39,13 @@ export const createCardTemplate =
             ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400"
             : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
 
+    const roleColor =
+      props.role === "Developer"
+        ? "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400"
+        : props.role === "Construction"
+          ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
+          : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
+
     const getInitials = (name: string) => {
       if (!name) return "??";
       return name
@@ -63,6 +70,11 @@ export const createCardTemplate =
             {props.wbs ? ` | WBS: ${props.wbs}` : ""}
           </span>
           <div className="flex items-center gap-1">
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleColor}`}
+            >
+              {props.role || "Developer"}
+            </span>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}`}
             >
@@ -231,6 +243,7 @@ export function KanbanBoardCore({
       validationRules: { required: true },
     },
     { text: "Status", key: "status", type: "DropDown" },
+    { text: "Role", key: "role", type: "DropDown" },
     { text: "Priority", key: "priority", type: "TextBox" },
     { text: "Progress", key: "progress", type: "Numeric" },
     { text: "Assignee", key: "assignee", type: "DropDown" },

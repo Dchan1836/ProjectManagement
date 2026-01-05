@@ -380,6 +380,7 @@ const contextMenuOpen = (args) => {
             <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
             <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
             <ColumnDirective field='assignee' headerText='Assignee' width='120'></ColumnDirective>
+            <ColumnDirective field='role' headerText='Role' width='120'></ColumnDirective>
             <ColumnDirective field='info' headerText='Info' width='200' clipMode='EllipsisWithTooltip'></ColumnDirective>
             <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
             <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>

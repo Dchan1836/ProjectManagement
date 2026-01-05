@@ -44,7 +44,6 @@
     "@syncfusion/ej2-data": "^32.1.19",
     "@syncfusion/ej2-react-base": "^32.1.20",
     "@syncfusion/ej2-react-buttons": "^32.1.21",
-    "@syncfusion/ej2-react-calendars": "^32.1.21",
     "@syncfusion/ej2-react-gantt": "^32.1.20",
     "@syncfusion/ej2-react-kanban": "^32.1.20",
     "@syncfusion/ej2-react-layouts": "^32.1.19",

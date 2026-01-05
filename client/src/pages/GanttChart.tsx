@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX } from "lucide-react";
+import { Search, FilterX, Filter as FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import './GanttChart.css';
 import styled from 'styled-components';
@@ -91,6 +91,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const deleteTask = useDeleteTask();
   const { toast } = useToast();
   const ganttInstance = useRef<GanttComponent>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -252,7 +253,23 @@ const contextMenuOpen = (args) => {
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFilters(!showFilters)}
+          data-testid="button-toggle-filters-gantt"
+        >
+          <FilterIcon className="h-4 w-4 mr-2" />
+          {showFilters ? "Hide Filters" : "Show Filters"}
+        </Button>
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredTasks?.length} tasks
+        </div>
+      </div>
+
+      {showFilters && (
+      <div className="bg-card border border-border rounded-xl p-4 shadow-sm mb-4">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -311,12 +328,9 @@ const contextMenuOpen = (args) => {
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-
-          <div className="ml-auto text-sm text-muted-foreground">
-            Showing {filteredTasks?.length} tasks
-          </div>
         </div>
       </div>
+      )}
 
       <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">
         <GanttComponent

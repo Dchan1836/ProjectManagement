@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX, Trash2 } from "lucide-react";
+import { Search, FilterX, Trash2, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const cardSettings: CardSettingsModel = {
@@ -130,6 +130,7 @@ export function KanbanBoardCore({
   const defaultDeleteTask = useDeleteTask();
   const kanbanInstance = useRef(null);
   const { toast } = useToast();
+  const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
@@ -409,15 +410,31 @@ export function KanbanBoardCore({
           </p>
         </div>
       )}
-      <ButtonComponent
-        onClick={toggleSwimlanes}
-        cssClass="e-info e-small"
-        style={{ width: "150px" }}
-      >
-        {swimlaneKey.keyField === "assignee"
-          ? "Disable Swimlanes"
-          : "Enable Swimlanes (by Assignee)"}
-      </ButtonComponent>
+      <div className="flex items-center gap-2 flex-wrap">
+        <ButtonComponent
+          onClick={toggleSwimlanes}
+          cssClass="e-info e-small"
+          style={{ width: "150px" }}
+        >
+          {swimlaneKey.keyField === "assignee"
+            ? "Disable Swimlanes"
+            : "Enable Swimlanes (by Assignee)"}
+        </ButtonComponent>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFilters(!showFilters)}
+          data-testid="button-toggle-filters-kanban"
+        >
+          <Filter className="h-4 w-4 mr-2" />
+          {showFilters ? "Hide Filters" : "Show Filters"}
+        </Button>
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredTasks?.length} tasks
+        </div>
+      </div>
+
+      {showFilters && (
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[200px]">
@@ -470,12 +487,9 @@ export function KanbanBoardCore({
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
-
-          <div className="ml-auto text-sm text-muted-foreground">
-            Showing {filteredTasks?.length} tasks
-          </div>
         </div>
       </div>
+      )}
 
       <div className="flex-1 overflow-x-auto pb-4">
         <div className="h-full min-w-[1000px] bg-transparent">

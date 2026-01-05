@@ -274,6 +274,10 @@ const contextMenuOpen = (args) => {
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
         <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
+            <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
+          </div>
           <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all active:scale-95">
             Export Report
           </button>

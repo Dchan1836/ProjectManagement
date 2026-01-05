@@ -1,6 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { useTasks, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
 import {
@@ -9,7 +9,6 @@ import {
   ColumnDirective,
   CardSettingsModel,
 } from "@syncfusion/ej2-react-kanban";
-import { Calendar } from "@syncfusion/ej2-calendars";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -264,77 +263,6 @@ export function KanbanBoardCore({
     { text: "Info", key: "info", type: "TextArea" },
   ];
 
-  const parseDate = (dateStr: string | null | undefined): Date | undefined => {
-    if (!dateStr) return undefined;
-    const date = new Date(dateStr);
-    return isNaN(date.getTime()) ? undefined : date;
-  };
-
-  const handleDialogOpen = (args: any) => {
-    if (!args.element || !args.data) return;
-
-    setTimeout(() => {
-      const startDateInput = args.element.querySelector('input[name="startDate"]');
-      const endDateInput = args.element.querySelector('input[name="endDate"]');
-      
-      if (startDateInput) {
-        const container = startDateInput.parentElement;
-        if (container) {
-          startDateInput.style.display = 'none';
-          
-          const calendarWrapper = document.createElement('div');
-          calendarWrapper.className = 'calendar-wrapper';
-          calendarWrapper.style.cssText = 'margin-top: 8px;';
-          container.appendChild(calendarWrapper);
-          
-          const calendarDiv = document.createElement('div');
-          calendarDiv.id = 'startDateCalendar';
-          calendarWrapper.appendChild(calendarDiv);
-          
-          const calendar = new Calendar({
-            value: parseDate(args.data.startDate),
-            change: (e: any) => {
-              if (e.value) {
-                const formatted = `${String(e.value.getMonth() + 1).padStart(2, '0')}/${String(e.value.getDate()).padStart(2, '0')}/${e.value.getFullYear()}`;
-                startDateInput.value = formatted;
-                args.data.startDate = formatted;
-              }
-            }
-          });
-          calendar.appendTo(calendarDiv);
-        }
-      }
-
-      if (endDateInput) {
-        const container = endDateInput.parentElement;
-        if (container) {
-          endDateInput.style.display = 'none';
-          
-          const calendarWrapper = document.createElement('div');
-          calendarWrapper.className = 'calendar-wrapper';
-          calendarWrapper.style.cssText = 'margin-top: 8px;';
-          container.appendChild(calendarWrapper);
-          
-          const calendarDiv = document.createElement('div');
-          calendarDiv.id = 'endDateCalendar';
-          calendarWrapper.appendChild(calendarDiv);
-          
-          const calendar = new Calendar({
-            value: parseDate(args.data.endDate),
-            change: (e: any) => {
-              if (e.value) {
-                const formatted = `${String(e.value.getMonth() + 1).padStart(2, '0')}/${String(e.value.getDate()).padStart(2, '0')}/${e.value.getFullYear()}`;
-                endDateInput.value = formatted;
-                args.data.endDate = formatted;
-              }
-            }
-          });
-          calendar.appendTo(calendarDiv);
-        }
-      }
-    }, 100);
-  };
-
   // const handleDialogOpen = (args: any) => {
   //   if (args.element) {
   //     const idInput = args.element.querySelector('input[name="id"]');
@@ -499,14 +427,14 @@ export function KanbanBoardCore({
   };
   return (
     <div className="h-full flex flex-col space-y-4">
-      {/* {showHeader && (
+      {showHeader && (
         <div>
           <h1 className="text-3xl font-bold text-foreground">Task Board</h1>
           <p className="text-muted-foreground">
             Visualize and optimize your workflow.
           </p>
         </div>
-      )} */}
+      )}
       <div className="flex items-center gap-2 flex-wrap">
         <ButtonComponent
           onClick={toggleSwimlanes}
@@ -620,7 +548,7 @@ export function KanbanBoardCore({
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
             dialogSettings={{ fields: dialogFields }}
-            dialogOpen={handleDialogOpen}
+            //dialogOpen={handleDialogOpen}
             allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: "transparent" }}

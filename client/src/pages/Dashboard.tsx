@@ -169,6 +169,10 @@ function onResizeStart() {
   return (
     <Layout>
       <div className="space-y-6 h-full flex flex-col">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Project Overview</h1>
+          <p className="text-muted-foreground">Drag and drop panels to customize your dashboard layout.</p>
+        </div>
 
         <div className="flex-1 min-h-0">
           <DashboardLayoutComponent 

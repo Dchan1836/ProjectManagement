@@ -185,7 +185,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
     const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
-    const matchesRole = roleFilter === "all" || taskRoles.includes(roleFilter);
+    const matchesRole = roleFilter === "all" || 
+      (roleFilter === "both" ? (taskRoles.includes("Developer") && taskRoles.includes("Construction")) : taskRoles.includes(roleFilter));
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
@@ -330,6 +331,7 @@ const contextMenuOpen = (args) => {
               <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="Developer">Developer</SelectItem>
               <SelectItem value="Construction">Construction</SelectItem>
+              <SelectItem value="both">Both Roles</SelectItem>
             </SelectContent>
           </Select>
 

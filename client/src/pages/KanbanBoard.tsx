@@ -398,7 +398,8 @@ export function KanbanBoardCore({
     const matchesAssignee =
       assigneeFilter === "all" || task.assignee === assigneeFilter;
     const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
-    const matchesRole = roleFilter === "all" || taskRoles.includes(roleFilter);
+    const matchesRole = roleFilter === "all" || 
+      (roleFilter === "both" ? (taskRoles.includes("Developer") && taskRoles.includes("Construction")) : taskRoles.includes(roleFilter));
 
     return matchesSearch && matchesPriority && matchesAssignee && matchesRole;
   });
@@ -512,6 +513,7 @@ export function KanbanBoardCore({
                 <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="Developer">Developer</SelectItem>
                 <SelectItem value="Construction">Construction</SelectItem>
+                <SelectItem value="both">Both Roles</SelectItem>
               </SelectContent>
             </Select>
 

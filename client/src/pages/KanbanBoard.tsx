@@ -3,6 +3,7 @@ import { useTasks, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
+import { CalendarComponent, DateTimePicker, DatePickerComponent } from '@syncfusion/ej2-react-calendars';
 import {
   KanbanComponent,
   ColumnsDirective,
@@ -19,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Search, FilterX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TextBoxComponent, NumericTextBoxComponent, SmartTextAreaComponent } from '@syncfusion/ej2-react-inputs';
+import { DropDownListComponent, AutoCompleteComponent } from '@syncfusion/ej2-react-dropdowns';
 
 export const cardSettings: CardSettingsModel = {
   contentField: "taskName",
@@ -26,6 +29,154 @@ export const cardSettings: CardSettingsModel = {
   tagsField: "priority",
   grabberField: "color",
   footerCssField: "className",
+};
+const CustomDialogTemplate = (props: any): JSX.Element => {
+  // Access data fields using props
+  const assignees = ['Jane Doe', 'Alex Smith', ]
+  return (
+    <div className="custom-dialog-template">
+      <table>
+        <tbody>
+          <tr>
+            <td className="e-label">ID</td>
+            <td>
+              <TextBoxComponent id="taskId" value={props.taskId} enabled={false} className="e-field" />
+            </td>
+          </tr>
+          <tr>
+            <td className="e-label">Status</td>
+            <td>
+              {/* Example DropDownList for Status */}
+              <DropDownListComponent
+                id="status"
+                value={props.status}
+                dataSource={['Open', 'InProgress', 'Testing', 'Close']}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+              <td className="e-label">Start</td>
+              <td>
+                {/* Example DropDownList for Status */}
+                <DatePickerComponent
+                  id="startDate"
+                  value={props.startDate}
+                  className="e-field"
+                />
+              </td>
+              </tr>
+                            <tr>
+               <td className="e-label">End</td>
+                <td>
+                  {/* Example DropDownList for Status */}
+                  <DatePickerComponent
+                    id="endDate"
+                    value={props.endDate}
+                    className="e-field"
+                  />
+                </td>
+            </tr>
+            <tr>
+            <td className="e-label">Priority</td>
+            <td>
+              {/* Example DropDownList for Status */}
+              <DropDownListComponent
+                id="priority"
+                value={props.priority}
+                dataSource={['Low', 'Normal', 'High', 'Critical']}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+              <td className="e-label">Progress</td>
+              <td>
+                {/* Example DropDownList for Status */}
+                <NumericTextBoxComponent
+                  id="progress"
+                  value={props.progress}
+                  placeholder="Enter a number"
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="e-field"
+                />
+              </td>
+            </tr>
+             <tr>
+              <td className="e-label">Duration</td>
+
+              <td>
+                {/* Example DropDownList for Status */}
+                <NumericTextBoxComponent
+                  id="duration"
+                  value={props.duration}
+                  placeholder="Enter a number"
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="e-field"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className="e-label">Assignee</td>
+              <td>
+
+                <DropDownListComponent
+                  id="assignee"
+                  value={props.assignee}
+                  placeholder=""
+                  dataSource={assignees}
+                  className="e-field"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className="e-label">WBS</td>
+              <td>
+
+                <SmartTextAreaComponent
+                  id="wbs"
+                  value={props.wbs}
+                  placeholder=""
+                  className="e-field"
+                />
+              </td>
+            </tr>
+            <tr>
+                          <td className="e-label">Notes</td>
+                          <td>
+
+                            <SmartTextAreaComponent
+                              id="info"
+                              value={props.info}
+                              placeholder=""
+                              rows={4}
+                              cols={60}
+                              className="e-field"
+                            />
+                          </td>
+                        </tr>
+          {/* Add more fields as needed (e.g., Priority, Assignee, Summary) */}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+const CustomDatePicker = (props) => {
+  // 'props' will contain the current data of the card being edited
+  {console.log(`CalendarComponent: ${props.endDate}`)}
+  return (
+    <DatePickerComponent
+      id="endDate"
+      value={new Date(props.endDate)} // Bind the field value
+      format="dd/MM/yyyy" // Set your desired format here
+      placeholder="Enter date"
+      // Ensure two-way binding if needed for the component's internal logic
+    />
+  );
 };
 
 export const createCardTemplate =
@@ -56,7 +207,7 @@ export const createCardTemplate =
     };
 
     return (
-      <div className="e-card-content p-3">
+      <div id="MyE-Card" className="e-card-content p-3">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs font-mono text-muted-foreground">
             #{props.taskId}
@@ -233,7 +384,7 @@ export function KanbanBoardCore({
     { text: "Progress", key: "progress", type: "Numeric" },
     { text: "Assignee", key: "assignee", type: "DropDown" },
     { text: "Start Date", key: "startDate", type: "TextBox" },
-    { text: "End Date", key: "endDate", type: "TextBox" },
+    { text: "End Date", key: "endDate", type: "TextBox"},
     { text: "Duration", key: "duration", type: "Numeric" },
     { text: "Parent ID", key: "parentId", type: "Numeric" },
     { text: "Predecessor", key: "predecessor", type: "TextBox" },
@@ -241,103 +392,7 @@ export function KanbanBoardCore({
     { text: "Info", key: "info", type: "TextArea" },
   ];
 
-  // const handleDialogOpen = (args: any) => {
-  //   if (args.element) {
-  //     const idInput = args.element.querySelector('input[name="id"]');
-  //     if (idInput) {
-  //       idInput.setAttribute('readonly', 'true');
-  //       idInput.style.backgroundColor = 'var(--muted)';
-  //       idInput.style.cursor = 'not-allowed';
-  //     }
 
-  //     // Find and replace the Save button with custom handler
-  //     const saveBtn = args.element.querySelector('.e-dialog-edit');
-  //     if (saveBtn) {
-  //       const newSaveBtn = saveBtn.cloneNode(true);
-  //       saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
-
-  //       newSaveBtn.addEventListener('click', (e: Event) => {
-  //         e.preventDefault();
-  //         e.stopPropagation();
-
-  //         // Collect form data from dialog inputs
-  //         const formData: any = {};
-  //         const inputs = args.element.querySelectorAll('input, textarea, select');
-  //         inputs.forEach((input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
-  //           const name = input.getAttribute('name');
-  //           if (name) {
-  //             formData[name] = input.value;
-  //           }
-  //         });
-
-  //         // Also get data from Syncfusion dropdowns
-  //         const dropdowns = args.element.querySelectorAll('.e-dropdownlist');
-  //         dropdowns.forEach((dd: any) => {
-  //           if (dd.ej2_instances && dd.ej2_instances[0]) {
-  //             const instance = dd.ej2_instances[0];
-  //             const name = instance.element?.getAttribute('name');
-  //             if (name) {
-  //               formData[name] = instance.value;
-  //             }
-  //           }
-  //         });
-
-  //         // Get numeric inputs
-  //         const numerics = args.element.querySelectorAll('.e-numerictextbox');
-  //         numerics.forEach((num: any) => {
-  //           if (num.ej2_instances && num.ej2_instances[0]) {
-  //             const instance = num.ej2_instances[0];
-  //             const name = instance.element?.getAttribute('name');
-  //             if (name) {
-  //               formData[name] = instance.value;
-  //             }
-  //           }
-  //         });
-
-  //         const taskId = parseInt(formData.id || args.data?.id);
-  //         if (!taskId) {
-  //           console.error('No task ID found');
-  //           return;
-  //         }
-
-  //         updateTask.mutate({
-  //           id: taskId,
-  //           data: {
-  //             taskName: formData.taskName,
-  //             status: formData.status,
-  //             priority: formData.priority,
-  //             progress: parseInt(formData.progress) || 0,
-  //             assignee: formData.assignee,
-  //             startDate: formData.startDate,
-  //             endDate: formData.endDate,
-  //             duration: parseInt(formData.duration) || null,
-  //             parentId: parseInt(formData.parentId) || null,
-  //             predecessor: formData.predecessor || null,
-  //             wbs: formData.wbs,
-  //             info: formData.info,
-  //           },
-  //         }, {
-  //           onSuccess: () => {
-  //             toast({ title: "Task saved successfully" });
-  //             // Close the dialog
-  //             if (kanbanInstance.current) {
-  //               (kanbanInstance.current as any).closeDialog();
-  //             }
-  //           },
-  //           onError: (err) => {
-  //             console.error('Failed to save task:', err);
-  //             toast({ title: "Failed to save task", variant: "destructive" });
-  //           },
-  //         });
-
-  //         // if (kanbanInstance.current) {
-  //         //   (kanbanInstance.current as any).closeDialog();
-  //         // }
-  //       });
-
-  //     }
-  //   }
-  // };
 
   if (isLoading) {
     return (
@@ -492,7 +547,9 @@ export function KanbanBoardCore({
             })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
-            dialogSettings={{ fields: dialogFields }}
+            dialogSettings={
+                {template: CustomDialogTemplate}
+            }
             //dialogOpen={handleDialogOpen}
             allowDragAndDrop={true}
             height="100%"

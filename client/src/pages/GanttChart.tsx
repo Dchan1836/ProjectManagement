@@ -101,13 +101,23 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
   const actionBegin = (args: any) => {
 
-    if(args.requestType === 'beforeOpenAddDialog') {
-//        args.rowData.parentId = null; Not Needed
-    }
+  console.log(`actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`);
+
+    if(args.requestType === 'refresh') {
+
+    } else if(args.requestType === 'beforeOpenAddDialog') {
+           //        args.rowData.parentId = null; Not Needed
+               }
     if(args.requestType === 'beforeAdd' && args.action === 'beforeAdd') {
-       args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
-//        args.newTaskData.parentId = 6; //args.modifiedTaskData[0].id;
-//        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
+
+
+
+            let taskId = 6;
+            args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`
+            args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
+            args.newTaskData.predecessor = `${taskId}FS`;
+
+
 //    args.newTaskData.parentId = null;
 //args.rowPosition = 'Top'
         }
@@ -122,7 +132,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     // if(args.requestType !== 'scroll'){
     //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
     // }
-    console.log(`action: ${args.action} requestType: ${args?.requestType}`);
+    console.log(`actionComplete name: ${args?.name} type: ${args?.type} requestType: ${args?.requestType} action: ${args?.action}`);
+
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'
@@ -141,7 +152,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     ||/*args.requestType === 'save' && */args.action === 'add')
     {
 
-      const taskData = args.data;
+      const taskData = args.newTaskData;
       createTask.mutate({
         taskName: taskData.taskName,
         startDate: taskData.startDate,
@@ -153,6 +164,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         parentId: Number(taskData.parentId),
         wbs: taskData.wbs,
         assignee: taskData.assignee,
+        predecessor: taskData.predecessor,
         info: taskData.info,
       }, {
         onSuccess: () => toast({ title: "Task created successfully" }),
@@ -179,6 +191,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           parentId: taskData.parentId,
           wbs: taskData.wbs,
           assignee: taskData.assignee,
+        predecessor: taskData.predecessor,
           info: taskData.info,
         },
       }, {

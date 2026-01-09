@@ -106,8 +106,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     }
     if(args.requestType === 'beforeAdd' && args.action === 'beforeAdd') {
        args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
-        args.newTaskData.parentId = 6; //args.modifiedTaskData[0].id;
-        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
+//        args.newTaskData.parentId = 6; //args.modifiedTaskData[0].id;
+//        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
 //    args.newTaskData.parentId = null;
 //args.rowPosition = 'Top'
         }

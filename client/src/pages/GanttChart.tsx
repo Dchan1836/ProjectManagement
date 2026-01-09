@@ -2,6 +2,7 @@ import { Layout } from "@/components/Layout";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
 import { 
   GanttComponent, 
   Inject, 
@@ -97,7 +98,19 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
 
+
   const actionBegin = (args: any) => {
+
+    if(args.requestType === 'beforeOpenAddDialog') {
+//        args.rowData.parentId = null; Not Needed
+    }
+    if(args.requestType === 'beforeAdd' && args.action === 'beforeAdd') {
+       args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
+        args.newTaskData.parentId = 6; //args.modifiedTaskData[0].id;
+        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
+//    args.newTaskData.parentId = null;
+//args.rowPosition = 'Top'
+        }
     // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
     // console.log(elements);
     // const targetString = 'e-rhandler e-rcursor';
@@ -109,12 +122,25 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     // if(args.requestType !== 'scroll'){
     //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
     // }
+    console.log(`action: ${args.action} requestType: ${args?.requestType}`);
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'
     || args.type === 'refresh'
     || args.requestType === 'openEditDialog') {
-    } else if (/*args.requestType === 'save' && */args.action === 'add') {
+//     } else if (args.requestType === 'add' && args.action === 'add')
+//     {
+//        args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
+//        args.newTaskData.parentId = args.modifiedTaskData[0].id;
+//        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
+
+    } else if (args.requestType === 'openAddDialog' && args.action === 'OpenDialog')
+    {
+    // Here is where I can set some stuff
+    } else if ((args.requestType === 'add' && args.action === 'add')
+    ||/*args.requestType === 'save' && */args.action === 'add')
+    {
+
       const taskData = args.data;
       createTask.mutate({
         taskName: taskData.taskName,
@@ -124,7 +150,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         progress: taskData.progress || 0,
         status: taskData.status || 'Open',
         priority: taskData.priority,
-        parentId: taskData.parentId,
+        parentId: Number(taskData.parentId),
         wbs: taskData.wbs,
         assignee: taskData.assignee,
         info: taskData.info,
@@ -225,11 +251,15 @@ const contextMenuOpen = (args) => {
             if (args.item.id === 'expandrow') {
                 ganttInstance.current.expandByID(Number(record.ganttProperties.taskId));
             }
+            if (args.item.id === 'hidecols') {
+                ganttInstance.current.hideColumn(args.column!.headerText);
+            }
         };
         const contextMenuItems = ['AutoFitAll', 'AutoFit', 'TaskInformation', 'DeleteTask', 'Save', 'Cancel',
             'SortAscending', 'SortDescending', 'Add', 'DeleteDependency', 'Convert', 'Indent', 'Outdent',
             { text: 'Collapse the Row', target: '.e-content', id: 'collapserow' },
-            { text: 'Expand the Row', target: '.e-content', id: 'expandrow' }];
+            { text: 'Expand the Row', target: '.e-content', id: 'expandrow' },
+            { text: 'Hide Column', target: '.e-gridheader', id: 'hidecols' } as ContextMenuItemModel];
         function change() {
             const ganttDependencyViewContainer = document.querySelector('.e-gantt-dependency-view-container');
             if (switchRef.checked) {
@@ -238,6 +268,10 @@ const contextMenuOpen = (args) => {
                 ganttDependencyViewContainer.style.visibility  = 'visible';
             }
         }
+         const openAddDialog = () => {
+                ganttInstance.current.editModule.dialogModule.openAddDialog();
+            };
+
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -316,6 +350,7 @@ const contextMenuOpen = (args) => {
             Showing {filteredTasks?.length} tasks
           </div>
         </div>
+        <ButtonComponent onClick={openAddDialog}>Open Add Dialog</ButtonComponent>
       </div>
 
       <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">

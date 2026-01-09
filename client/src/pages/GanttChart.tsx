@@ -115,7 +115,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
             let taskId = 6;
             args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`
             args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
-            args.newTaskData.predecessor = `${taskId}FS`;
+            args.newTaskData.predecessor = `1FS`;
 
 
 //    args.newTaskData.parentId = null;

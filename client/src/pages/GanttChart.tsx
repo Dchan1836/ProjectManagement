@@ -1,6 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect} from "react";
 import { useToast } from "@/hooks/use-toast";
 import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
 import { 
@@ -17,6 +17,7 @@ import {
   ColumnDirective,
   ContextMenu,
 } from '@syncfusion/ej2-react-gantt';
+import { DialogComponent } from '@syncfusion/ej2-react-popups'
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -81,6 +82,57 @@ export const progressTemplate = (props: any) => {
   );
 };
 
+// Your Custom Dialog Component
+  const CustomDialog = ({ isOpen, data, title, onSave, onClose }) => {
+    const [taskName, setTaskName] = useState(data?.taskName || '');
+    const [resource, setResource] = useState(data?.resource || '');
+    const [parentId, setParentId] = useState(data?.parentId || '');
+    const [wbs, setWbs] = useState(data?.wbs || '');
+
+    useEffect(() => {
+        setTaskName(data?.taskName || '');
+        setResource(data?.resource || '');
+        setParentId(data?.parentId || '');
+        setWbs(data?.wbs || '');
+    }, [data]);
+
+    const saveHandler = () => {
+        console.log(`Saving: taskName: ${taskName } resource: ${resource}  parentId: ${parentId} wbs: ${wbs}`);
+        onSave();
+    };
+
+    return (
+      <DialogComponent
+        visible={isOpen}
+        header={title}
+        showCloseIcon={true}
+        width="350px"
+        buttons={[{ buttonModel: { content: 'Save', isPrimary: true }, click: saveHandler }, { buttonModel: { content: 'Cancel' }, click: onClose }]}
+        target=".e-gantt" // Ensure dialog is modal to the gantt
+        overlayClick={onClose}
+      >
+        <div>
+            <div>
+          <label>Task Name: </label>
+          <input type="text" value={taskName} onChange={(e) => setTaskName(e.target.value)} />
+          </div>
+          <div>
+              <label>Resource: </label>
+              <input type="text" value={resource} onChange={(e) => setResource(e.target.value)} />
+            </div>
+            <div>
+                          <label>Parent: </label>
+                          <input type="text" value={parentId} onChange={(e) => setResource(e.target.value)} />
+                        </div>
+            <div>
+                          <label>WBS: </label>
+                          <input type="text" value={wbs} onChange={(e) => setResource(e.target.value)} />
+                        </div>
+        </div>
+      </DialogComponent>
+    );
+  }
+
 interface GanttChartCoreProps {
   showHeader?: boolean;
 }
@@ -97,11 +149,33 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentTaskData, setCurrentTaskData] = useState(null)
+    const [dialogTitle, setDialogTitle] = useState('');
+
+const handleDoubleClick = (args: any) => {
+  console.log('Row double-clicked!', args.rowData);
+  // use this to figure out the wbs, parentid, dependency
+  const taskName = ganttInstance.current.updatedRecords[0].taskName;
+
+        //args.cancel = true; // Prevents default Syncfusion dialog
+        args.rowData.resource = 'Resource';
+        args.rowData.parentId = 3;
+        args.rowData.wbs = '1.3.3';
+        setCurrentTaskData(args.rowData);
+        setDialogTitle('New Task' );
+        setIsDialogOpen(true);
+
+   return;
+};
 
 
   const actionBegin = (args: any) => {
 
   console.log(`actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`);
+
+
+
 
     if(args.requestType === 'refresh') {
 
@@ -109,8 +183,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
            //        args.rowData.parentId = null; Not Needed
                }
     if(args.requestType === 'beforeAdd' && args.action === 'beforeAdd') {
-
-
+            // Here is how we can get the TaskRecords
+            const taskName = ganttInstance.current.updatedRecords[0].taskName;
 
             let taskId = 6;
             args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`
@@ -240,6 +314,14 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 const contextMenuOpen = (args) => {
             let record = args.rowData;
             console.log(`contextMenuOpen`);
+            if(args.name === 'contextMenuOpen' && args.type === 'Content') {
+                if(args.items[0].text === 'Task Information') {
+                // Here we show that the dialog objects are backed by
+                // Javascript objects.  We change attributes to affect
+                // the dialog
+                    args.items[0].text = `Edit Selected`;
+                }
+            }
             if (args.type !== 'Header' && record) {
                 if (!record.hasChildRecords) {
                     args.hideItems.push('Collapse the Row');
@@ -284,7 +366,24 @@ const contextMenuOpen = (args) => {
          const openAddDialog = () => {
                 ganttInstance.current.editModule.dialogModule.openAddDialog();
             };
+const handleCustomSave = (updatedData) => {
+    if (ganttInstance.current) {
+    //  You can do this, but I suggest creating the args for Handle Complete
 
+      if (currentTaskData.TaskID) { // Check if it's an existing task
+//        ganttInstance.current.updateRecordByID(updatedData);
+      } else { // It's a new task
+//        ganttInstance.current.addRecord(updatedData, 'Top');
+      }
+    }
+    setIsDialogOpen(false);
+    setCurrentTaskData(null);
+  };
+
+  const handleCustomClose = () => {
+    setIsDialogOpen(false);
+    setCurrentTaskData(null);
+  }
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -393,6 +492,7 @@ const contextMenuOpen = (args) => {
           rowHeight={45}
           taskbarHeight={30}
           actionBegin={actionBegin}
+          recordDoubleClick={handleDoubleClick}
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>
@@ -411,6 +511,13 @@ const contextMenuOpen = (args) => {
           <Inject services={[Selection, Toolbar, Edit, Filter, Sort, Resize, DayMarkers, ContextMenu]} />
         </GanttComponent>
       </div>
+      <CustomDialog
+              isOpen={isDialogOpen}
+              data={currentTaskData}
+              title={dialogTitle}
+              onSave={handleCustomSave}
+              onClose={handleCustomClose}
+            />
     </div>
   );
 }

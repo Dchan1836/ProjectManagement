@@ -42,6 +42,11 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid task data", details: parsed.error.errors });
       }
+      console.log(`app.post: ${JSON.stringify(parsed.data)}`);
+      if(parsed.data.parentId == 0) {
+        console.log(`Seting parentId to null`);
+          parsed.data.parentId = null;
+      }
       const task = await storage.createTask(parsed.data);
       res.status(201).json(task);
     } catch (error) {

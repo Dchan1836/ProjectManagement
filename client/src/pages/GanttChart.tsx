@@ -1,7 +1,8 @@
 import { Layout } from "@/components/Layout";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect} from "react";
 import { useToast } from "@/hooks/use-toast";
+import {ButtonComponent} from '@syncfusion/ej2-react-buttons';
 import { 
   GanttComponent, 
   Inject, 
@@ -16,7 +17,7 @@ import {
   ColumnDirective,
   ContextMenu,
 } from '@syncfusion/ej2-react-gantt';
-import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
+import { DialogComponent } from '@syncfusion/ej2-react-popups'
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,17 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FilterX, Filter as FilterIcon } from "lucide-react";
+import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import './GanttChart.css';
 import styled from 'styled-components';
-
-const hierarchyModeData = [
-  { text: 'Parent', value: 'Parent' },
-  { text: 'Child', value: 'Child' },
-  { text: 'Both', value: 'Both' },
-  { text: 'None', value: 'None' },
-];
 
 
 const MyButton = styled.button`
@@ -88,6 +82,57 @@ export const progressTemplate = (props: any) => {
   );
 };
 
+// Your Custom Dialog Component
+  const CustomDialog = ({ isOpen, data, title, onSave, onClose }) => {
+    const [taskName, setTaskName] = useState(data?.taskName || '');
+    const [resource, setResource] = useState(data?.resource || '');
+    const [parentId, setParentId] = useState(data?.parentId || '');
+    const [wbs, setWbs] = useState(data?.wbs || '');
+
+    useEffect(() => {
+        setTaskName(data?.taskName || '');
+        setResource(data?.resource || '');
+        setParentId(data?.parentId || '');
+        setWbs(data?.wbs || '');
+    }, [data]);
+
+    const saveHandler = () => {
+        console.log(`Saving: taskName: ${taskName } resource: ${resource}  parentId: ${parentId} wbs: ${wbs}`);
+        onSave();
+    };
+
+    return (
+      <DialogComponent
+        visible={isOpen}
+        header={title}
+        showCloseIcon={true}
+        width="350px"
+        buttons={[{ buttonModel: { content: 'Save', isPrimary: true }, click: saveHandler }, { buttonModel: { content: 'Cancel' }, click: onClose }]}
+        target=".e-gantt" // Ensure dialog is modal to the gantt
+        overlayClick={onClose}
+      >
+        <div>
+            <div>
+          <label>Task Name: </label>
+          <input type="text" value={taskName} onChange={(e) => setTaskName(e.target.value)} />
+          </div>
+          <div>
+              <label>Resource: </label>
+              <input type="text" value={resource} onChange={(e) => setResource(e.target.value)} />
+            </div>
+            <div>
+                          <label>Parent: </label>
+                          <input type="text" value={parentId} onChange={(e) => setResource(e.target.value)} />
+                        </div>
+            <div>
+                          <label>WBS: </label>
+                          <input type="text" value={wbs} onChange={(e) => setResource(e.target.value)} />
+                        </div>
+        </div>
+      </DialogComponent>
+    );
+  }
+
 interface GanttChartCoreProps {
   showHeader?: boolean;
 }
@@ -99,25 +144,57 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const deleteTask = useDeleteTask();
   const { toast } = useToast();
   const ganttInstance = useRef<GanttComponent>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [hierarchyMode, setHierarchyMode] = useState("Parent");
 
-  const onHierarchyModeChange = (args: any) => {
-    const mode = args.value as string;
-    setHierarchyMode(mode);
-    if (ganttInstance.current) {
-      ganttInstance.current.filterSettings.hierarchyMode = mode as any;
-      ganttInstance.current.clearFiltering();
-    }
-  };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentTaskData, setCurrentTaskData] = useState(null)
+    const [dialogTitle, setDialogTitle] = useState('');
+
+const handleDoubleClick = (args: any) => {
+  console.log('Row double-clicked!', args.rowData);
+  // use this to figure out the wbs, parentid, dependency
+  const taskName = ganttInstance.current.updatedRecords[0].taskName;
+
+        //args.cancel = true; // Prevents default Syncfusion dialog
+        args.rowData.resource = 'Resource';
+        args.rowData.parentId = 3;
+        args.rowData.wbs = '1.3.3';
+        setCurrentTaskData(args.rowData);
+        setDialogTitle('New Task' );
+        setIsDialogOpen(true);
+
+   return;
+};
 
 
   const actionBegin = (args: any) => {
+
+  console.log(`actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`);
+
+
+
+
+    if(args.requestType === 'refresh') {
+
+    } else if(args.requestType === 'beforeOpenAddDialog') {
+           //        args.rowData.parentId = null; Not Needed
+               }
+    if(args.requestType === 'beforeAdd' && args.action === 'beforeAdd') {
+            // Here is how we can get the TaskRecords
+            const taskName = ganttInstance.current.updatedRecords[0].taskName;
+
+            let taskId = 6;
+            args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`
+            args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
+            args.newTaskData.predecessor = `1FS`;
+
+
+//    args.newTaskData.parentId = null;
+//args.rowPosition = 'Top'
+        }
     // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
     // console.log(elements);
     // const targetString = 'e-rhandler e-rcursor';
@@ -129,13 +206,27 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     // if(args.requestType !== 'scroll'){
     //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
     // }
+    console.log(`actionComplete name: ${args?.name} type: ${args?.type} requestType: ${args?.requestType} action: ${args?.action}`);
+
     if((args.requestType ==='scroll' && args.action === 'HorizontalScroll')
     || args.requestType === 'scroll'
     || args.requestType === 'refresh'
     || args.type === 'refresh'
     || args.requestType === 'openEditDialog') {
-    } else if (/*args.requestType === 'save' && */args.action === 'add') {
-      const taskData = args.data;
+//     } else if (args.requestType === 'add' && args.action === 'add')
+//     {
+//        args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
+//        args.newTaskData.parentId = args.modifiedTaskData[0].id;
+//        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
+
+    } else if (args.requestType === 'openAddDialog' && args.action === 'OpenDialog')
+    {
+    // Here is where I can set some stuff
+    } else if ((args.requestType === 'add' && args.action === 'add')
+    ||/*args.requestType === 'save' && */args.action === 'add')
+    {
+
+      const taskData = args.newTaskData;
       createTask.mutate({
         taskName: taskData.taskName,
         startDate: taskData.startDate,
@@ -144,9 +235,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         progress: taskData.progress || 0,
         status: taskData.status || 'Open',
         priority: taskData.priority,
-        parentId: taskData.parentId,
+        parentId: Number(taskData.parentId),
         wbs: taskData.wbs,
         assignee: taskData.assignee,
+        predecessor: taskData.predecessor,
         info: taskData.info,
       }, {
         onSuccess: () => toast({ title: "Task created successfully" }),
@@ -173,6 +265,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           parentId: taskData.parentId,
           wbs: taskData.wbs,
           assignee: taskData.assignee,
+        predecessor: taskData.predecessor,
           info: taskData.info,
         },
       }, {
@@ -198,39 +291,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     );
   }
 
-  const matchesRoleFilter = (task: any) => {
-    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
-    if (roleFilter === "all") return true;
-    if (roleFilter === "both") return taskRoles.includes("Developer") && taskRoles.includes("Construction");
-    return taskRoles.includes(roleFilter);
-  };
-
-  const getMatchingTaskIds = () => {
-    if (!tasks) return new Set<number>();
-    const matchingIds = new Set<number>();
-    
-    tasks.forEach((task: any) => {
-      if (matchesRoleFilter(task)) {
-        matchingIds.add(task.id);
-        let parentId = task.parentId;
-        while (parentId) {
-          matchingIds.add(parentId);
-          const parentTask = tasks.find((t: any) => t.id === parentId);
-          parentId = parentTask?.parentId;
-        }
-      }
-    });
-    
-    return matchingIds;
-  };
-
-  const roleMatchingIds = getMatchingTaskIds();
-
   const filteredTasks = tasks?.filter((task: any) => {
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee = assigneeFilter === "all" || task.assignee === assigneeFilter;
-    const matchesRole = roleFilter === "all" || roleMatchingIds.has(task.id);
     const matchesSearch = !searchTerm || (
       (task.taskName && task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (task.wbs && task.wbs.includes(searchTerm)) ||
@@ -238,7 +302,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       (task.id && task.id.toString().includes(searchTerm))
     );
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee && matchesRole;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
   });
 
   const resetFilters = () => {
@@ -246,16 +310,18 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setStatusFilter("all");
     setPriorityFilter("all");
     setAssigneeFilter("all");
-    setRoleFilter("all");
-    setHierarchyMode("Parent");
-    if (ganttInstance.current) {
-      ganttInstance.current.filterSettings.hierarchyMode = "Parent";
-      ganttInstance.current.clearFiltering();
-    }
   };
 const contextMenuOpen = (args) => {
             let record = args.rowData;
             console.log(`contextMenuOpen`);
+            if(args.name === 'contextMenuOpen' && args.type === 'Content') {
+                if(args.items[0].text === 'Task Information') {
+                // Here we show that the dialog objects are backed by
+                // Javascript objects.  We change attributes to affect
+                // the dialog
+                    args.items[0].text = `Edit Selected`;
+                }
+            }
             if (args.type !== 'Header' && record) {
                 if (!record.hasChildRecords) {
                     args.hideItems.push('Collapse the Row');
@@ -280,11 +346,15 @@ const contextMenuOpen = (args) => {
             if (args.item.id === 'expandrow') {
                 ganttInstance.current.expandByID(Number(record.ganttProperties.taskId));
             }
+            if (args.item.id === 'hidecols') {
+                ganttInstance.current.hideColumn(args.column!.headerText);
+            }
         };
         const contextMenuItems = ['AutoFitAll', 'AutoFit', 'TaskInformation', 'DeleteTask', 'Save', 'Cancel',
             'SortAscending', 'SortDescending', 'Add', 'DeleteDependency', 'Convert', 'Indent', 'Outdent',
             { text: 'Collapse the Row', target: '.e-content', id: 'collapserow' },
-            { text: 'Expand the Row', target: '.e-content', id: 'expandrow' }];
+            { text: 'Expand the Row', target: '.e-content', id: 'expandrow' },
+            { text: 'Hide Column', target: '.e-gridheader', id: 'hidecols' } as ContextMenuItemModel];
         function change() {
             const ganttDependencyViewContainer = document.querySelector('.e-gantt-dependency-view-container');
             if (switchRef.checked) {
@@ -293,37 +363,42 @@ const contextMenuOpen = (args) => {
                 ganttDependencyViewContainer.style.visibility  = 'visible';
             }
         }
+         const openAddDialog = () => {
+                ganttInstance.current.editModule.dialogModule.openAddDialog();
+            };
+const handleCustomSave = (updatedData) => {
+    if (ganttInstance.current) {
+    //  You can do this, but I suggest creating the args for Handle Complete
+
+      if (currentTaskData.TaskID) { // Check if it's an existing task
+//        ganttInstance.current.updateRecordByID(updatedData);
+      } else { // It's a new task
+//        ganttInstance.current.addRecord(updatedData, 'Top');
+      }
+    }
+    setIsDialogOpen(false);
+    setCurrentTaskData(null);
+  };
+
+  const handleCustomClose = () => {
+    setIsDialogOpen(false);
+    setCurrentTaskData(null);
+  }
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          {/* <div>
+          <div>
             <h1 className="text-3xl font-bold text-foreground">Project Timeline</h1>
             <p className="text-muted-foreground">Manage project schedules and dependencies.</p>
-          </div> */}
+          </div>
           <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all active:scale-95">
             Export Report
           </button>
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowFilters(!showFilters)}
-          data-testid="button-toggle-filters-gantt"
-        >
-          <FilterIcon className="h-4 w-4 mr-2" />
-          {showFilters ? "Hide Filters" : "Show Filters"}
-        </Button>
-        <div className="text-sm text-muted-foreground">
-          Showing {filteredTasks?.length} tasks
-        </div>
-      </div>
-
-      {showFilters && (
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm mb-4">
+      <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -372,31 +447,6 @@ const contextMenuOpen = (args) => {
             </SelectContent>
           </Select>
 
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-[150px]" data-testid="select-role-filter-gantt">
-              <SelectValue placeholder="Role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="Developer">Developer</SelectItem>
-              <SelectItem value="Construction">Construction</SelectItem>
-              <SelectItem value="both">Both Roles</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Hierarchy:</span>
-            <DropDownListComponent 
-              dataSource={hierarchyModeData}
-              fields={{ text: 'text', value: 'value' }}
-              value={hierarchyMode}
-              change={onHierarchyModeChange}
-              width={120}
-              popupHeight="200px"
-              data-testid="select-hierarchy-mode"
-            />
-          </div>
-
           <Button 
             variant="ghost" 
             size="sm" 
@@ -407,15 +457,19 @@ const contextMenuOpen = (args) => {
             <FilterX className="h-4 w-4 mr-2" />
             Reset
           </Button>
+
+          <div className="ml-auto text-sm text-muted-foreground">
+            Showing {filteredTasks?.length} tasks
+          </div>
         </div>
+        <ButtonComponent onClick={openAddDialog}>Open Add Dialog</ButtonComponent>
       </div>
-      )}
 
       <div className="flex-1 bg-white dark:bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-1">
         <GanttComponent
           ref={ganttInstance}
           dataSource={filteredTasks}
-          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter, roleFilter, taskCount: filteredTasks?.length })}
+          key={JSON.stringify({ searchTerm, statusFilter, priorityFilter, assigneeFilter })}
           taskFields={taskFields}
           height="100%"
           treeColumnIndex={2}
@@ -438,6 +492,7 @@ const contextMenuOpen = (args) => {
           rowHeight={45}
           taskbarHeight={30}
           actionBegin={actionBegin}
+          recordDoubleClick={handleDoubleClick}
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>
@@ -445,7 +500,6 @@ const contextMenuOpen = (args) => {
             <ColumnDirective field='id' headerText='ID' width='70' textAlign='Left'></ColumnDirective>
             <ColumnDirective field='taskName' headerText='Task Name' width='250' clipMode='EllipsisWithTooltip'></ColumnDirective>
             <ColumnDirective field='assignee' headerText='Assignee' width='120'></ColumnDirective>
-            <ColumnDirective field='role' headerText='Role' width='120'></ColumnDirective>
             <ColumnDirective field='info' headerText='Info' width='200' clipMode='EllipsisWithTooltip'></ColumnDirective>
             <ColumnDirective field='priority' headerText='Priority' width='100'></ColumnDirective>
             <ColumnDirective field='status' headerText='Status' width='120'></ColumnDirective>
@@ -457,6 +511,13 @@ const contextMenuOpen = (args) => {
           <Inject services={[Selection, Toolbar, Edit, Filter, Sort, Resize, DayMarkers, ContextMenu]} />
         </GanttComponent>
       </div>
+      <CustomDialog
+              isOpen={isDialogOpen}
+              data={currentTaskData}
+              title={dialogTitle}
+              onSave={handleCustomSave}
+              onClose={handleCustomClose}
+            />
     </div>
   );
 }

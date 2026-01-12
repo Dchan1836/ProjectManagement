@@ -44,7 +44,7 @@ export default function SplitView() {
               )} />
               <PaneDirective size="50%" min="30%" content={() => (
                 <div id="ME20" className="h-full p-2 overflow-auto">
-                  <KanbanBoardCore 
+                  <KanbanBoardCore
                     tasks={tasks}
                     isLoading={isLoading}
                     updateTask={updateTask}

@@ -173,7 +173,10 @@ const handleDoubleClick = (args: any) => {
   const actionBegin = (args: any) => {
 
   console.log(`actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`);
-
+    // if (args.columnObject == undefined) {
+    //   // args.cancel = true;
+    //   args.columnObject.allowEditing = false;
+    // }
 
 
 
@@ -493,11 +496,6 @@ const handleCustomSave = (updatedData) => {
           taskbarHeight={30}
           actionBegin={actionBegin}
           actionComplete={handleActionComplete}
-          beginEdit={(args: any) => {
-            if (args.columnIndex !== undefined) {
-              args.cancel = true;
-            }
-          }}
         >
           <ColumnsDirective>
             <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>

@@ -492,7 +492,6 @@ const handleCustomSave = (updatedData) => {
           rowHeight={45}
           taskbarHeight={30}
           actionBegin={actionBegin}
-          recordDoubleClick={handleDoubleClick}
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>

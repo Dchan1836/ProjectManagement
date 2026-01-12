@@ -173,10 +173,7 @@ const handleDoubleClick = (args: any) => {
   const actionBegin = (args: any) => {
 
   console.log(`actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`);
-    // if (args.columnObject == undefined) {
-    //   // args.cancel = true;
-    //   args.columnObject.allowEditing = false;
-    // }
+
 
 
 

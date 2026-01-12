@@ -493,6 +493,11 @@ const handleCustomSave = (updatedData) => {
           taskbarHeight={30}
           actionBegin={actionBegin}
           actionComplete={handleActionComplete}
+          beginEdit={(args: any) => {
+            if (args.columnIndex !== undefined) {
+              args.cancel = true;
+            }
+          }}
         >
           <ColumnsDirective>
             <ColumnDirective field='wbs' headerText='WBS' width='70' textAlign='Left'></ColumnDirective>

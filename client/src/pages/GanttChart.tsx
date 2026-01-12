@@ -665,6 +665,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           taskbarHeight={30}
           actionBegin={actionBegin}
           recordDoubleClick={handleDoubleClick}
+          // Changed By Duane
           actionComplete={handleActionComplete}
         >
           <ColumnsDirective>

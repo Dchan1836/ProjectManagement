@@ -5,6 +5,7 @@ import {
   useUpdateTask,
   useDeleteTask,
 } from "@/hooks/use-tasks";
+import { DropDownList } from '@syncfusion/ej2-dropdowns';
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
@@ -61,6 +62,7 @@ export const taskFields = {
   priority: "priority",
   resourceInfo: "assignee",
   info: "info",
+  taskExtra: "taskExtra"
 };
 
 export const editSettings = {
@@ -69,6 +71,8 @@ export const editSettings = {
   allowDeleting: true,
   allowTaskbarEditing: true,
   showDeleteConfirmDialog: true,
+  // Set mode to 'Dialog' for dialog editing.  This pops up the default blue banner dialog
+  // mode: 'Dialog',
 };
 
 export const toolbar = [
@@ -137,6 +141,7 @@ const CustomDialog = ({ isOpen, data, title, onSave, onClose }) => {
       ]}
       target=".e-gantt" // Ensure dialog is modal to the gantt
       overlayClick={onClose}
+      close={onClose}
     >
       <TabComponent id="dialogTabs">
         <div className="e-tab-header">
@@ -230,6 +235,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
+
+    if(args?.cellIndex !== 2) {
+        return;
+    }
     // use this to figure out the wbs, parentid, dependency
     const taskName = ganttInstance.current.updatedRecords[0].taskName;
 
@@ -533,9 +542,33 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   };
 
   const handleCustomClose = () => {
+    console.log(`handleCustomClose`);
     setIsDialogOpen(false);
     setCurrentTaskData(null);
   };
+  let elem;
+   let dropdownlistObj;
+      let dropdownlist = {
+         create: () => {
+              elem = document.createElement('input');
+              return elem;
+          },
+        read: () => {
+             return dropdownlistObj.value;
+          },
+        destroy: () => {
+              dropdownlistObj.destroy();
+          },
+          write: (args) => {
+              dropdownlistObj = new DropDownList({
+                  dataSource: ganttInstance.current.treeGrid.grid.dataSource,
+                  fields: { value: 'taskExtra' },
+                  value: args.rowData[args.column.field],
+                  floatLabelType: 'Auto',
+              });
+              dropdownlistObj.appendTo(elem);
+          }
+      };
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -686,6 +719,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
               headerText="Task Name"
               width="250"
               clipMode="EllipsisWithTooltip"
+              allowEditing={false}
             ></ColumnDirective>
             <ColumnDirective
               field="assignee"
@@ -733,6 +767,14 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
               headerText="Progress"
               width="120"
               template={progressTemplate}
+              textAlign="Left"
+            ></ColumnDirective>
+
+            <ColumnDirective
+              field="taskExtra"
+              headerText="Task Extras"
+              width="120"
+              edit={dropdownlist}
               textAlign="Left"
             ></ColumnDirective>
           </ColumnsDirective>

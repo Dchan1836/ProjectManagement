@@ -687,6 +687,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           allowFiltering={true}
           allowSorting={true}
           allowResizing={true}
+          allowRowDragAndDrop={true}
           allowTaskbarDragAndDrop={true}
           highlightWeekends={true}
           toolbar={toolbar}

@@ -18,6 +18,7 @@ export class MemStorage implements IStorage {
       {
         id: 1,
         taskName: "Project Initiation",
+        taskExtra: "Project Initiation Extra",
         startDate: new Date("2024-04-01"),
         endDate: new Date("2024-04-21"),
         duration: 20,
@@ -33,6 +34,7 @@ export class MemStorage implements IStorage {
       {
         id: 2,
         taskName: "Identify Site Location",
+        taskExtra: "Idenfity Site Location Extra",
         startDate: new Date("2024-04-01"),
         endDate: new Date("2024-04-05"),
         duration: 4,

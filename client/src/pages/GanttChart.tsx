@@ -235,6 +235,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
+
+    if(args?.cellIndex !== 2) {
+        return;
+    }
     // use this to figure out the wbs, parentid, dependency
     const taskName = ganttInstance.current.updatedRecords[0].taskName;
 

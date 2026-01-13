@@ -15,22 +15,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.tasks = [
-      {
-        id: 1,
-        taskName: "Project Initiation",
-        taskExtra: "Project Initiation Extra",
-        startDate: new Date("2024-04-01"),
-        endDate: new Date("2024-04-21"),
-        duration: 20,
-        progress: 100,
-        status: "Close",
-        priority: "High",
-        parentId: null,
-        predecessor: null,
-        wbs: "1",
-        assignee: "Jane Doe",
-        info: "Initial project kickoff and planning"
-      },
+
       {
         id: 2,
         taskName: "Identify Site Location",
@@ -47,21 +32,7 @@ export class MemStorage implements IStorage {
         assignee: "Jane Doe",
         info: "Site selection completed"
       },
-      {
-        id: 3,
-        taskName: "Perform Soil Test",
-        startDate: new Date("2024-04-05"),
-        endDate: new Date("2024-04-10"),
-        duration: 5,
-        progress: 100,
-        status: "Close",
-        priority: "Critical",
-        parentId: 1,
-        predecessor: "2FS",
-        wbs: "1.2",
-        assignee: "Alex Smith",
-        info: "Soil quality is stable"
-      },
+
       {
         id: 4,
         taskName: "Project Estimation",
@@ -77,6 +48,21 @@ export class MemStorage implements IStorage {
         assignee: "Jane Doe",
         info: "Budgeting in progress"
       },
+       {
+              id: 3,
+              taskName: "Perform Soil Test",
+              startDate: new Date("2024-04-05"),
+              endDate: new Date("2024-04-10"),
+              duration: 5,
+              progress: 100,
+              status: "Close",
+              priority: "Critical",
+              parentId: 1,
+              predecessor: "2FS",
+              wbs: null,
+              assignee: "Alex Smith",
+              info: "Soil quality is stable"
+            },
       {
         id: 5,
         taskName: "Development Phase",
@@ -246,8 +232,8 @@ export class MemStorage implements IStorage {
         id: 16,
         taskName: "Code Deployment",
         startDate: new Date("2024-06-22"),
-        endDate: new Date("2024-06-24"),
-        duration: 3,
+        endDate: new Date("2024-07-20"),
+        duration: 8,
         progress: 0,
         status: "Open",
         priority: "High",
@@ -286,7 +272,23 @@ export class MemStorage implements IStorage {
         wbs: "4.5",
         assignee: "Alex Smith",
         info: "Create user and technical documentation"
-      }
+      },
+      {
+              id: 1,
+              taskName: "Project Initiation",
+              taskExtra: "Project Initiation Extra",
+              startDate: new Date("2024-04-01"),
+              endDate: new Date("2024-04-21"),
+              duration: 20,
+              progress: 100,
+              status: "Close",
+              priority: "High",
+              parentId: null,
+              predecessor: null,
+              wbs: "1",
+              assignee: "Jane Doe",
+              info: "Initial project kickoff and planning"
+            },
     ];
     this.idCounter = 19;
   }

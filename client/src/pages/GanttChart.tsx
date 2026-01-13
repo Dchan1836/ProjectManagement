@@ -27,6 +27,7 @@ import {
   ColumnsDirective,
   ColumnDirective,
   ContextMenu,
+  RowDD,
 } from "@syncfusion/ej2-react-gantt";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import { Input } from "@/components/ui/input";
@@ -324,9 +325,11 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       (args.requestType === "add" && args.action === "add") ||
       /*args.requestType === 'save' && */ args.action === "add"
     ) {
+      let action = 'create';
       const taskData = args.newTaskData;
       createTask.mutate(
         {
+          action: action,
           taskName: taskData.taskName,
           startDate: taskData.startDate,
           endDate: taskData.endDate,
@@ -347,7 +350,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         }
       );
     } else if (
-      args.requestType === "save" &&
+      (args.requestType === "save"  ||
+      args.requestType === "rowDropped" )&&
       (args.action === "DialogEditing" ||
         args.action === "TaskbarEditing" ||
         args.action === "CellEditing")
@@ -365,6 +369,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         {
           id: taskData.id,
           data: {
+            action: args.requestType,
             taskName: taskData.taskName,
             startDate: taskData.startDate,
             endDate: taskData.endDate,
@@ -682,6 +687,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           allowFiltering={true}
           allowSorting={true}
           allowResizing={true}
+          allowTaskbarDragAndDrop={true}
           highlightWeekends={true}
           toolbar={toolbar}
           editSettings={editSettings}
@@ -788,6 +794,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
               Resize,
               DayMarkers,
               ContextMenu,
+              RowDD,
             ]}
           />
         </GanttComponent>

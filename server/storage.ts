@@ -7,6 +7,7 @@ export interface IStorage {
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
   deleteTask(id: number): Promise<boolean>;
   getMetrics(): Promise<Metrics>;
+  getNextWbs(parentId: number | null): Promise<string>;
 }
 
 export class MemStorage implements IStorage {
@@ -349,6 +350,44 @@ export class MemStorage implements IStorage {
       inProgressTasks,
       criticalTasks
     };
+  }
+
+  async getNextWbs(parentId: number | null): Promise<string> {
+    if (parentId === null) {
+      const rootTasks = this.tasks.filter(t => t.parentId === null);
+      const wbsNumbers = rootTasks
+        .map(t => t.wbs)
+        .filter(wbs => wbs && /^\d+$/.test(wbs))
+        .map(wbs => parseInt(wbs!, 10));
+      
+      const maxWbs = wbsNumbers.length > 0 ? Math.max(...wbsNumbers) : 0;
+      return String(maxWbs + 1);
+    } else {
+      const parentTask = this.tasks.find(t => t.id === parentId);
+      
+      let parentWbs: string;
+      if (!parentTask) {
+        return `${parentId}.1`;
+      } else if (!parentTask.wbs) {
+        parentWbs = String(parentId);
+      } else {
+        parentWbs = parentTask.wbs;
+      }
+
+      const siblingTasks = this.tasks.filter(t => t.parentId === parentId);
+      const childWbsNumbers = siblingTasks
+        .map(t => t.wbs)
+        .filter(wbs => wbs && wbs.startsWith(parentWbs + "."))
+        .map(wbs => {
+          const suffix = wbs!.substring(parentWbs.length + 1);
+          const firstPart = suffix.split(".")[0];
+          return parseInt(firstPart, 10);
+        })
+        .filter(n => !isNaN(n));
+      
+      const maxChildNum = childWbsNumbers.length > 0 ? Math.max(...childWbsNumbers) : 0;
+      return `${parentWbs}.${maxChildNum + 1}`;
+    }
   }
 }
 

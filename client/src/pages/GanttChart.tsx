@@ -6,8 +6,9 @@ import {
   useDeleteTask,
 } from "@/hooks/use-tasks";
 import { DropDownList } from '@syncfusion/ej2-dropdowns';
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
 import {
   TabComponent,
@@ -232,6 +233,22 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentTaskData, setCurrentTaskData] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("");
+  const pendingWbsRef = useRef<string | null>(null);
+
+  const fetchNextWbs = useCallback(async (parentId: number | null): Promise<string> => {
+    try {
+      const url = parentId !== null 
+        ? `/api/next-wbs?parentId=${parentId}` 
+        : `/api/next-wbs`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch WBS");
+      const data = await response.json();
+      return data.wbs;
+    } catch (error) {
+      console.error("Failed to fetch next WBS:", error);
+      return "";
+    }
+  }, []);
 
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
@@ -253,7 +270,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     return;
   };
 
-  const actionBegin = (args: any) => {
+  const actionBegin = async (args: any) => {
     console.log(
       `actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`
     );
@@ -274,26 +291,21 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
     if (args.requestType === "refresh") {
     } else if (args.requestType === "beforeOpenAddDialog") {
-      //        args.rowData.parentId = null; Not Needed
+      const selectedRecords = ganttInstance.current?.selectionModule?.getSelectedRecords() as any[];
+      const parentId = selectedRecords?.[0]?.id ?? null;
+      const nextWbs = await fetchNextWbs(parentId);
+      pendingWbsRef.current = nextWbs;
+      
+      if (args.rowData) {
+        args.rowData.wbs = nextWbs;
+      }
     }
     if (args.requestType === "beforeAdd" && args.action === "beforeAdd") {
-      // Here is how we can get the TaskRecords
-      const taskName = ganttInstance.current.updatedRecords[0].taskName;
-
-      let taskId = 6;
-      args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`;
-      args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
-      args.newTaskData.predecessor = `1FS`;
-
-      //    args.newTaskData.parentId = null;
-      //args.rowPosition = 'Top'
+      if (pendingWbsRef.current) {
+        args.newTaskData.wbs = pendingWbsRef.current;
+        args.data.wbs = pendingWbsRef.current;
+      }
     }
-    // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
-    // console.log(elements);
-    // const targetString = 'e-rhandler e-rcursor';
-    // if(document.getElementsByClassName() === targetString){
-    //   console.log("found component");
-    // }
   };
   const handleActionComplete = (args: any) => {
     // if(args.requestType !== 'scroll'){
@@ -319,12 +331,22 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       args.requestType === "openAddDialog" &&
       args.action === "OpenDialog"
     ) {
-      // Here is where I can set some stuff
+      if (pendingWbsRef.current) {
+        setTimeout(() => {
+          const wbsInput = document.querySelector('input[id*="_wbs"]') as HTMLInputElement;
+          if (wbsInput) {
+            wbsInput.value = pendingWbsRef.current || "";
+            const event = new Event('input', { bubbles: true });
+            wbsInput.dispatchEvent(event);
+          }
+        }, 100);
+      }
     } else if (
       (args.requestType === "add" && args.action === "add") ||
       /*args.requestType === 'save' && */ args.action === "add"
     ) {
       const taskData = args.newTaskData;
+      const wbsToUse = taskData.wbs || pendingWbsRef.current;
       createTask.mutate(
         {
           taskName: taskData.taskName,
@@ -335,13 +357,16 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           status: taskData.status || "Open",
           priority: taskData.priority,
           parentId: Number(taskData.parentId),
-          wbs: taskData.wbs,
+          wbs: wbsToUse,
           assignee: taskData.assignee,
           predecessor: taskData.predecessor,
           info: taskData.info,
         },
         {
-          onSuccess: () => toast({ title: "Task created successfully" }),
+          onSuccess: () => {
+            toast({ title: "Task created successfully" });
+            pendingWbsRef.current = null;
+          },
           onError: () =>
             toast({ title: "Failed to create task", variant: "destructive" }),
         }

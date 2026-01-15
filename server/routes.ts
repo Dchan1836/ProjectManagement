@@ -98,24 +98,5 @@ export async function registerRoutes(
     res.json(metrics);
   });
 
-  app.get("/api/next-wbs", async (req, res) => {
-    try {
-      const parentIdParam = req.query.parentId;
-      let parentId: number | null = null;
-      
-      if (parentIdParam !== undefined && parentIdParam !== null && parentIdParam !== "") {
-        parentId = parseInt(parentIdParam as string);
-        if (isNaN(parentId)) {
-          parentId = null;
-        }
-      }
-      
-      const nextWbs = await storage.getNextWbs(parentId);
-      res.json({ wbs: nextWbs });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to generate WBS" });
-    }
-  });
-
   return httpServer;
 }

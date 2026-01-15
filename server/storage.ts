@@ -15,23 +15,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.tasks = [
-      {
-        id: 1,
-        taskName: "Project Initiation",
-        taskExtra: "Project Initiation Extra",
-        startDate: new Date("2024-04-01"),
-        endDate: new Date("2024-04-21"),
-        duration: 20,
-        progress: 100,
-        status: "Close",
-        priority: "High",
-        parentId: null,
-        predecessor: null,
-        wbs: "1",
-        assignee: "Jane Doe",
-        info: "Initial project kickoff and planning",
-        role: ["Construction"]
-      },
+
       {
         id: 2,
         taskName: "Identify Site Location",
@@ -46,25 +30,9 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "1.1",
         assignee: "Jane Doe",
-        info: "Site selection completed",
-        role: ["Construction"]
+        info: "Site selection completed"
       },
-      {
-        id: 3,
-        taskName: "Perform Soil Test",
-        startDate: new Date("2024-04-05"),
-        endDate: new Date("2024-04-10"),
-        duration: 5,
-        progress: 100,
-        status: "Close",
-        priority: "Critical",
-        parentId: 1,
-        predecessor: "2FS",
-        wbs: "1.2",
-        assignee: "Alex Smith",
-        info: "Soil quality is stable",
-        role: ["Construction"]
-      },
+
       {
         id: 4,
         taskName: "Project Estimation",
@@ -78,9 +46,23 @@ export class MemStorage implements IStorage {
         predecessor: "3FS",
         wbs: "1.3",
         assignee: "Jane Doe",
-        info: "Budgeting in progress",
-        role: ["Construction", "Developer"]
+        info: "Budgeting in progress"
       },
+       {
+              id: 3,
+              taskName: "Perform Soil Test",
+              startDate: new Date("2024-04-05"),
+              endDate: new Date("2024-04-10"),
+              duration: 5,
+              progress: 100,
+              status: "Close",
+              priority: "Critical",
+              parentId: 1,
+              predecessor: "2FS",
+              wbs: null,
+              assignee: "Alex Smith",
+              info: "Soil quality is stable"
+            },
       {
         id: 5,
         taskName: "Development Phase",
@@ -94,8 +76,7 @@ export class MemStorage implements IStorage {
         predecessor: "1FS",
         wbs: "2",
         assignee: "Alex Smith",
-        info: "Main development cycle",
-        role: ["Developer"]
+        info: "Main development cycle"
       },
       {
         id: 6,
@@ -110,8 +91,7 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "2.1",
         assignee: "Alex Smith",
-        info: "React and Tailwind setup",
-        role: ["Developer"]
+        info: "React and Tailwind setup"
       },
       {
         id: 7,
@@ -126,8 +106,7 @@ export class MemStorage implements IStorage {
         predecessor: "6SS",
         wbs: "2.2",
         assignee: "Jane Doe",
-        info: "Express and Drizzle configuration",
-        role: ["Developer"]
+        info: "Express and Drizzle configuration"
       },
       {
         id: 8,
@@ -142,8 +121,7 @@ export class MemStorage implements IStorage {
         predecessor: "6FS,7FS",
         wbs: "2.3",
         assignee: "Alex Smith",
-        info: "Connecting frontend to backend",
-        role: ["Developer", "Construction"]
+        info: "Connecting frontend to backend"
       },
       {
         id: 9,
@@ -158,8 +136,7 @@ export class MemStorage implements IStorage {
         predecessor: "5FS",
         wbs: "3",
         assignee: "Jane Doe",
-        info: "QA and bug fixing",
-        role: ["Developer"]
+        info: "QA and bug fixing"
       },
       {
         id: 10,
@@ -174,8 +151,7 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "3.1",
         assignee: "Alex Smith",
-        info: "Verifying individual modules",
-        role: ["Developer"]
+        info: "Verifying individual modules"
       },
       {
         id: 11,
@@ -190,8 +166,7 @@ export class MemStorage implements IStorage {
         predecessor: "10FS",
         wbs: "3.2",
         assignee: "Jane Doe",
-        info: "End-to-end system testing",
-        role: ["Developer", "Construction"]
+        info: "End-to-end system testing"
       },
       {
         id: 12,
@@ -206,8 +181,7 @@ export class MemStorage implements IStorage {
         predecessor: "11FS",
         wbs: "3.3",
         assignee: "Alex Smith",
-        info: "Client validation and sign-off",
-        role: ["Construction"]
+        info: "Client validation and sign-off"
       },
       {
         id: 13,
@@ -222,8 +196,7 @@ export class MemStorage implements IStorage {
         predecessor: "9FS",
         wbs: "4",
         assignee: "Jane Doe",
-        info: "Production deployment and go-live",
-        role: ["Developer"]
+        info: "Production deployment and go-live"
       },
       {
         id: 14,
@@ -238,8 +211,7 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "4.1",
         assignee: "Alex Smith",
-        info: "Configure production servers",
-        role: ["Developer"]
+        info: "Configure production servers"
       },
       {
         id: 15,
@@ -254,15 +226,14 @@ export class MemStorage implements IStorage {
         predecessor: "14FS",
         wbs: "4.2",
         assignee: "Jane Doe",
-        info: "Migrate data to production",
-        role: ["Developer"]
+        info: "Migrate data to production"
       },
       {
         id: 16,
         taskName: "Code Deployment",
         startDate: new Date("2024-06-22"),
-        endDate: new Date("2024-06-24"),
-        duration: 3,
+        endDate: new Date("2024-07-20"),
+        duration: 8,
         progress: 0,
         status: "Open",
         priority: "High",
@@ -270,8 +241,7 @@ export class MemStorage implements IStorage {
         predecessor: "14FS,15FS",
         wbs: "4.3",
         assignee: "Alex Smith",
-        info: "Deploy application to production",
-        role: ["Developer", "Construction"]
+        info: "Deploy application to production"
       },
       {
         id: 17,
@@ -286,8 +256,7 @@ export class MemStorage implements IStorage {
         predecessor: "16FS",
         wbs: "4.4",
         assignee: "Jane Doe",
-        info: "Final production validation",
-        role: ["Construction"]
+        info: "Final production validation"
       },
       {
         id: 18,
@@ -302,107 +271,26 @@ export class MemStorage implements IStorage {
         predecessor: "16SS",
         wbs: "4.5",
         assignee: "Alex Smith",
-        info: "Create user and technical documentation",
-        role: ["Developer"]
+        info: "Create user and technical documentation"
       },
       {
-        id: 19,
-        taskName: "Site Preparation",
-        startDate: new Date("2024-07-01"),
-        endDate: new Date("2024-07-10"),
-        duration: 10,
-        progress: 0,
-        status: "Open",
-        priority: "High",
-        parentId: null,
-        predecessor: null,
-        wbs: "5",
-        assignee: "Jane Doe",
-        info: "Clear and prepare construction site",
-        role: ["Construction"]
-      },
-      {
-        id: 20,
-        taskName: "Foundation Work",
-        startDate: new Date("2024-07-11"),
-        endDate: new Date("2024-07-25"),
-        duration: 15,
-        progress: 0,
-        status: "Open",
-        priority: "Critical",
-        parentId: 19,
-        predecessor: "19FS",
-        wbs: "5.1",
-        assignee: "Alex Smith",
-        info: "Pour concrete foundation",
-        role: ["Construction"]
-      },
-      {
-        id: 21,
-        taskName: "Structural Framing",
-        startDate: new Date("2024-07-26"),
-        endDate: new Date("2024-08-15"),
-        duration: 21,
-        progress: 0,
-        status: "Open",
-        priority: "High",
-        parentId: 19,
-        predecessor: "20FS",
-        wbs: "5.2",
-        assignee: "Jane Doe",
-        info: "Erect steel and wood framing",
-        role: ["Construction"]
-      },
-      {
-        id: 22,
-        taskName: "Electrical Wiring",
-        startDate: new Date("2024-08-16"),
-        endDate: new Date("2024-08-30"),
-        duration: 15,
-        progress: 0,
-        status: "Open",
-        priority: "Normal",
-        parentId: 19,
-        predecessor: "21FS",
-        wbs: "5.3",
-        assignee: "Alex Smith",
-        info: "Install electrical systems and wiring",
-        role: ["Construction"]
-      },
-      {
-        id: 23,
-        taskName: "Plumbing Installation",
-        startDate: new Date("2024-08-16"),
-        endDate: new Date("2024-08-28"),
-        duration: 13,
-        progress: 0,
-        status: "Open",
-        priority: "Normal",
-        parentId: 19,
-        predecessor: "21FS",
-        wbs: "5.4",
-        assignee: "Jane Doe",
-        info: "Install water and drainage systems",
-        role: ["Construction"]
-      },
-      {
-        id: 24,
-        taskName: "Final Inspection",
-        startDate: new Date("2024-09-01"),
-        endDate: new Date("2024-09-05"),
-        duration: 5,
-        progress: 0,
-        status: "Open",
-        priority: "Critical",
-        parentId: 19,
-        predecessor: "22FS,23FS",
-        wbs: "5.5",
-        assignee: "Alex Smith",
-        info: "Building code compliance inspection",
-        role: ["Construction", "Developer"]
-      }
+              id: 1,
+              taskName: "Project Initiation",
+              taskExtra: "Project Initiation Extra",
+              startDate: new Date("2024-04-01"),
+              endDate: new Date("2024-04-21"),
+              duration: 20,
+              progress: 100,
+              status: "Close",
+              priority: "High",
+              parentId: null,
+              predecessor: null,
+              wbs: "1",
+              assignee: "Jane Doe",
+              info: "Initial project kickoff and planning"
+            },
     ];
-    this.idCounter = 25;
+    this.idCounter = 19;
   }
 
   async getTasks(): Promise<Task[]> {
@@ -428,7 +316,6 @@ export class MemStorage implements IStorage {
       wbs: insertTask.wbs ?? null,
       assignee: insertTask.assignee ?? null,
       info: insertTask.info ?? null,
-      role: insertTask.role ?? null,
     };
     this.tasks.push(task);
     return task;
@@ -437,7 +324,7 @@ export class MemStorage implements IStorage {
   async updateTask(id: number, updates: Partial<InsertTask>): Promise<Task | undefined> {
     const index = this.tasks.findIndex(t => t.id === id);
     if (index === -1) return undefined;
-    
+
     this.tasks[index] = { ...this.tasks[index], ...updates };
     return this.tasks[index];
   }
@@ -445,7 +332,7 @@ export class MemStorage implements IStorage {
   async deleteTask(id: number): Promise<boolean> {
     const index = this.tasks.findIndex(t => t.id === id);
     if (index === -1) return false;
-    
+
     this.tasks.splice(index, 1);
     return true;
   }

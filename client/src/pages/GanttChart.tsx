@@ -28,6 +28,8 @@ import {
   ColumnDirective,
   ContextMenu,
   RowDD,
+  AddDialogFieldsDirective,
+  AddDialogFieldDirective,
 } from "@syncfusion/ej2-react-gantt";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import { Input } from "@/components/ui/input";
@@ -73,7 +75,7 @@ export const editSettings = {
   allowTaskbarEditing: true,
   showDeleteConfirmDialog: true,
   // Set mode to 'Dialog' for dialog editing.  This pops up the default blue banner dialog
-  // mode: 'Dialog',
+   mode: 'Dialog',
 };
 
 export const toolbar = [
@@ -237,9 +239,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
 
-    if(args?.cellIndex !== 2) {
-        return;
-    }
+    if(args?.cellIndex <= 2) {
+       // Only pop this Add Dialog if this is a double click on the first three columns
+
     // use this to figure out the wbs, parentid, dependency
     const taskName = ganttInstance.current.updatedRecords[0].taskName;
 
@@ -247,9 +249,18 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     args.rowData.resource = "Resource";
     args.rowData.parentId = 3;
     args.rowData.wbs = "1.3.3";
-    setCurrentTaskData(args.rowData);
-    setDialogTitle("New Task");
-    setIsDialogOpen(true);
+    if(false) {
+        alert("This should fail if we are still using id as the taskId");
+        setCurrentTaskData(args.rowData);
+        setDialogTitle("New Task");
+        setIsDialogOpen(true);
+    } else {
+      // Open the add dialog programmatically
+      args.rowData.id = 100;
+      ganttInstance.current.editModule.dialogModule.openAddDialog();
+      }
+    }
+
 
     return;
   };
@@ -275,16 +286,38 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
     if (args.requestType === "refresh") {
     } else if (args.requestType === "beforeOpenAddDialog") {
-      //        args.rowData.parentId = null; Not Needed
+        // Tests if the double click is inside the Gantt Table
+        if(event.currentTarget.classList.contains("e-treelistgrid")) {
+            args.rowData.parentId = 6;
+            args.rowData.taskName = `Preset TaskName: ${args.rowData.taskName}`;
+            args.rowData.wbs = `1.12.1`;
+        }
+
+    } else if (args.requestType === "beforeOpenEditDialog") {
+        // Tests if the double click is inside the Gantt Table
+        // Disable the Open Edit so that we only open the ADD Dialog
+//        args.rowData.assignToParentId = 6;
+//        args.rowData.id = 29;
+        if(event.currentTarget.classList.contains("e-treelistgrid") &&
+        event?.toElement?.ariaColIndex < 3) {
+            args.cancel = true;
+        }
+      if(args.rowData.ganttProperties.resourceInfo &&
+      args.rowData.ganttProperties.resourceInfo.length > 0 &&
+      args.rowData.ganttProperties.resourceInfo[0]['unit']=== 100) {
+        // I don't know why this has an element called Unit and is set to 100 but it is
+        // Causing me grief!!!
+        args.rowData.ganttProperties.resourceInfo = []
+      }
     }
     if (args.requestType === "beforeAdd" && args.action === "beforeAdd") {
       // Here is how we can get the TaskRecords
       const taskName = ganttInstance.current.updatedRecords[0].taskName;
 
-      let taskId = 6;
-      args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`;
-      args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
-      args.newTaskData.predecessor = `1FS`;
+//      let taskId = 6;
+//      args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`;
+//      args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
+//      args.newTaskData.predecessor = `1FS`;
 
       //    args.newTaskData.parentId = null;
       //args.rowPosition = 'Top'
@@ -321,25 +354,27 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       args.action === "OpenDialog"
     ) {
       // Here is where I can set some stuff
+//      args.cancel = true;
     } else if (
       (args.requestType === "add" && args.action === "add") ||
       /*args.requestType === 'save' && */ args.action === "add"
     ) {
-      let action = 'create';
       const taskData = args.newTaskData;
       createTask.mutate(
         {
-          action: action,
+          action: args.requestType,
+          id: taskData.id,
           taskName: taskData.taskName,
           startDate: taskData.startDate,
           endDate: taskData.endDate,
           duration: Number(taskData.duration),
-          progress: Number(taskData.progress || 0),
+          progress: Number(taskData.progress) || 0,
           status: taskData.status || "Open",
           priority: taskData.priority,
-          parentId: Number(taskData.parentId || null),
+          parentId: Number(taskData.parentI) || null,
           wbs: taskData.wbs,
-          assignee: taskData.assignee,
+
+          assignee: Array.isArray(taskData.assignee)? taskData.assignee[0]: taskData.assignee,
           predecessor: taskData.predecessor,
           info: taskData.info,
         },
@@ -377,7 +412,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
             progress: Number(taskData.progress),
             status: taskData.status,
             priority: taskData.priority,
-            parentId: Number(taskData.parentId || null),
+            parentId: Number(taskData.parentId) || null,
             wbs: taskData.wbs,
             assignee: taskData.assignee,
             predecessor: taskData.predecessor,
@@ -485,6 +520,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const contextMenuClick = (args) => {
     console.log(`contentMenuClick`);
     let record = args.rowData;
+    if(args.item.text === 'Below') {
+        ganttInstance.current.editModule.dialogModule.openAddDialog();
+//        args.cancel = true;  // Stop further default processing
+    }
     if (args.item.id === "collapserow") {
       ganttInstance.current.collapseByID(Number(record.ganttProperties.taskId));
     }
@@ -574,6 +613,18 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
               dropdownlistObj.appendTo(elem);
           }
       };
+  const preActionBegin = (args: any) => {
+    console.log(`preActionBegin`);
+    actionBegin(args);
+  }
+  const handleDataBound = () => {
+          console.log('Gantt component has been fully initialized and data is bound!');
+          if(ganttInstance) {
+            console.log(`Gantt Instance is ready`);
+            ganttInstance.current.actionBegin = preActionBegin;
+          }
+          // Place your custom logic here (e.g., calling component methods, further customization)
+        }
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -681,6 +732,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
             assigneeFilter,
           })}
           taskFields={taskFields}
+          addDialogFields={taskFields}
           height="100%"
           treeColumnIndex={2}
           allowSelection={true}
@@ -707,6 +759,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           recordDoubleClick={handleDoubleClick}
           // Changed By Duane
           actionComplete={handleActionComplete}
+          dataBound={handleDataBound}
         >
           <ColumnsDirective>
             <ColumnDirective
@@ -726,7 +779,6 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
               headerText="Task Name"
               width="250"
               clipMode="EllipsisWithTooltip"
-              allowEditing={false}
             ></ColumnDirective>
             <ColumnDirective
               field="assignee"
@@ -785,6 +837,13 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
               textAlign="Left"
             ></ColumnDirective>
           </ColumnsDirective>
+          <AddDialogFieldsDirective>
+                      <AddDialogFieldDirective type='General' headerText='General' fields={['taskId','taskName','parentId', 'startDate', 'endDate','wbs']} ></AddDialogFieldDirective>
+                      <AddDialogFieldDirective type='Dependency' ></AddDialogFieldDirective>
+                      <AddDialogFieldDirective type='Resources'></AddDialogFieldDirective>
+                      <AddDialogFieldDirective type='Segments' ></AddDialogFieldDirective>
+                      <AddDialogFieldDirective type='Notes'></AddDialogFieldDirective>
+                  </AddDialogFieldsDirective>
           <Inject
             services={[
               Selection,

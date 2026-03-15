@@ -1,4 +1,9 @@
-import { tasks, type Task, type InsertTask, type Metrics } from "@shared/schema";
+import {
+  tasks,
+  type Task,
+  type InsertTask,
+  type Metrics,
+} from "@shared/schema";
 
 export interface IStorage {
   getTasks(): Promise<Task[]>;
@@ -15,7 +20,6 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.tasks = [
-
       {
         id: 2,
         taskName: "Identify Site Location",
@@ -298,11 +302,11 @@ export class MemStorage implements IStorage {
   }
 
   async getTask(id: number): Promise<Task | undefined> {
-    return this.tasks.find(t => t.id === id);
+    return this.tasks.find((t) => t.id === id);
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const task: Task = { 
+    const task: Task = {
       id: this.idCounter++,
       taskName: insertTask.taskName,
       startDate: insertTask.startDate,
@@ -321,16 +325,20 @@ export class MemStorage implements IStorage {
     return task;
   }
 
-  async updateTask(id: number, updates: Partial<InsertTask>): Promise<Task | undefined> {
-    const index = this.tasks.findIndex(t => t.id === id);
+  async updateTask(
+    id: number,
+    updates: Partial<InsertTask>,
+  ): Promise<Task | undefined> {
+    const index = this.tasks.findIndex((t) => t.id === id);
     if (index === -1) return undefined;
 
     this.tasks[index] = { ...this.tasks[index], ...updates };
+    console.log(updates);
     return this.tasks[index];
   }
 
   async deleteTask(id: number): Promise<boolean> {
-    const index = this.tasks.findIndex(t => t.id === id);
+    const index = this.tasks.findIndex((t) => t.id === id);
     if (index === -1) return false;
 
     this.tasks.splice(index, 1);
@@ -338,16 +346,20 @@ export class MemStorage implements IStorage {
   }
 
   async getMetrics(): Promise<Metrics> {
-    const totalProjects = this.tasks.filter(t => t.parentId === null).length;
-    const completedTasks = this.tasks.filter(t => t.progress === 100).length;
-    const inProgressTasks = this.tasks.filter(t => t.status === "In Progress").length;
-    const criticalTasks = this.tasks.filter(t => t.priority === "Critical" && t.status !== "Close").length;
+    const totalProjects = this.tasks.filter((t) => t.parentId === null).length;
+    const completedTasks = this.tasks.filter((t) => t.progress === 100).length;
+    const inProgressTasks = this.tasks.filter(
+      (t) => t.status === "In Progress",
+    ).length;
+    const criticalTasks = this.tasks.filter(
+      (t) => t.priority === "Critical" && t.status !== "Close",
+    ).length;
 
     return {
       totalProjects,
       completedTasks,
       inProgressTasks,
-      criticalTasks
+      criticalTasks,
     };
   }
 }

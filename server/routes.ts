@@ -6,13 +6,18 @@ import { insertTaskSchema } from "@shared/schema";
 
 export async function registerRoutes(
   httpServer: Server,
-  app: Express
+  app: Express,
 ): Promise<Server> {
-  
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS",
+    );
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept",
+    );
     if (req.method === "OPTIONS") {
       return res.sendStatus(200);
     }
@@ -40,12 +45,14 @@ export async function registerRoutes(
     try {
       const parsed = insertTaskSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid task data", details: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ error: "Invalid task data", details: parsed.error.errors });
       }
       console.log(`app.post: ${JSON.stringify(parsed.data)}`);
-      if(parsed.data.parentId == 0) {
+      if (parsed.data.parentId == 0) {
         console.log(`Seting parentId to null`);
-          parsed.data.parentId = null;
+        parsed.data.parentId = null;
       }
       const task = await storage.createTask(parsed.data);
       res.status(201).json(task);
@@ -60,16 +67,23 @@ export async function registerRoutes(
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid task ID" });
       }
-      
+
       const parsed = insertTaskSchema.partial().safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid task data", details: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ error: "Invalid task data", details: parsed.error.errors });
       }
-      
+
+    if (parsed.data.parentId == 0) {
+          console.log(`Seting parentId to null`);
+          parsed.data.parentId = null;
+        }
       const task = await storage.updateTask(id, parsed.data);
       if (!task) {
         return res.status(404).json({ error: "Task not found" });
       }
+    console.log("====================================  " + parsed.data.taskIndex)
       res.json(task);
     } catch (error) {
       res.status(500).json({ error: "Failed to update task" });
@@ -82,7 +96,7 @@ export async function registerRoutes(
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid task ID" });
       }
-      
+
       const deleted = await storage.deleteTask(id);
       if (!deleted) {
         return res.status(404).json({ error: "Task not found" });

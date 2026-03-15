@@ -3,7 +3,11 @@ import { useTasks, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
-import { CalendarComponent, DateTimePicker, DatePickerComponent } from '@syncfusion/ej2-react-calendars';
+import {
+  CalendarComponent,
+  DateTimePicker,
+  DatePickerComponent,
+} from "@syncfusion/ej2-react-calendars";
 import {
   KanbanComponent,
   ColumnsDirective,
@@ -20,8 +24,15 @@ import {
 } from "@/components/ui/select";
 import { Search, FilterX, Trash2, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TextBoxComponent, NumericTextBoxComponent, SmartTextAreaComponent } from '@syncfusion/ej2-react-inputs';
-import { DropDownListComponent, AutoCompleteComponent } from '@syncfusion/ej2-react-dropdowns';
+import {
+  TextBoxComponent,
+  NumericTextBoxComponent,
+  SmartTextAreaComponent,
+} from "@syncfusion/ej2-react-inputs";
+import {
+  DropDownListComponent,
+  AutoCompleteComponent,
+} from "@syncfusion/ej2-react-dropdowns";
 
 export const cardSettings: CardSettingsModel = {
   contentField: "taskName",
@@ -32,7 +43,7 @@ export const cardSettings: CardSettingsModel = {
 };
 const CustomDialogTemplate = (props: any): JSX.Element => {
   // Access data fields using props
-  const assignees = ['Jane Doe', 'Alex Smith', ]
+  const assignees = ["Jane Doe", "Alex Smith"];
   return (
     <div className="custom-dialog-template">
       <table>
@@ -40,7 +51,12 @@ const CustomDialogTemplate = (props: any): JSX.Element => {
           <tr>
             <td className="e-label">ID</td>
             <td>
-              <TextBoxComponent id="taskId" value={props.taskId} enabled={false} className="e-field" />
+              <TextBoxComponent
+                id="taskId"
+                value={props.taskId}
+                enabled={false}
+                className="e-field"
+              />
             </td>
           </tr>
           <tr>
@@ -50,115 +66,112 @@ const CustomDialogTemplate = (props: any): JSX.Element => {
               <DropDownListComponent
                 id="status"
                 value={props.status}
-                dataSource={['Open', 'InProgress', 'Testing', 'Close']}
+                dataSource={["Open", "InProgress", "Testing", "Close"]}
                 className="e-field"
               />
             </td>
           </tr>
           <tr>
-              <td className="e-label">Start</td>
-              <td>
-                {/* Example DropDownList for Status */}
-                <DatePickerComponent
-                  id="startDate"
-                  value={props.startDate}
-                  className="e-field"
-                />
-              </td>
-              </tr>
-                            <tr>
-               <td className="e-label">End</td>
-                <td>
-                  {/* Example DropDownList for Status */}
-                  <DatePickerComponent
-                    id="endDate"
-                    value={props.endDate}
-                    className="e-field"
-                  />
-                </td>
-            </tr>
-            <tr>
+            <td className="e-label">Start</td>
+            <td>
+              {/* Example DropDownList for Status */}
+              <DatePickerComponent
+                id="startDate"
+                value={props.startDate}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className="e-label">End</td>
+            <td>
+              {/* Example DropDownList for Status */}
+              <DatePickerComponent
+                id="endDate"
+                value={props.endDate}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
             <td className="e-label">Priority</td>
             <td>
               {/* Example DropDownList for Status */}
               <DropDownListComponent
                 id="priority"
                 value={props.priority}
-                dataSource={['Low', 'Normal', 'High', 'Critical']}
+                dataSource={["Low", "Normal", "High", "Critical"]}
                 className="e-field"
               />
             </td>
           </tr>
           <tr>
-              <td className="e-label">Progress</td>
-              <td>
-                {/* Example DropDownList for Status */}
-                <NumericTextBoxComponent
-                  id="progress"
-                  value={props.progress}
-                  placeholder="Enter a number"
-                  min={0}
-                  max={100}
-                  step={1}
-                  className="e-field"
-                />
-              </td>
-            </tr>
-             <tr>
-              <td className="e-label">Duration</td>
+            <td className="e-label">Progress</td>
+            <td>
+              {/* Example DropDownList for Status */}
+              <NumericTextBoxComponent
+                id="progress"
+                value={props.progress}
+                placeholder="Enter a number"
+                min={0}
+                max={100}
+                step={1}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className="e-label">Duration</td>
 
-              <td>
-                {/* Example DropDownList for Status */}
-                <NumericTextBoxComponent
-                  id="duration"
-                  value={props.duration}
-                  placeholder="Enter a number"
-                  min={0}
-                  max={100}
-                  step={1}
-                  className="e-field"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="e-label">Assignee</td>
-              <td>
-
-                <DropDownListComponent
-                  id="assignee"
-                  value={props.assignee}
-                  placeholder=""
-                  dataSource={assignees}
-                  className="e-field"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="e-label">WBS</td>
-              <td>
-
-                <SmartTextAreaComponent
-                  id="wbs"
-                  value={props.wbs}
-                  placeholder=""
-                  className="e-field"
-                />
-              </td>
-            </tr>
-            <tr>
-                          <td className="e-label">Notes</td>
-                          <td>
-
-                            <SmartTextAreaComponent
-                              id="info"
-                              value={props.info}
-                              placeholder=""
-                              rows={4}
-                              cols={60}
-                              className="e-field"
-                            />
-                          </td>
-                        </tr>
+            <td>
+              {/* Example DropDownList for Status */}
+              <NumericTextBoxComponent
+                id="duration"
+                value={props.duration}
+                placeholder="Enter a number"
+                min={0}
+                max={100}
+                step={1}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className="e-label">Assignee</td>
+            <td>
+              <DropDownListComponent
+                id="assignee"
+                value={props.assignee}
+                placeholder=""
+                dataSource={assignees}
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className="e-label">WBS</td>
+            <td>
+              <SmartTextAreaComponent
+                id="wbs"
+                value={props.wbs}
+                placeholder=""
+                className="e-field"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className="e-label">Notes</td>
+            <td>
+              <SmartTextAreaComponent
+                id="info"
+                value={props.info}
+                placeholder=""
+                rows={4}
+                cols={60}
+                className="e-field"
+              />
+            </td>
+          </tr>
           {/* Add more fields as needed (e.g., Priority, Assignee, Summary) */}
         </tbody>
       </table>
@@ -167,7 +180,9 @@ const CustomDialogTemplate = (props: any): JSX.Element => {
 };
 const CustomDatePicker = (props) => {
   // 'props' will contain the current data of the card being edited
-  {console.log(`CalendarComponent: ${props.endDate}`)}
+  {
+    console.log(`CalendarComponent: ${props.endDate}`);
+  }
   return (
     <DatePickerComponent
       id="endDate"
@@ -199,7 +214,11 @@ export const createCardTemplate =
       return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
     };
 
-    const roles = Array.isArray(props.role) ? props.role : (props.role ? [props.role] : []);
+    const roles = Array.isArray(props.role)
+      ? props.role
+      : props.role
+        ? [props.role]
+        : [];
 
     const getInitials = (name: string) => {
       if (!name) return "??";
@@ -406,15 +425,13 @@ export function KanbanBoardCore({
     { text: "Progress", key: "progress", type: "Numeric" },
     { text: "Assignee", key: "assignee", type: "DropDown" },
     { text: "Start Date", key: "startDate", type: "TextBox" },
-    { text: "End Date", key: "endDate", type: "TextBox"},
+    { text: "End Date", key: "endDate", type: "TextBox" },
     { text: "Duration", key: "duration", type: "Numeric" },
     { text: "Parent ID", key: "parentId", type: "Numeric" },
     { text: "Predecessor", key: "predecessor", type: "TextBox" },
     { text: "WBS", key: "wbs", type: "TextBox" },
     { text: "Info", key: "info", type: "TextArea" },
   ];
-
-
 
   if (isLoading) {
     return (
@@ -452,9 +469,16 @@ export function KanbanBoardCore({
       priorityFilter === "all" || task.priority === priorityFilter;
     const matchesAssignee =
       assigneeFilter === "all" || task.assignee === assigneeFilter;
-    const taskRoles = Array.isArray(task.role) ? task.role : (task.role ? [task.role] : []);
-    const matchesRole = roleFilter === "all" || 
-      (roleFilter === "both" ? (taskRoles.includes("Developer") && taskRoles.includes("Construction")) : taskRoles.includes(roleFilter));
+    const taskRoles = Array.isArray(task.role)
+      ? task.role
+      : task.role
+        ? [task.role]
+        : [];
+    const matchesRole =
+      roleFilter === "all" ||
+      (roleFilter === "both"
+        ? taskRoles.includes("Developer") && taskRoles.includes("Construction")
+        : taskRoles.includes(roleFilter));
 
     return matchesSearch && matchesPriority && matchesAssignee && matchesRole;
   });
@@ -602,9 +626,7 @@ export function KanbanBoardCore({
             })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}
             swimlaneSettings={swimlaneKey}
-            dialogSettings={
-                {template: CustomDialogTemplate}
-            }
+            dialogSettings={{ template: CustomDialogTemplate }}
             //dialogOpen={handleDialogOpen}
             allowDragAndDrop={true}
             height="100%"

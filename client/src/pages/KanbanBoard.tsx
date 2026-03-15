@@ -236,13 +236,27 @@ export const createCardTemplate =
       }
     };
 
+    const isMilestone = props.parentId === null || props.parentId === undefined;
+
     return (
       <div id="MyE-Card" className="e-card-content p-3">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-mono text-muted-foreground">
-            #{props.taskId}
-            {props.wbs ? ` | WBS: ${props.wbs}` : ""}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-muted-foreground">
+              #{props.taskId}
+              {props.wbs ? ` | WBS: ${props.wbs}` : ""}
+            </span>
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                isMilestone
+                  ? "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400"
+                  : "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400"
+              }`}
+              data-testid={`badge-type-${props.taskId}`}
+            >
+              {isMilestone ? "Milestone" : "Subtask"}
+            </span>
+          </div>
           <div className="flex items-center gap-1 flex-wrap">
             {roles.map((role: string, index: number) => (
               <span

@@ -1,4 +1,9 @@
-import { tasks, type Task, type InsertTask, type Metrics } from "@shared/schema";
+import {
+  tasks,
+  type Task,
+  type InsertTask,
+  type Metrics,
+} from "@shared/schema";
 
 export interface IStorage {
   getTasks(): Promise<Task[]>;
@@ -15,7 +20,6 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.tasks = [
-
       {
         id: 2,
         taskName: "Identify Site Location",
@@ -30,7 +34,8 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "1.1",
         assignee: "Jane Doe",
-        info: "Site selection completed"
+        info: "Site selection completed",
+        taskIndex: null,
       },
 
       {
@@ -46,23 +51,25 @@ export class MemStorage implements IStorage {
         predecessor: "3FS",
         wbs: "1.3",
         assignee: "Jane Doe",
-        info: "Budgeting in progress"
+        info: "Budgeting in progress",
+        taskIndex: null,
       },
-       {
-              id: 3,
-              taskName: "Perform Soil Test",
-              startDate: new Date("2024-04-05"),
-              endDate: new Date("2024-04-10"),
-              duration: 5,
-              progress: 100,
-              status: "Close",
-              priority: "Critical",
-              parentId: 1,
-              predecessor: "2FS",
-              wbs: null,
-              assignee: "Alex Smith",
-              info: "Soil quality is stable"
-            },
+      {
+        id: 3,
+        taskName: "Perform Soil Test",
+        startDate: new Date("2024-04-05"),
+        endDate: new Date("2024-04-10"),
+        duration: 5,
+        progress: 100,
+        status: "Close",
+        priority: "Critical",
+        parentId: 1,
+        predecessor: "2FS",
+        wbs: null,
+        assignee: "Alex Smith",
+        info: "Soil quality is stable",
+        taskIndex: null,
+      },
       {
         id: 5,
         taskName: "Development Phase",
@@ -76,7 +83,8 @@ export class MemStorage implements IStorage {
         predecessor: "1FS",
         wbs: "2",
         assignee: "Alex Smith",
-        info: "Main development cycle"
+        info: "Main development cycle",
+        taskIndex: null,
       },
       {
         id: 6,
@@ -91,7 +99,8 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "2.1",
         assignee: "Alex Smith",
-        info: "React and Tailwind setup"
+        info: "React and Tailwind setup",
+        taskIndex: null,
       },
       {
         id: 7,
@@ -106,7 +115,8 @@ export class MemStorage implements IStorage {
         predecessor: "6SS",
         wbs: "2.2",
         assignee: "Jane Doe",
-        info: "Express and Drizzle configuration"
+        info: "Express and Drizzle configuration",
+        taskIndex: null,
       },
       {
         id: 8,
@@ -121,7 +131,8 @@ export class MemStorage implements IStorage {
         predecessor: "6FS,7FS",
         wbs: "2.3",
         assignee: "Alex Smith",
-        info: "Connecting frontend to backend"
+        info: "Connecting frontend to backend",
+        taskIndex: null,
       },
       {
         id: 9,
@@ -136,7 +147,8 @@ export class MemStorage implements IStorage {
         predecessor: "5FS",
         wbs: "3",
         assignee: "Jane Doe",
-        info: "QA and bug fixing"
+        info: "QA and bug fixing",
+        taskIndex: null,
       },
       {
         id: 10,
@@ -151,7 +163,8 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "3.1",
         assignee: "Alex Smith",
-        info: "Verifying individual modules"
+        info: "Verifying individual modules",
+        taskIndex: null,
       },
       {
         id: 11,
@@ -166,7 +179,8 @@ export class MemStorage implements IStorage {
         predecessor: "10FS",
         wbs: "3.2",
         assignee: "Jane Doe",
-        info: "End-to-end system testing"
+        info: "End-to-end system testing",
+        taskIndex: null,
       },
       {
         id: 12,
@@ -181,7 +195,8 @@ export class MemStorage implements IStorage {
         predecessor: "11FS",
         wbs: "3.3",
         assignee: "Alex Smith",
-        info: "Client validation and sign-off"
+        info: "Client validation and sign-off",
+        taskIndex: null,
       },
       {
         id: 13,
@@ -196,7 +211,8 @@ export class MemStorage implements IStorage {
         predecessor: "9FS",
         wbs: "4",
         assignee: "Jane Doe",
-        info: "Production deployment and go-live"
+        info: "Production deployment and go-live",
+        taskIndex: null,
       },
       {
         id: 14,
@@ -211,7 +227,8 @@ export class MemStorage implements IStorage {
         predecessor: null,
         wbs: "4.1",
         assignee: "Alex Smith",
-        info: "Configure production servers"
+        info: "Configure production servers",
+        taskIndex: null,
       },
       {
         id: 15,
@@ -226,7 +243,8 @@ export class MemStorage implements IStorage {
         predecessor: "14FS",
         wbs: "4.2",
         assignee: "Jane Doe",
-        info: "Migrate data to production"
+        info: "Migrate data to production",
+        taskIndex: null,
       },
       {
         id: 16,
@@ -241,7 +259,8 @@ export class MemStorage implements IStorage {
         predecessor: "14FS,15FS",
         wbs: "4.3",
         assignee: "Alex Smith",
-        info: "Deploy application to production"
+        info: "Deploy application to production",
+        taskIndex: null,
       },
       {
         id: 17,
@@ -256,7 +275,8 @@ export class MemStorage implements IStorage {
         predecessor: "16FS",
         wbs: "4.4",
         assignee: "Jane Doe",
-        info: "Final production validation"
+        info: "Final production validation",
+        taskIndex: null,
       },
       {
         id: 18,
@@ -271,24 +291,26 @@ export class MemStorage implements IStorage {
         predecessor: "16SS",
         wbs: "4.5",
         assignee: "Alex Smith",
-        info: "Create user and technical documentation"
+        info: "Create user and technical documentation",
+        taskIndex: null,
       },
       {
-              id: 1,
-              taskName: "Project Initiation",
-              taskExtra: "Project Initiation Extra",
-              startDate: new Date("2024-04-01"),
-              endDate: new Date("2024-04-21"),
-              duration: 20,
-              progress: 100,
-              status: "Close",
-              priority: "High",
-              parentId: null,
-              predecessor: null,
-              wbs: "1",
-              assignee: "Jane Doe",
-              info: "Initial project kickoff and planning"
-            },
+        id: 1,
+        taskName: "Project Initiation",
+        taskExtra: "Project Initiation Extra",
+        startDate: new Date("2024-04-01"),
+        endDate: new Date("2024-04-21"),
+        duration: 20,
+        progress: 100,
+        status: "Close",
+        priority: "High",
+        parentId: null,
+        predecessor: null,
+        wbs: "1",
+        assignee: "Jane Doe",
+        info: "Initial project kickoff and planning",
+        taskIndex: null,
+      },
     ];
     this.idCounter = 19;
   }
@@ -298,11 +320,11 @@ export class MemStorage implements IStorage {
   }
 
   async getTask(id: number): Promise<Task | undefined> {
-    return this.tasks.find(t => t.id === id);
+    return this.tasks.find((t) => t.id === id);
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const task: Task = { 
+    const task: Task = {
       id: this.idCounter++,
       taskName: insertTask.taskName,
       startDate: insertTask.startDate,
@@ -316,38 +338,47 @@ export class MemStorage implements IStorage {
       wbs: insertTask.wbs ?? null,
       assignee: insertTask.assignee ?? null,
       info: insertTask.info ?? null,
+      taskIndex: insertTask.index ?? null,
     };
     this.tasks.push(task);
     return task;
   }
 
-  async updateTask(id: number, updates: Partial<InsertTask>): Promise<Task | undefined> {
-    const index = this.tasks.findIndex(t => t.id === id);
+  async updateTask(
+    id: number,
+    updates: Partial<InsertTask>,
+  ): Promise<Task | undefined> {
+    const index = this.tasks.findIndex((t) => t.id === id);
     if (index === -1) return undefined;
-    
+
     this.tasks[index] = { ...this.tasks[index], ...updates };
+    console.log(updates);
     return this.tasks[index];
   }
 
   async deleteTask(id: number): Promise<boolean> {
-    const index = this.tasks.findIndex(t => t.id === id);
+    const index = this.tasks.findIndex((t) => t.id === id);
     if (index === -1) return false;
-    
+
     this.tasks.splice(index, 1);
     return true;
   }
 
   async getMetrics(): Promise<Metrics> {
-    const totalProjects = this.tasks.filter(t => t.parentId === null).length;
-    const completedTasks = this.tasks.filter(t => t.progress === 100).length;
-    const inProgressTasks = this.tasks.filter(t => t.status === "In Progress").length;
-    const criticalTasks = this.tasks.filter(t => t.priority === "Critical" && t.status !== "Close").length;
+    const totalProjects = this.tasks.filter((t) => t.parentId === null).length;
+    const completedTasks = this.tasks.filter((t) => t.progress === 100).length;
+    const inProgressTasks = this.tasks.filter(
+      (t) => t.status === "In Progress",
+    ).length;
+    const criticalTasks = this.tasks.filter(
+      (t) => t.priority === "Critical" && t.status !== "Close",
+    ).length;
 
     return {
       totalProjects,
       completedTasks,
       inProgressTasks,
-      criticalTasks
+      criticalTasks,
     };
   }
 }

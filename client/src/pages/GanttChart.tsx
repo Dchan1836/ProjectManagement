@@ -5,7 +5,7 @@ import {
   useUpdateTask,
   useDeleteTask,
 } from "@/hooks/use-tasks";
-import { DropDownList } from '@syncfusion/ej2-dropdowns';
+import { DropDownList } from "@syncfusion/ej2-dropdowns";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
@@ -42,6 +42,7 @@ import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import "./GanttChart.css";
 import styled from "styled-components";
+import { cloneDeep } from 'lodash';
 
 const MyButton = styled.button`
   background: blue;
@@ -63,7 +64,7 @@ export const taskFields = {
   priority: "priority",
   resourceInfo: "assignee",
   info: "info",
-  taskExtra: "taskExtra"
+  taskExtra: "taskExtra",
 };
 
 export const editSettings = {
@@ -95,8 +96,8 @@ export const progressTemplate = (props: any) => {
             props.progress === 100
               ? "bg-green-500"
               : props.progress > 50
-              ? "bg-blue-500"
-              : "bg-orange-400"
+                ? "bg-blue-500"
+                : "bg-orange-400"
           }`}
           style={{ width: `${props.progress}%` }}
         />
@@ -122,7 +123,7 @@ const CustomDialog = ({ isOpen, data, title, onSave, onClose }) => {
 
   const saveHandler = () => {
     console.log(
-      `Saving: taskName: ${taskName} resource: ${resource}  parentId: ${parentId} wbs: ${wbs}`
+      `Saving: taskName: ${taskName} resource: ${resource}  parentId: ${parentId} wbs: ${wbs}`,
     );
     onSave();
   };
@@ -201,14 +202,9 @@ const CustomDialog = ({ isOpen, data, title, onSave, onClose }) => {
               </td>
             </tr>
           </table>
-          <div>
-                  Dependencies
-          </div>
-          <div>
-                  More Stuff
-          </div>
+          <div>Dependencies</div>
+          <div>More Stuff</div>
         </div>
-
       </TabComponent>
     </DialogComponent>
   );
@@ -233,17 +229,19 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentTaskData, setCurrentTaskData] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("");
+  const [temp, setTemp] = useState(null);
+  const [c, setC] = useState(0);
 
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
 
-    if(args?.cellIndex !== 2) {
-        return;
+    if (args?.cellIndex !== 2) {
+      return;
     }
     // use this to figure out the wbs, parentid, dependency
     const taskName = ganttInstance.current.updatedRecords[0].taskName;
 
-//    args.cancel = true; // Prevents default Syncfusion dialog
+    //    args.cancel = true; // Prevents default Syncfusion dialog
     args.rowData.resource = "Resource";
     args.rowData.parentId = 3;
     args.rowData.wbs = "1.3.3";
@@ -255,8 +253,13 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   };
 
   const actionBegin = (args: any) => {
+//       if(c == 0 && args.data != undefined){
+//           console.log("================================ c == 0 ===========================================================")
+//             setTemp(cloneDeep(ganttInstance.current.currentViewData));
+//           setC(1);
+//           }
     console.log(
-      `actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`
+      `actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`,
     );
 
     // Access the dialog element
@@ -266,7 +269,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
     // Find the general tab content area (selector may vary, check component structure)
     const generalTab = args?.element?.querySelector(
-      "[role='presentation'][General]"
+      "[role='presentation'][General]",
     );
 
     if (generalTab) {
@@ -274,6 +277,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     }
 
     if (args.requestType === "refresh") {
+
+//         args.cancel = true;
     } else if (args.requestType === "beforeOpenAddDialog") {
       //        args.rowData.parentId = null; Not Needed
     }
@@ -296,19 +301,19 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     //   console.log("found component");
     // }
   };
+//   let temp = null;
+//   let c = 0;
   const handleActionComplete = (args: any) => {
     // if(args.requestType !== 'scroll'){
     //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
     // }
     console.log(
-      `actionComplete name: ${args?.name} type: ${args?.type} requestType: ${args?.requestType} action: ${args?.action}`
+      `actionComplete name: ${args?.name} type: ${args?.type} requestType: ${args?.requestType} action: ${args?.action}`,
     );
 
     if (
       (args.requestType === "scroll" && args.action === "HorizontalScroll") ||
       args.requestType === "scroll" ||
-      args.requestType === "refresh" ||
-      args.type === "refresh" ||
       args.requestType === "openEditDialog"
     ) {
       //     } else if (args.requestType === 'add' && args.action === 'add')
@@ -316,6 +321,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       //        args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
       //        args.newTaskData.parentId = args.modifiedTaskData[0].id;
       //        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
+    }else if (args.requestType === "refresh" ){
+        console.log("requestTYpe: refresh");
+//         args.cancel = true;
     } else if (
       args.requestType === "openAddDialog" &&
       args.action === "OpenDialog"
@@ -325,37 +333,45 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
       (args.requestType === "add" && args.action === "add") ||
       /*args.requestType === 'save' && */ args.action === "add"
     ) {
-      let action = 'create';
+      let action = "create";
       const taskData = args.newTaskData;
       createTask.mutate(
         {
-          action: action,
-          taskName: taskData.taskName,
-          startDate: taskData.startDate,
-          endDate: taskData.endDate,
-          duration: Number(taskData.duration),
-          progress: Number(taskData.progress || 0),
-          status: taskData.status || "Open",
-          priority: taskData.priority,
-          parentId: Number(taskData.parentId || null),
-          wbs: taskData.wbs,
-          assignee: taskData.assignee,
-          predecessor: taskData.predecessor,
-          info: taskData.info,
+              action: action,
+              id: taskData.id,
+              taskName: taskData.taskName,
+              startDate: taskData.startDate,
+              endDate: taskData.endDate,
+              duration: Number(taskData.duration),
+              progress: Number(taskData.progress || 0),
+              status: taskData.status || "Open",
+              priority: taskData.priority,
+              parentId: Number(taskData.parentId || null),
+              wbs: taskData.wbs,
+              assignee: taskData.assignee,
+              predecessor: taskData.predecessor,
+              info: taskData.info,
         },
         {
           onSuccess: () => toast({ title: "Task created successfully" }),
           onError: () =>
             toast({ title: "Failed to create task", variant: "destructive" }),
-        }
+        },
       );
     } else if (
-      (args.requestType === "save"  ||
-      args.requestType === "rowDropped" )&&
+      (args.requestType === "save" || args.requestType === "rowDropped") &&
       (args.action === "DialogEditing" ||
         args.action === "TaskbarEditing" ||
         args.action === "CellEditing")
     ) {
+//     console.log("temp   " + temp);
+//     console.log("================================================")
+//     console.log("args.data     " + args.data);
+//     console.log("================================================")
+//     console.log("ganttInstance.current     " + ganttInstance.current);
+//         args.cancel = true;
+//         console.log(tasks);
+//         cosol.log(args.data);
       const taskData = args.data;
       console.log(
         `duration: ${args.data.duration} typeofduration: ${typeof args.data
@@ -363,33 +379,63 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           args.data.startDate
         } typeofstartdate: ${typeof args.data.startDate} id: ${
           args.data.id
-        } typeofid: ${typeof args.data.id} `
+        } typeofid: ${typeof args.data.id} `,
       );
-      updateTask.mutate(
-        {
-          id: taskData.id,
-          data: {
-            action: args.requestType,
-            taskName: taskData.taskName,
-            startDate: taskData.startDate,
-            endDate: taskData.endDate,
-            duration: Number(taskData.duration),
-            progress: Number(taskData.progress),
-            status: taskData.status,
-            priority: taskData.priority,
-            parentId: Number(taskData.parentId || null),
-            wbs: taskData.wbs,
-            assignee: taskData.assignee,
-            predecessor: taskData.predecessor,
-            info: taskData.info,
-          },
-        },
-        {
-          onSuccess: () => toast({ title: "Task updated successfully" }),
-          onError: () =>
-            toast({ title: "Failed to update task", variant: "destructive" }),
-        }
-      );
+      const modifiedData = args.modifiedRecords;
+      modifiedData.map(t => {
+//           console.log(t.index);
+           updateTask.mutate(
+                   {
+                     id: t.taskData.id,
+                     data: {
+                       action: args.requestType,
+                       taskIndex: t.index,
+                       taskName: t.taskData.taskName,
+                       startDate: t.taskData.startDate,
+                       endDate: t.taskData.endDate,
+                       duration: Number(t.taskData.duration),
+                       progress: Number(t.taskData.progress),
+                       status: t.taskData.status,
+                       priority: t.taskData.priority,
+                       parentId: Number(t.taskData.parentId || null),
+                       wbs: t.taskData.wbs,
+                       assignee: t.taskData.assignee,
+                       predecessor: t.taskData.predecessor,
+                       info: t.taskData.info,
+                     },
+                   },
+                   {
+                     onSuccess: () => toast({ title: "Task updated successfully" }),
+                     onError: () =>
+                       toast({ title: "Failed to update task", variant: "destructive" }),
+                   },
+                 );
+          });
+//       updateTask.mutate(
+//         {
+//           id: taskData.id,
+//           data: {
+//             action: args.requestType,
+//             taskName: taskData.taskName,
+//             startDate: taskData.startDate,
+//             endDate: taskData.endDate,
+//             duration: Number(taskData.duration),
+//             progress: Number(taskData.progress),
+//             status: taskData.status,
+//             priority: taskData.priority,
+//             parentId: Number(taskData.parentId || null),
+//             wbs: taskData.wbs,
+//             assignee: taskData.assignee,
+//             predecessor: taskData.predecessor,
+//             info: taskData.info,
+//           },
+//         },
+//         {
+//           onSuccess: () => toast({ title: "Task updated successfully" }),
+//           onError: () =>
+//             toast({ title: "Failed to update task", variant: "destructive" }),
+//         },
+//       );
     } else if (args.requestType === "delete") {
       const taskData = args.data?.[0];
       if (taskData?.id) {
@@ -445,7 +491,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
 
     // Find the general tab content area (selector may vary, check component structure)
     const generalTab = args.element.querySelector(
-      "#gantt_1539073415_0_contextMenu_TaskInformation"
+      "#gantt_1539073415_0_contextMenu_TaskInformation",
     );
 
     if (generalTab) {
@@ -519,7 +565,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   ];
   function change() {
     const ganttDependencyViewContainer = document.querySelector(
-      ".e-gantt-dependency-view-container"
+      ".e-gantt-dependency-view-container",
     );
     if (switchRef.checked) {
       ganttDependencyViewContainer.style.visibility = "hidden";
@@ -552,28 +598,28 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setCurrentTaskData(null);
   };
   let elem;
-   let dropdownlistObj;
-      let dropdownlist = {
-         create: () => {
-              elem = document.createElement('input');
-              return elem;
-          },
-        read: () => {
-             return dropdownlistObj.value;
-          },
-        destroy: () => {
-              dropdownlistObj.destroy();
-          },
-          write: (args) => {
-              dropdownlistObj = new DropDownList({
-                  dataSource: ganttInstance.current.treeGrid.grid.dataSource,
-                  fields: { value: 'taskExtra' },
-                  value: args.rowData[args.column.field],
-                  floatLabelType: 'Auto',
-              });
-              dropdownlistObj.appendTo(elem);
-          }
-      };
+  let dropdownlistObj;
+  let dropdownlist = {
+    create: () => {
+      elem = document.createElement("input");
+      return elem;
+    },
+    read: () => {
+      return dropdownlistObj.value;
+    },
+    destroy: () => {
+      dropdownlistObj.destroy();
+    },
+    write: (args) => {
+      dropdownlistObj = new DropDownList({
+        dataSource: ganttInstance.current.treeGrid.grid.dataSource,
+        fields: { value: "taskExtra" },
+        value: args.rowData[args.column.field],
+        floatLabelType: "Auto",
+      });
+      dropdownlistObj.appendTo(elem);
+    },
+  };
   return (
     <div className="h-full flex flex-col space-y-4">
       {showHeader && (
@@ -707,6 +753,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           recordDoubleClick={handleDoubleClick}
           // Changed By Duane
           actionComplete={handleActionComplete}
+//             timelineSettings={{ updateTimeScaleView: false }}
         >
           <ColumnsDirective>
             <ColumnDirective

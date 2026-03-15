@@ -563,7 +563,7 @@ export function KanbanBoardCore({
           onValueChange={setSelectedParentId}
         >
           <SelectTrigger
-            className="w-[220px]"
+            className="w-[220px] bg-white dark:bg-gray-900"
             data-testid="select-parent-task-filter"
           >
             <SelectValue placeholder="Filter by parent task" />

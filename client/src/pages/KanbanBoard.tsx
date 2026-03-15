@@ -324,6 +324,7 @@ export function KanbanBoardCore({
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [selectedParentId, setSelectedParentId] = useState("all");
   const [swimlaneKey, setSwimlaneKey] = useState({ keyField: "assignee" }); // Default to 'Assignee' for swimlanes
 
   const tasks = injectedTasks ?? fetchedTasks;
@@ -458,7 +459,16 @@ export function KanbanBoardCore({
     endDate: formatDateToMMDDYYYY(task.endDate),
   }));
 
+  const parentTasks = tasksWithTaskId?.filter(
+    (task: any) => task.parentId === null || task.parentId === undefined,
+  ) ?? [];
+
   const filteredTasks = tasksWithTaskId?.filter((task: any) => {
+    const matchesParent =
+      selectedParentId === "all" ||
+      task.taskId === Number(selectedParentId) ||
+      task.parentId === Number(selectedParentId);
+
     const matchesSearch =
       !searchTerm ||
       (task.taskName &&
@@ -480,7 +490,7 @@ export function KanbanBoardCore({
         ? taskRoles.includes("Developer") && taskRoles.includes("Construction")
         : taskRoles.includes(roleFilter));
 
-    return matchesSearch && matchesPriority && matchesAssignee && matchesRole;
+    return matchesParent && matchesSearch && matchesPriority && matchesAssignee && matchesRole;
   });
 
   const resetFilters = () => {
@@ -488,6 +498,7 @@ export function KanbanBoardCore({
     setPriorityFilter("all");
     setAssigneeFilter("all");
     setRoleFilter("all");
+    setSelectedParentId("all");
   };
 
   const toggleSwimlanes = (event) => {
@@ -533,6 +544,25 @@ export function KanbanBoardCore({
           <Filter className="h-4 w-4 mr-2" />
           {showFilters ? "Hide Filters" : "Show Filters"}
         </Button>
+        <Select
+          value={selectedParentId}
+          onValueChange={setSelectedParentId}
+        >
+          <SelectTrigger
+            className="w-[220px]"
+            data-testid="select-parent-task-filter"
+          >
+            <SelectValue placeholder="Filter by parent task" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tasks</SelectItem>
+            {parentTasks.map((task: any) => (
+              <SelectItem key={task.taskId} value={String(task.taskId)}>
+                #{task.taskId} — {task.taskName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="text-sm text-muted-foreground">
           Showing {filteredTasks?.length} tasks
         </div>
@@ -622,6 +652,7 @@ export function KanbanBoardCore({
               priorityFilter,
               assigneeFilter,
               roleFilter,
+              selectedParentId,
               taskCount: tasks?.length,
             })}
             cardSettings={{ ...cardSettings, template: cardTemplate }}

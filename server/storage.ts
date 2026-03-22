@@ -332,6 +332,28 @@ export class MemStorage implements IStorage {
     const index = this.tasks.findIndex((t) => t.id === id);
     if (index === -1) return undefined;
 
+    const currentTask = this.tasks[index];
+
+    if ("parentId" in updates && updates.parentId !== currentTask.parentId) {
+      const newParentId = updates.parentId ?? null;
+
+      if (newParentId === null) {
+        const topLevelCount = this.tasks.filter(
+          (t) => t.parentId === null && t.id !== id,
+        ).length;
+        updates.wbs = String(topLevelCount + 1);
+      } else {
+        const parent = this.tasks.find((t) => t.id === newParentId);
+        if (parent) {
+          const parentWbs = parent.wbs ?? String(newParentId);
+          const siblingCount = this.tasks.filter(
+            (t) => t.parentId === newParentId && t.id !== id,
+          ).length;
+          updates.wbs = `${parentWbs}.${siblingCount + 1}`;
+        }
+      }
+    }
+
     this.tasks[index] = { ...this.tasks[index], ...updates };
     console.log(updates);
     return this.tasks[index];

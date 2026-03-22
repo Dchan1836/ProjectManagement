@@ -456,38 +456,23 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     );
   }
 
-  const sortTasksForGantt = (taskList: any[]) => {
-    if (!taskList) return taskList;
-    const topLevel = taskList.filter(
-      (t) => t.parentId === null || t.parentId === undefined,
-    );
-    const children = taskList.filter(
-      (t) => t.parentId !== null && t.parentId !== undefined,
-    );
-    return [...topLevel, ...children];
-  };
+  const filteredTasks = tasks?.filter((task: any) => {
+    const matchesStatus =
+      statusFilter === "all" || task.status === statusFilter;
+    const matchesPriority =
+      priorityFilter === "all" || task.priority === priorityFilter;
+    const matchesAssignee =
+      assigneeFilter === "all" || task.assignee === assigneeFilter;
+    const matchesSearch =
+      !searchTerm ||
+      (task.taskName &&
+        task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (task.wbs && task.wbs.includes(searchTerm)) ||
+      (task.id && task.id.toString() === searchTerm) ||
+      (task.id && task.id.toString().includes(searchTerm));
 
-  const filteredTasks = sortTasksForGantt(
-    tasks?.filter((task: any) => {
-      const matchesStatus =
-        statusFilter === "all" || task.status === statusFilter;
-      const matchesPriority =
-        priorityFilter === "all" || task.priority === priorityFilter;
-      const matchesAssignee =
-        assigneeFilter === "all" || task.assignee === assigneeFilter;
-      const matchesSearch =
-        !searchTerm ||
-        (task.taskName &&
-          task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (task.wbs && task.wbs.includes(searchTerm)) ||
-        (task.id && task.id.toString() === searchTerm) ||
-        (task.id && task.id.toString().includes(searchTerm));
-
-      return (
-        matchesSearch && matchesStatus && matchesPriority && matchesAssignee
-      );
-    }),
-  );
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
+  });
 
   const resetFilters = () => {
     setSearchTerm("");

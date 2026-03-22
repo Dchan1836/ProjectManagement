@@ -526,6 +526,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           args.hideItems.push("Collapse the Row");
         }
       }
+      if (record.parentId === null || record.parentId === undefined) {
+        args.hideItems.push("Promote to Task");
+      }
     }
   };
   const contextMenuClick = (args) => {
@@ -539,6 +542,17 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     }
     if (args.item.id === "hidecols") {
       ganttInstance.current.hideColumn(args.column!.headerText);
+    }
+    if (args.item.id === "promotetask") {
+      const taskId = record.id ?? record.ganttProperties?.taskId;
+      updateTask.mutate(
+        { id: Number(taskId), data: { parentId: null } },
+        {
+          onSuccess: () => toast({ title: "Task promoted to top-level task" }),
+          onError: () =>
+            toast({ title: "Failed to promote task", variant: "destructive" }),
+        },
+      );
     }
   };
   const contextMenuItems = [
@@ -557,6 +571,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     "Outdent",
     { text: "Collapse the Row", target: ".e-content", id: "collapserow" },
     { text: "Expand the Row", target: ".e-content", id: "expandrow" },
+    { text: "Promote to Task", target: ".e-content", id: "promotetask" },
     {
       text: "Hide Column",
       target: ".e-gridheader",

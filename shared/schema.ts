@@ -33,6 +33,23 @@ export const insertTaskSchema = createInsertSchema(tasks, {
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 
+export const defaultTask: Task = {
+  id: 0,
+  taskName: "",
+  startDate: new Date(),
+  endDate: new Date(),
+  duration: 0,
+  progress: 0,
+  status: "Open",
+  priority: "Normal",
+  parentId: null,
+  predecessor: null,
+  wbs: null,
+  assignee: null,
+  info: null,
+  role: [],
+};
+
 // Dashboard Metrics Type
 export const metricsSchema = z.object({
   totalProjects: z.number(),

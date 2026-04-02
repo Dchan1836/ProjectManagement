@@ -3,6 +3,7 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { insertTaskSchema } from "@shared/schema";
+import { TaskBuilder } from "./task-builder";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -110,6 +111,19 @@ export async function registerRoutes(
   app.get(api.metrics.get.path, async (req, res) => {
     const metrics = await storage.getMetrics();
     res.json(metrics);
+  });
+
+  app.get("/api/date-info", (req, res) => {
+    const country = typeof req.query.country === "string" ? req.query.country : "US";
+    const tb = new TaskBuilder();
+    const info = tb.getCurrentDate(country);
+    res.json({
+      date: info.date.toISOString(),
+      isHoliday: info.isHoliday,
+      holidayName: info.holidayName,
+      holidayType: info.holidayType,
+      nextWorkday: info.nextWorkday.toISOString(),
+    });
   });
 
   return httpServer;

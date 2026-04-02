@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { 
   LayoutDashboard, 
   KanbanSquare, 
@@ -10,17 +11,68 @@ import {
   X,
   Bell,
   Search,
-  Settings
+  Settings,
+  CalendarDays,
+  Sun,
+  Star,
+  ArrowRight,
+  Info,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import logoImage from "@assets/upskilled_evolution_logo_1767034599609.jpg";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+interface DateInfo {
+  date: string;
+  isHoliday: boolean;
+  holidayName: string | null;
+  holidayType: string | null;
+  nextWorkday: string;
+}
+
+const HOLIDAY_TYPE_LABELS: Record<string, string> = {
+  public:      "Public Holiday",
+  bank:        "Bank Holiday",
+  optional:    "Optional Holiday",
+  school:      "School Holiday",
+  observance:  "Observance",
+};
+
+const HOLIDAY_TYPE_COLORS: Record<string, string> = {
+  public:     "bg-red-100 text-red-700 border-red-200",
+  bank:       "bg-blue-100 text-blue-700 border-blue-200",
+  optional:   "bg-purple-100 text-purple-700 border-purple-200",
+  school:     "bg-yellow-100 text-yellow-700 border-yellow-200",
+  observance: "bg-gray-100 text-gray-700 border-gray-200",
+};
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dateDialogOpen, setDateDialogOpen] = useState(false);
+
+  const { data: dateInfo, isLoading: dateLoading } = useQuery<DateInfo>({
+    queryKey: ["/api/date-info"],
+    staleTime: 60_000,
+  });
 
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -29,6 +81,12 @@ export function Layout({ children }: LayoutProps) {
     { label: "Split View", href: "/split-view", icon: Columns },
     { label: "Task List", href: "/tasks", icon: ListTodo },
   ];
+
+  const todayLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row overflow-hidden font-sans">
@@ -108,9 +166,19 @@ export function Layout({ children }: LayoutProps) {
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
             </button>
             <div className="h-8 w-px bg-border mx-2"></div>
-            <div className="text-sm text-muted-foreground font-medium">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </div>
+
+            {/* Clickable date section */}
+            <button
+              data-testid="button-date-info"
+              onClick={() => setDateDialogOpen(true)}
+              className="flex items-center gap-2 text-sm text-muted-foreground font-medium px-3 py-1.5 rounded-full hover:bg-secondary hover:text-foreground transition-colors cursor-pointer group"
+            >
+              <CalendarDays size={16} className="text-primary group-hover:scale-110 transition-transform" />
+              <span>{todayLabel}</span>
+              {dateInfo?.isHoliday && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" title="Holiday today" />
+              )}
+            </button>
           </div>
         </header>
 
@@ -127,6 +195,91 @@ export function Layout({ children }: LayoutProps) {
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
+
+      {/* Date Info Dialog */}
+      <Dialog open={dateDialogOpen} onOpenChange={setDateDialogOpen}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-date-info">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <CalendarDays size={20} className="text-primary" />
+              Date Information
+            </DialogTitle>
+          </DialogHeader>
+
+          {dateLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          ) : dateInfo ? (
+            <div className="space-y-4 pt-2">
+
+              {/* Today's date */}
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/40 border border-border/50">
+                <Sun size={20} className="text-amber-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Today</p>
+                  <p data-testid="text-date-today" className="text-base font-semibold text-foreground">
+                    {formatDate(dateInfo.date)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Holiday status */}
+              <div className={`flex items-start gap-3 p-4 rounded-xl border ${
+                dateInfo.isHoliday
+                  ? "bg-amber-50 border-amber-200"
+                  : "bg-secondary/40 border-border/50"
+              }`}>
+                <Star
+                  size={20}
+                  className={dateInfo.isHoliday ? "text-amber-500 mt-0.5 shrink-0" : "text-muted-foreground mt-0.5 shrink-0"}
+                />
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Holiday Status</p>
+                  {dateInfo.isHoliday ? (
+                    <div className="space-y-2">
+                      <p data-testid="text-holiday-name" className="text-base font-semibold text-amber-700">
+                        {dateInfo.holidayName}
+                      </p>
+                      {dateInfo.holidayType && (
+                        <Badge
+                          data-testid="badge-holiday-type"
+                          variant="outline"
+                          className={`text-xs ${HOLIDAY_TYPE_COLORS[dateInfo.holidayType] ?? "bg-gray-100 text-gray-700"}`}
+                        >
+                          {HOLIDAY_TYPE_LABELS[dateInfo.holidayType] ?? dateInfo.holidayType}
+                        </Badge>
+                      )}
+                    </div>
+                  ) : (
+                    <p data-testid="text-no-holiday" className="text-sm text-muted-foreground">
+                      No holiday today
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Next workday */}
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/40 border border-border/50">
+                <ArrowRight size={20} className="text-emerald-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Next Workday</p>
+                  <p data-testid="text-next-workday" className="text-base font-semibold text-foreground">
+                    {formatDate(dateInfo.nextWorkday)}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground flex items-center gap-1 pt-1">
+                <Info size={12} />
+                Holiday data based on US public calendar. Click the date in the header to refresh.
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground py-4 text-center">Could not load date information.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

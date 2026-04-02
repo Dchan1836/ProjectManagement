@@ -33,22 +33,24 @@ export const insertTaskSchema = createInsertSchema(tasks, {
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 
-export const defaultTask: Task = {
-  id: 0,
-  taskName: "",
-  startDate: new Date(),
-  endDate: new Date(),
-  duration: 0,
-  progress: 0,
-  status: "Open",
-  priority: "Normal",
-  parentId: null,
-  predecessor: null,
-  wbs: null,
-  assignee: null,
-  info: null,
-  role: [],
-};
+export class TaskBuilder implements Task {
+  id: number = 0;
+  taskName: string = "";
+  startDate: Date = new Date();
+  endDate: Date = new Date();
+  duration: number | null = 0;
+  progress: number = 0;
+  status: string = "Open";
+  priority: string | null = "Normal";
+  parentId: number | null = null;
+  predecessor: string | null = null;
+  wbs: string | null = null;
+  assignee: string | null = null;
+  info: string | null = null;
+  role: string[] | null = [];
+}
+
+export const defaultTask = new TaskBuilder();
 
 // Dashboard Metrics Type
 export const metricsSchema = z.object({

@@ -214,6 +214,21 @@ interface GanttChartCoreProps {
   showHeader?: boolean;
 }
 
+function compareWbs(a: string | null, b: string | null): number {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  const aParts = a.split(".").map(Number);
+  const bParts = b.split(".").map(Number);
+  const len = Math.max(aParts.length, bParts.length);
+  for (let i = 0; i < len; i++) {
+    const av = aParts[i] ?? 0;
+    const bv = bParts[i] ?? 0;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
+}
+
 export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const { data: tasks, isLoading } = useTasks();
   const createTask = useCreateTask();
@@ -459,23 +474,25 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     );
   }
 
-  const filteredTasks = tasks?.filter((task: any) => {
-    const matchesStatus =
-      statusFilter === "all" || task.status === statusFilter;
-    const matchesPriority =
-      priorityFilter === "all" || task.priority === priorityFilter;
-    const matchesAssignee =
-      assigneeFilter === "all" || task.assignee === assigneeFilter;
-    const matchesSearch =
-      !searchTerm ||
-      (task.taskName &&
-        task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (task.wbs && task.wbs.includes(searchTerm)) ||
-      (task.id && task.id.toString() === searchTerm) ||
-      (task.id && task.id.toString().includes(searchTerm));
+  const filteredTasks = tasks
+    ?.filter((task: any) => {
+      const matchesStatus =
+        statusFilter === "all" || task.status === statusFilter;
+      const matchesPriority =
+        priorityFilter === "all" || task.priority === priorityFilter;
+      const matchesAssignee =
+        assigneeFilter === "all" || task.assignee === assigneeFilter;
+      const matchesSearch =
+        !searchTerm ||
+        (task.taskName &&
+          task.taskName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (task.wbs && task.wbs.includes(searchTerm)) ||
+        (task.id && task.id.toString() === searchTerm) ||
+        (task.id && task.id.toString().includes(searchTerm));
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
-  });
+      return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
+    })
+    .sort((a: any, b: any) => compareWbs(a.wbs, b.wbs));
 
   const resetFilters = () => {
     setSearchTerm("");

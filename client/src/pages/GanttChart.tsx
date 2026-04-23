@@ -6,7 +6,7 @@ import {
   useDeleteTask,
 } from "@/hooks/use-tasks";
 import { DropDownList } from "@syncfusion/ej2-dropdowns";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
 import {
@@ -221,6 +221,9 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const deleteTask = useDeleteTask();
   const { toast } = useToast();
   const ganttInstance = useRef<GanttComponent>(null);
+  const splitterPos = useRef<string>("45%");
+  const splitterSettings = useMemo(() => ({ position: "45%" }), []);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -480,8 +483,29 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setPriorityFilter("all");
     setAssigneeFilter("all");
   };
+  const handleSplitterResized = (args: any) => {
+    const pane = (ganttInstance.current as any)?.splitterModule?.splitterObject
+      ?.element?.querySelectorAll(".e-pane")[0];
+    if (pane) {
+      const totalWidth = (ganttInstance.current as any)?.element?.offsetWidth || 0;
+      const paneWidth = pane.scrollWidth || 0;
+      if (totalWidth > 0) {
+        splitterPos.current =
+          ((paneWidth / totalWidth) * 100).toFixed(2) + "%";
+      }
+    }
+  };
+
   const handleDataBound = () => {
-    ganttInstance.current?.collapseAll();
+    const gantt = ganttInstance.current as any;
+    if (!gantt) return;
+
+    const savedPos = splitterPos.current;
+    gantt.collapseAll();
+
+    requestAnimationFrame(() => {
+      gantt.setSplitterPosition(savedPos, "position");
+    });
   };
 
   const contextMenuOpen = (args) => {
@@ -765,7 +789,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           projectEndDate={new Date("2024-12-31")}
           gridLines="Both"
           labelSettings={{ leftLabel: "taskName" }}
-          splitterSettings={{ position: "45%" }}
+          splitterSettings={splitterSettings}
+          splitterResized={handleSplitterResized}
           rowHeight={45}
           taskbarHeight={30}
           actionBegin={actionBegin}

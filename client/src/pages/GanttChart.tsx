@@ -480,6 +480,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setPriorityFilter("all");
     setAssigneeFilter("all");
   };
+  const handleDataBound = () => {
+    ganttInstance.current?.collapseAll();
+  };
+
   const contextMenuOpen = (args) => {
     let record = args.rowData;
     console.log(`contextMenuOpen`);
@@ -766,8 +770,8 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           taskbarHeight={30}
           actionBegin={actionBegin}
           recordDoubleClick={handleDoubleClick}
-          // Changed By Duane
           actionComplete={handleActionComplete}
+          dataBound={handleDataBound}
 //             timelineSettings={{ updateTimeScaleView: false }}
         >
           <ColumnsDirective>

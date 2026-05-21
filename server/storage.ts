@@ -359,21 +359,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMetrics(): Promise<Metrics> {
-    const allTasks = await db.select().from(tasks);
-    const totalProjects = allTasks.filter((t) => t.parentId === null).length;
-    const completedTasks = allTasks.filter((t) => t.progress === 100).length;
-    const inProgressTasks = allTasks.filter(
-      (t) => t.status === "In Progress",
-    ).length;
-    const criticalTasks = allTasks.filter(
-      (t) => t.priority === "Critical" && t.status !== "Close",
-    ).length;
+    const result = await db.execute(sql`
+      SELECT
+        COUNT(*) FILTER (WHERE parent_id IS NULL)                              AS "totalProjects",
+        COUNT(*) FILTER (WHERE progress = 100)                                 AS "completedTasks",
+        COUNT(*) FILTER (WHERE status = 'In Progress')                        AS "inProgressTasks",
+        COUNT(*) FILTER (WHERE priority = 'Critical' AND status != 'Close')   AS "criticalTasks"
+      FROM tasks
+    `);
 
+    const row = result.rows[0] as Record<string, unknown>;
     return {
-      totalProjects,
-      completedTasks,
-      inProgressTasks,
-      criticalTasks,
+      totalProjects:    Number(row.totalProjects),
+      completedTasks:   Number(row.completedTasks),
+      inProgressTasks:  Number(row.inProgressTasks),
+      criticalTasks:    Number(row.criticalTasks),
     };
   }
 }

@@ -240,6 +240,10 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [currentTaskData, setCurrentTaskData] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("");
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteData, setPendingDeleteData] = useState<any[]>([]);
+  const [pendingSubtaskCount, setPendingSubtaskCount] = useState(0);
+
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
 
@@ -260,8 +264,51 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     return;
   };
 
-  const actionBegin = (_args: any) => {
-    // intentionally left minimal — persistence is handled in handleActionComplete
+  const countDescendants = (record: any): number => {
+    if (!record.childRecords || record.childRecords.length === 0) return 0;
+    return record.childRecords.reduce(
+      (sum: number, child: any) => sum + 1 + countDescendants(child),
+      0,
+    );
+  };
+
+  const actionBegin = (args: any) => {
+    if (args.requestType === "delete") {
+      const tasksToDelete: any[] = args.data ?? [];
+      const subtaskCount = tasksToDelete.reduce(
+        (sum: number, task: any) => sum + countDescendants(task),
+        0,
+      );
+      if (subtaskCount > 0) {
+        args.cancel = true;
+        setPendingDeleteData(tasksToDelete);
+        setPendingSubtaskCount(subtaskCount);
+        setDeleteConfirmOpen(true);
+      }
+    }
+  };
+
+  const handleConfirmedDelete = () => {
+    pendingDeleteData.forEach((taskData, index) => {
+      if (taskData?.id) {
+        deleteTask.mutate(taskData.id, {
+          onSuccess: index === 0
+            ? () => toast({ title: "Task deleted successfully" })
+            : undefined,
+          onError: () =>
+            toast({ title: "Failed to delete task", variant: "destructive" }),
+        });
+      }
+    });
+    setDeleteConfirmOpen(false);
+    setPendingDeleteData([]);
+    setPendingSubtaskCount(0);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setPendingDeleteData([]);
+    setPendingSubtaskCount(0);
   };
   const handleActionComplete = (args: any) => {
     if (
@@ -797,6 +844,46 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         onSave={handleCustomSave}
         onClose={handleCustomClose}
       />
+
+      {deleteConfirmOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          data-testid="delete-confirm-overlay"
+        >
+          <div
+            className="bg-background border border-border rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
+            data-testid="delete-confirm-dialog"
+          >
+            <h2 className="text-lg font-semibold text-foreground mb-2">
+              Delete task and subtasks?
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              This task has{" "}
+              <span className="font-medium text-foreground" data-testid="text-subtask-count">
+                {pendingSubtaskCount} subtask{pendingSubtaskCount !== 1 ? "s" : ""}
+              </span>{" "}
+              that will also be permanently removed. This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-background hover:bg-muted transition-colors"
+                onClick={handleCancelDelete}
+                data-testid="button-cancel-delete"
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                onClick={handleConfirmedDelete}
+                data-testid="button-confirm-delete"
+              >
+                Delete all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

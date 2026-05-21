@@ -23,6 +23,7 @@ export interface FormattedTask {
 export function useTasks() {
   return useQuery({
     queryKey: [api.tasks.list.path],
+    refetchInterval: 30 * 1000,
     queryFn: async () => {
       const res = await fetch(api.tasks.list.path);
       if (!res.ok) throw new Error("Failed to fetch tasks");

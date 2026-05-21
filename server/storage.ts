@@ -351,11 +351,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTask(id: number): Promise<boolean> {
-    const rows = await db
-      .delete(tasks)
-      .where(eq(tasks.id, id))
-      .returning({ id: tasks.id });
-    return rows.length > 0;
+    const toDelete: number[] = [];
+    const queue: number[] = [id];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      toDelete.push(current);
+      const children = await db
+        .select({ id: tasks.id })
+        .from(tasks)
+        .where(eq(tasks.parentId, current));
+      for (const child of children) {
+        queue.push(child.id);
+      }
+    }
+
+    let deleted = false;
+    for (const taskId of toDelete.reverse()) {
+      const rows = await db
+        .delete(tasks)
+        .where(eq(tasks.id, taskId))
+        .returning({ id: tasks.id });
+      if (taskId === id && rows.length > 0) deleted = true;
+    }
+
+    return deleted;
   }
 
   async getMetrics(): Promise<Metrics> {

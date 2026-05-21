@@ -346,23 +346,6 @@ export function KanbanBoardCore({
   const updateTask = injectedUpdateTask ?? defaultUpdateTask;
   const deleteTask = injectedDeleteTask ?? defaultDeleteTask;
 
-  const handleDragStop = (args: any) => {
-    const cardData = args.data?.[0];
-    if (cardData && cardData.taskId) {
-      updateTask.mutate(
-        {
-          id: cardData.taskId,
-          data: { status: cardData.status },
-        },
-        {
-          onSuccess: () => toast({ title: "Task status updated" }),
-          onError: () =>
-            toast({ title: "Failed to update task", variant: "destructive" }),
-        },
-      );
-    }
-  };
-
   const handleDeleteTask = (taskId: number) => {
     deleteTask.mutate(taskId, {
       onSuccess: () => toast({ title: "Task deleted successfully" }),
@@ -676,7 +659,6 @@ export function KanbanBoardCore({
             allowDragAndDrop={true}
             height="100%"
             style={{ backgroundColor: "transparent" }}
-            dragStop={handleDragStop}
             actionBegin={handleActionBegin}
           >
             <ColumnsDirective>

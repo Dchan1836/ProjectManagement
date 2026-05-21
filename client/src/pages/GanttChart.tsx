@@ -6,7 +6,7 @@ import {
   useDeleteTask,
 } from "@/hooks/use-tasks";
 import { DropDownList } from "@syncfusion/ej2-dropdowns";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
 import {
@@ -41,14 +41,6 @@ import {
 import { Search, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import "./GanttChart.css";
-import styled from "styled-components";
-import { cloneDeep } from 'lodash';
-
-const MyButton = styled.button`
-  background: blue;
-  color: white;
-  padding: 10px 20px;
-`;
 
 export const taskFields = {
   id: "id",
@@ -247,8 +239,6 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentTaskData, setCurrentTaskData] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("");
-  const [temp, setTemp] = useState(null);
-  const [c, setC] = useState(0);
 
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
@@ -270,105 +260,35 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     return;
   };
 
-  const actionBegin = (args: any) => {
-//       if(c == 0 && args.data != undefined){
-//           console.log("================================ c == 0 ===========================================================")
-//             setTemp(cloneDeep(ganttInstance.current.currentViewData));
-//           setC(1);
-//           }
-    console.log(
-      `actionBegin name: ${args?.name} requestType: ${args?.requestType} action: ${args?.action}`,
-    );
-
-    // Access the dialog element
-    if (args?.element?.ej2_instances) {
-      const dialog = args.element.ej2_instances[0]; // Get the Syncfusion Dialog instance
-    }
-
-    // Find the general tab content area (selector may vary, check component structure)
-    const generalTab = args?.element?.querySelector(
-      "[role='presentation'][General]",
-    );
-
-    if (generalTab) {
-      generalTab.setContent = "General..";
-    }
-
-    if (args.requestType === "refresh") {
-
-//         args.cancel = true;
-    } else if (args.requestType === "beforeOpenAddDialog") {
-      //        args.rowData.parentId = null; Not Needed
-    }
-    if (args.requestType === "beforeAdd" && args.action === "beforeAdd") {
-      // Here is how we can get the TaskRecords
-      const taskName = ganttInstance.current.updatedRecords[0].taskName;
-
-      let taskId = 6;
-      args.newTaskData.taskName = `child of: ${taskId} ${args.data.taskName}`;
-      args.newTaskData.parentId = taskId; //args.modifiedTaskData[0]?.id;
-      args.newTaskData.predecessor = `1FS`;
-
-      //    args.newTaskData.parentId = null;
-      //args.rowPosition = 'Top'
-    }
-    // const elements: HTMLCollectionOf<Element> = document.getElementsByClassName('e-rhandler e-rcursor');
-    // console.log(elements);
-    // const targetString = 'e-rhandler e-rcursor';
-    // if(document.getElementsByClassName() === targetString){
-    //   console.log("found component");
-    // }
+  const actionBegin = (_args: any) => {
+    // intentionally left minimal — persistence is handled in handleActionComplete
   };
-//   let temp = null;
-//   let c = 0;
   const handleActionComplete = (args: any) => {
-    // if(args.requestType !== 'scroll'){
-    //   console.log(`requesti Type: ${args.requestType}   action: ${args.action}`);
-    // }
-    console.log(
-      `actionComplete name: ${args?.name} type: ${args?.type} requestType: ${args?.requestType} action: ${args?.action}`,
-    );
-
     if (
-      (args.requestType === "scroll" && args.action === "HorizontalScroll") ||
       args.requestType === "scroll" ||
-      args.requestType === "openEditDialog"
+      args.requestType === "openEditDialog" ||
+      args.requestType === "refresh" ||
+      (args.requestType === "openAddDialog" && args.action === "OpenDialog")
     ) {
-      //     } else if (args.requestType === 'add' && args.action === 'add')
-      //     {
-      //        args.newTaskData.taskName = `child of: ${args.data.id} ${args.data.taskName}`
-      //        args.newTaskData.parentId = args.modifiedTaskData[0].id;
-      //        args.newTaskData.predecessor = `${args.modifiedTaskData[0].id}FS`;
-    }else if (args.requestType === "refresh" ){
-        console.log("requestTYpe: refresh");
-//         args.cancel = true;
-    } else if (
-      args.requestType === "openAddDialog" &&
-      args.action === "OpenDialog"
-    ) {
-      // Here is where I can set some stuff
-    } else if (
-      (args.requestType === "add" && args.action === "add") ||
-      /*args.requestType === 'save' && */ args.action === "add"
-    ) {
-      let action = "create";
+      return;
+    }
+
+    if (args.action === "add") {
       const taskData = args.newTaskData;
       createTask.mutate(
         {
-              action: action,
-              id: taskData.id,
-              taskName: taskData.taskName,
-              startDate: taskData.startDate,
-              endDate: taskData.endDate,
-              duration: Number(taskData.duration),
-              progress: Number(taskData.progress || 0),
-              status: taskData.status || "Open",
-              priority: taskData.priority,
-              parentId: Number(taskData.parentId || null),
-              wbs: taskData.wbs,
-              assignee: taskData.assignee,
-              predecessor: taskData.predecessor,
-              info: taskData.info,
+          taskName: taskData.taskName,
+          startDate: taskData.startDate,
+          endDate: taskData.endDate,
+          duration: Number(taskData.duration),
+          progress: Number(taskData.progress || 0),
+          status: taskData.status || "Open",
+          priority: taskData.priority,
+          parentId: taskData.parentId ? Number(taskData.parentId) : null,
+          wbs: taskData.wbs,
+          assignee: taskData.assignee,
+          predecessor: taskData.predecessor,
+          info: taskData.info,
         },
         {
           onSuccess: () => toast({ title: "Task created successfully" }),
@@ -377,92 +297,54 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
         },
       );
     } else if (
-      (args.requestType === "save" || args.requestType === "rowDropped") &&
-      (args.action === "DialogEditing" ||
-        args.action === "TaskbarEditing" ||
-        args.action === "CellEditing")
+      (args.requestType === "save" &&
+        (args.action === "DialogEditing" ||
+          args.action === "TaskbarEditing" ||
+          args.action === "CellEditing")) ||
+      args.requestType === "rowDropped"
     ) {
-//     console.log("temp   " + temp);
-//     console.log("================================================")
-//     console.log("args.data     " + args.data);
-//     console.log("================================================")
-//     console.log("ganttInstance.current     " + ganttInstance.current);
-//         args.cancel = true;
-//         console.log(tasks);
-//         cosol.log(args.data);
-      const taskData = args.data;
-      console.log(
-        `duration: ${args.data.duration} typeofduration: ${typeof args.data
-          .duration} startdate: ${
-          args.data.startDate
-        } typeofstartdate: ${typeof args.data.startDate} id: ${
-          args.data.id
-        } typeofid: ${typeof args.data.id} `,
-      );
-      const modifiedData = args.modifiedRecords;
-      modifiedData.map(t => {
-//           console.log(t.index);
-           updateTask.mutate(
-                   {
-                     id: t.taskData.id,
-                     data: {
-                       action: args.requestType,
-                       taskIndex: t.index,
-                       taskName: t.taskData.taskName,
-                       startDate: t.taskData.startDate,
-                       endDate: t.taskData.endDate,
-                       duration: Number(t.taskData.duration),
-                       progress: Number(t.taskData.progress),
-                       status: t.taskData.status,
-                       priority: t.taskData.priority,
-                       parentId: Number(t.taskData.parentId || null),
-                       wbs: t.taskData.wbs,
-                       assignee: t.taskData.assignee,
-                       predecessor: t.taskData.predecessor,
-                       info: t.taskData.info,
-                     },
-                   },
-                   {
-                     onSuccess: () => toast({ title: "Task updated successfully" }),
-                     onError: () =>
-                       toast({ title: "Failed to update task", variant: "destructive" }),
-                   },
-                 );
-          });
-//       updateTask.mutate(
-//         {
-//           id: taskData.id,
-//           data: {
-//             action: args.requestType,
-//             taskName: taskData.taskName,
-//             startDate: taskData.startDate,
-//             endDate: taskData.endDate,
-//             duration: Number(taskData.duration),
-//             progress: Number(taskData.progress),
-//             status: taskData.status,
-//             priority: taskData.priority,
-//             parentId: Number(taskData.parentId || null),
-//             wbs: taskData.wbs,
-//             assignee: taskData.assignee,
-//             predecessor: taskData.predecessor,
-//             info: taskData.info,
-//           },
-//         },
-//         {
-//           onSuccess: () => toast({ title: "Task updated successfully" }),
-//           onError: () =>
-//             toast({ title: "Failed to update task", variant: "destructive" }),
-//         },
-//       );
+      const modifiedData: any[] = args.modifiedRecords ?? [];
+      modifiedData.forEach((t, index) => {
+        updateTask.mutate(
+          {
+            id: t.taskData.id,
+            data: {
+              taskName: t.taskData.taskName,
+              startDate: t.taskData.startDate,
+              endDate: t.taskData.endDate,
+              duration: Number(t.taskData.duration),
+              progress: Number(t.taskData.progress),
+              status: t.taskData.status,
+              priority: t.taskData.priority,
+              parentId: t.taskData.parentId ? Number(t.taskData.parentId) : null,
+              wbs: t.taskData.wbs,
+              assignee: t.taskData.assignee,
+              predecessor: t.taskData.predecessor,
+              info: t.taskData.info,
+            },
+          },
+          {
+            onSuccess: index === 0
+              ? () => toast({ title: "Task updated successfully" })
+              : undefined,
+            onError: () =>
+              toast({ title: "Failed to update task", variant: "destructive" }),
+          },
+        );
+      });
     } else if (args.requestType === "delete") {
-      const taskData = args.data?.[0];
-      if (taskData?.id) {
-        deleteTask.mutate(taskData.id, {
-          onSuccess: () => toast({ title: "Task deleted successfully" }),
-          onError: () =>
-            toast({ title: "Failed to delete task", variant: "destructive" }),
-        });
-      }
+      const tasksToDelete: any[] = args.data ?? [];
+      tasksToDelete.forEach((taskData, index) => {
+        if (taskData?.id) {
+          deleteTask.mutate(taskData.id, {
+            onSuccess: index === 0
+              ? () => toast({ title: "Task deleted successfully" })
+              : undefined,
+            onError: () =>
+              toast({ title: "Failed to delete task", variant: "destructive" }),
+          });
+        }
+      });
     }
   };
 

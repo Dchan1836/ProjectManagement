@@ -84,7 +84,7 @@ export async function registerRoutes(
       if (!task) {
         return res.status(404).json({ error: "Task not found" });
       }
-    console.log("====================================  " + parsed.data.taskIndex)
+    console.log("====================================  update task", id)
       res.json(task);
     } catch (error) {
       res.status(500).json({ error: "Failed to update task" });

@@ -243,6 +243,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDeleteData, setPendingDeleteData] = useState<any[]>([]);
   const [pendingSubtaskCount, setPendingSubtaskCount] = useState(0);
+  const [pendingDependentTasks, setPendingDependentTasks] = useState<{ id: number; taskName: string }[]>([]);
 
   const handleDoubleClick = (args: any) => {
     console.log("Row double-clicked!", args.rowData);
@@ -272,17 +273,38 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     );
   };
 
+  const parsePredecessorIds = (predecessor: string | null): number[] => {
+    if (!predecessor) return [];
+    return predecessor
+      .split(",")
+      .map((p) => {
+        const match = p.trim().match(/^(\d+)/);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter((id): id is number => id !== null);
+  };
+
   const actionBegin = (args: any) => {
     if (args.requestType === "delete") {
       const tasksToDelete: any[] = args.data ?? [];
+      const deleteIds = new Set(tasksToDelete.map((t: any) => t.id));
+
       const subtaskCount = tasksToDelete.reduce(
         (sum: number, task: any) => sum + countDescendants(task),
         0,
       );
-      if (subtaskCount > 0) {
+
+      const dependentTasks = (tasks ?? []).filter((t: any) => {
+        if (deleteIds.has(t.id)) return false;
+        const predIds = parsePredecessorIds(t.predecessor);
+        return predIds.some((pid) => deleteIds.has(pid));
+      }).map((t: any) => ({ id: t.id, taskName: t.taskName }));
+
+      if (subtaskCount > 0 || dependentTasks.length > 0) {
         args.cancel = true;
         setPendingDeleteData(tasksToDelete);
         setPendingSubtaskCount(subtaskCount);
+        setPendingDependentTasks(dependentTasks);
         setDeleteConfirmOpen(true);
       }
     }
@@ -303,12 +325,14 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
     setDeleteConfirmOpen(false);
     setPendingDeleteData([]);
     setPendingSubtaskCount(0);
+    setPendingDependentTasks([]);
   };
 
   const handleCancelDelete = () => {
     setDeleteConfirmOpen(false);
     setPendingDeleteData([]);
     setPendingSubtaskCount(0);
+    setPendingDependentTasks([]);
   };
   const handleActionComplete = (args: any) => {
     if (
@@ -851,20 +875,46 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
           data-testid="delete-confirm-overlay"
         >
           <div
-            className="bg-background border border-border rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
+            className="bg-background border border-border rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
             data-testid="delete-confirm-dialog"
           >
-            <h2 className="text-lg font-semibold text-foreground mb-2">
-              Delete task and subtasks?
+            <h2 className="text-lg font-semibold text-foreground mb-3">
+              Delete task{pendingSubtaskCount > 0 ? " and subtasks" : ""}?
             </h2>
+
+            {pendingSubtaskCount > 0 && (
+              <p className="text-sm text-muted-foreground mb-3">
+                This task has{" "}
+                <span className="font-medium text-foreground" data-testid="text-subtask-count">
+                  {pendingSubtaskCount} subtask{pendingSubtaskCount !== 1 ? "s" : ""}
+                </span>{" "}
+                that will also be permanently removed.
+              </p>
+            )}
+
+            {pendingDependentTasks.length > 0 && (
+              <div className="mb-3" data-testid="dependency-warning">
+                <p className="text-sm text-muted-foreground mb-2">
+                  <span className="font-medium text-foreground">
+                    {pendingDependentTasks.length} task{pendingDependentTasks.length !== 1 ? "s" : ""}
+                  </span>{" "}
+                  depend{pendingDependentTasks.length === 1 ? "s" : ""} on{" "}
+                  {pendingDeleteData.length === 1 ? "this task" : "these tasks"} and will lose their dependency links:
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 pl-3 border-l-2 border-destructive/40 max-h-32 overflow-y-auto">
+                  {pendingDependentTasks.map((t) => (
+                    <li key={t.id} className="truncate" data-testid={`dependency-task-${t.id}`}>
+                      <span className="font-medium text-foreground">#{t.id}</span> {t.taskName}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <p className="text-sm text-muted-foreground mb-6">
-              This task has{" "}
-              <span className="font-medium text-foreground" data-testid="text-subtask-count">
-                {pendingSubtaskCount} subtask{pendingSubtaskCount !== 1 ? "s" : ""}
-              </span>{" "}
-              that will also be permanently removed. This action cannot be
-              undone.
+              This action cannot be undone.
             </p>
+
             <div className="flex justify-end gap-3">
               <button
                 className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-background hover:bg-muted transition-colors"
@@ -878,7 +928,7 @@ export function GanttChartCore({ showHeader = false }: GanttChartCoreProps) {
                 onClick={handleConfirmedDelete}
                 data-testid="button-confirm-delete"
               >
-                Delete all
+                Delete
               </button>
             </div>
           </div>
